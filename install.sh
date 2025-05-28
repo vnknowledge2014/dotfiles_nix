@@ -72,8 +72,10 @@ case $OS in
     
     # Cài đặt Nix nếu chưa có
     if ! command -v nix &> /dev/null; then
-      echo "Cài đặt Nix..."
-      sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume --daemon
+      echo "Cài đặt Nix từ Determinate Systems..."
+      curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --determinate
+      
+      # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
     fi
     
@@ -157,10 +159,10 @@ case $OS in
     
     # Cài đặt Nix nếu chưa có
     if ! command -v nix &> /dev/null; then
-      echo "Cài đặt Nix..."
-      sh <(curl -L https://nixos.org/nix/install) --daemon
+      echo "Cài đặt Nix từ Determinate Systems..."
+      curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --determinate
       
-      # Đảm bảo Nix sẵn sàng
+      # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
     fi
     
