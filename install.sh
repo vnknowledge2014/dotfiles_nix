@@ -108,11 +108,13 @@ case $OS in
   nixos)
     echo "Thiết lập NixOS..."
     
-    # Đảm bảo flakes được bật
-    if ! grep -q "experimental-features" /etc/nix/nix.conf 2>/dev/null; then
-      echo "Bật Nix flakes..."
-      sudo mkdir -p /etc/nix
-      echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
+    # Cài đặt Nix từ Determinate Systems nếu chưa có
+    if ! command -v nix &> /dev/null; then
+      echo "Cài đặt Nix từ Determinate Systems..."
+      curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --determinate
+      
+      # Tải lại environment
+      . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
     fi
     
     # Kiểm tra cấu hình máy
