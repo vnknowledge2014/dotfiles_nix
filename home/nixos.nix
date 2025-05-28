@@ -16,9 +16,7 @@
   
   # Các gói cơ bản cho NixOS
   home.packages = with pkgs; [
-    git
-    oh-my-zsh
-    inputs.zen-browser.packages.${system}.default
+    
   ];
 
   # Phiên bản Home Manager

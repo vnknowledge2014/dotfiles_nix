@@ -33,21 +33,11 @@
     
     # Danh sách đầy đủ
     brews = [
-      "mas"      # Mac App Store CLI
-      "python"
-      "go"
-      "gh"       # GitHub CLI
-      "node" 
-      "yarn"
+
     ];
     
     casks = [
-      "google-chrome"
-      "firefox"
-      "visual-studio-code"
-      "iterm2"
-      "docker"
-      "rectangle"  # Quản lý cửa sổ
+
     ];
     
     masApps = {

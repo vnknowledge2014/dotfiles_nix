@@ -14,8 +14,7 @@
     core = {
       enable = true;
       packages = with pkgs; [
-        nodejs
-        yarn
+        
       ];
     };
     
@@ -68,10 +67,7 @@
 
   # Các package cá nhân
   home.packages = with pkgs; [
-    fzf
-    bat
-    eza
-    htop
+
   ];
 
   # Cấu hình Git cá nhân

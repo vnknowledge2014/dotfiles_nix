@@ -3,16 +3,11 @@
 let
   # Cấu hình Homebrew chung
   commonBrews = [
-    "mas" # Mac App Store CLI
-    "python"
-    "go"
-    "gh"  # GitHub CLI
+
   ];
   
   commonCasks = [
-    "google-chrome"
-    "iterm2"
-    "rectangle"  # Quản lý cửa sổ
+
   ];
   
   commonMasApps = {

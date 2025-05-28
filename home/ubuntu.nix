@@ -49,16 +49,7 @@
   
   # Các gói cơ bản cho Ubuntu
   home.packages = with pkgs; [
-    # CLI tools
-    ripgrep
-    fd
-    jq
-    tree
-    htop
-    neofetch
-    bat
-    exa
-    fzf
+
   ];
 
   # Cấu hình Editor

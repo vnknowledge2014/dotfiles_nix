@@ -47,9 +47,6 @@
 
   # Các package cá nhân
   home.packages = with pkgs; [
-    gitbutler
-    vscode
-    ghostty
     inputs.zen-browser.packages.${system}.default
   ];
 

@@ -55,13 +55,6 @@
     wslu  # Tiện ích WSL
     wsl-open  # Mở file Windows từ WSL
     wsl-clipboard  # Tích hợp clipboard
-    
-    # Công cụ phát triển
-    ripgrep
-    fd
-    jq
-    htop
-    bat
   ];
 
   # Tích hợp Windows
