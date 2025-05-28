@@ -31,10 +31,12 @@
       enable = true;
       zsh = {
         enable = true;
+        autosuggestions.enable = true;
+        syntaxHighlighting.enable = true;
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "wsl" "docker" ];
+          plugins = [ "git" "wsl" "docker" "zsh-autosuggestions" "zsh-syntax-highlighting"];
         };
         aliases = {
           ll = "ls -l";
@@ -58,7 +60,7 @@
   ];
 
   # Tích hợp Windows
-  programs.zsh.initExtra = lib.mkIf config.programs.zsh.enable ''
+  programs.zsh.initContent = lib.mkIf config.programs.zsh.enable ''
     # Đường dẫn Windows
     export PATH=$PATH:/mnt/c/Windows/System32:/mnt/c/Windows
     
@@ -89,6 +91,6 @@
   };
   
   # Phiên bản Home Manager
-  home.stateVersion = "24.11";
+  home.stateVersion = "25.05";
   programs.home-manager.enable = true;
 }

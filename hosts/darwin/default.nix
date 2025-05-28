@@ -16,18 +16,18 @@
   # Thiết lập cơ bản
   networking.hostName = hostname;
   
+  # Set primary user for nix-darwin (required for certain options)
+  system.primaryUser = username;
+  
   # Cấu hình Nix
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   
+  # Fix nixbld group GID
+  ids.gids.nixbld = 350;
+  
   # Cài đặt môi trường macOS cơ bản
   environment.systemPackages = with pkgs; [
-    coreutils
-    gnugrep
-    wget
-    curl
-    git
-    jq
-    zsh
+
   ];
   
   # Thiết lập macOS cơ bản
@@ -54,9 +54,6 @@
       _FXShowPosixPathInTitle = true;
     };
   };
-  
-  # Các dịch vụ cơ bản
-  services.nix-daemon.enable = true;
   
   # Cấu hình shell
   programs.zsh.enable = true;

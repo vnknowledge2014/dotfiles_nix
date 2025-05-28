@@ -14,7 +14,7 @@
     core = {
       enable = true;
       packages = with pkgs; [
-        
+
       ];
     };
     
@@ -22,10 +22,12 @@
       enable = true;
       zsh = {
         enable = true;
+        autosuggestions.enable = true;  # Moved outside of oh-my-zsh
+        syntaxHighlighting.enable = true;  # Moved outside of oh-my-zsh
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "macos" "docker" "vscode" "npm" "yarn" ];
+          plugins = [ "git" "macos" "docker" ];  # Removed autosuggestions and syntax-highlighting from here
         };
         aliases = {
           ll = lib.mkForce "eza -l --icons";
@@ -76,6 +78,15 @@
     userEmail = "vnknowledge2014@gmail.com";
   };
 
+  # Cấu hình Editor
+  # programs.vscode = {
+  #   enable = true;
+  #   package = pkgs.vscode;
+  #   extensions = with pkgs.vscode-extensions; [
+      
+  #   ];
+  # };
+
   # Các cấu hình riêng khác
   home.sessionVariables = {
     EDITOR = "nvim";
@@ -93,6 +104,6 @@
   };
 
   # Phiên bản Home Manager
-  home.stateVersion = "24.11";
+  home.stateVersion = "25.05";
   programs.home-manager.enable = true;
 }

@@ -9,6 +9,14 @@ in {
     zsh = {
       enable = mkEnableOption "Enable zsh configuration";
       
+      autosuggestions = {
+        enable = mkEnableOption "Enable zsh autosuggestions";
+      };
+      
+      syntaxHighlighting = {
+        enable = mkEnableOption "Enable zsh syntax highlighting";
+      };
+      
       ohmyzsh = {
         enable = mkEnableOption "Enable oh-my-zsh";
         theme = mkOption {
@@ -18,7 +26,7 @@ in {
         };
         plugins = mkOption {
           type = types.listOf types.str;
-          default = [ "git" ];
+          default = [ "git" "docker" ];
           description = "oh-my-zsh plugins";
         };
       };
@@ -40,8 +48,9 @@ in {
   config = mkIf cfg.enable {
     programs.zsh = mkIf cfg.zsh.enable {
       enable = true;
-      enableAutosuggestions = true;
-      enableSyntaxHighlighting = true;
+      
+      enableAutosuggestions = cfg.zsh.autosuggestions.enable;
+      enableSyntaxHighlighting = cfg.zsh.syntaxHighlighting.enable;
       
       oh-my-zsh = mkIf cfg.zsh.ohmyzsh.enable {
         enable = true;
@@ -50,7 +59,7 @@ in {
       };
       
       shellAliases = cfg.zsh.aliases;
-      initExtra = cfg.zsh.extraConfig;
+      initContent = cfg.zsh.extraConfig;
     };
   };
 }

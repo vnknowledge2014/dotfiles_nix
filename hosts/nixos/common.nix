@@ -5,6 +5,7 @@
   
   # Cấu hình Nix
   nix = {
+    enable = true;
     settings = {
       experimental-features = [ "nix-command" "flakes" ];
     };
@@ -17,13 +18,7 @@
   
   # Gói phần mềm cơ bản
   environment.systemPackages = with pkgs; [
-    git
-    curl
-    wget
-    vim
-    htop
-    ripgrep
-    fd
+
   ];
   
   # Cài đặt ngôn ngữ và khu vực

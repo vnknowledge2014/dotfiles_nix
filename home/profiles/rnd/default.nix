@@ -21,11 +21,14 @@
     shell = {
       enable = true;
       zsh = {
+        
+        autosuggestions.enable = true;
+        syntaxHighlighting.enable = true;
         enable = true;
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "docker" ];
+          plugins = [ "git" "docker" "zsh-autosuggestions" "zsh-syntax-highlighting"];
         };
         aliases = {
           ll = "ls -l";
@@ -57,6 +60,6 @@
   };
 
   # Phiên bản Home Manager
-  home.stateVersion = "24.11";
+  home.stateVersion = "25.05";
   programs.home-manager.enable = true;
 }

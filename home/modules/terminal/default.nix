@@ -19,6 +19,16 @@ in {
     ghostty = {
       enable = mkEnableOption "Enable Ghostty configuration";
     };
+
+    wezterm = {
+      enable = mkEnableOption "Enable WezTerm configuration";
+      
+      settings = mkOption {
+        type = types.attrs;
+        default = {};
+        description = "WezTerm settings";
+      };
+    };
   };
 
   config = mkIf cfg.enable {
@@ -58,5 +68,48 @@ in {
     home.packages = mkIf cfg.ghostty.enable [
       pkgs.ghostty
     ];
+
+    # WezTerm configuration
+    programs.wezterm = mkIf cfg.wezterm.enable {
+      enable = true;
+      extraConfig = ''
+        local wezterm = require 'wezterm'
+        local config = {}
+
+        -- Default settings
+        config.window_padding = {
+          left = 10,
+          right = 10,
+          top = 10,
+          bottom = 10
+        }
+
+        -- Tương đương với decorations: "full" của Alacritty
+        config.window_decorations = "TITLE | RESIZE | MACOS_FORCE_ENABLE_SHADOW"
+        
+        -- Tương đương với startup_mode: "Windowed" của Alacritty
+        config.window_state = "Normal"
+
+        -- Font configuration với style rõ ràng
+        config.font = wezterm.font({
+          family = "JetBrains Mono",
+          weight = "Regular"
+        })
+        config.font_size = 12.0
+
+        -- Nord theme colors
+        config.colors = {
+          background = "#2e3440",
+          foreground = "#d8dee9"
+        }
+
+        -- Additional user settings
+        ${concatStringsSep "\n" (mapAttrsToList (name: value: 
+          "config.${name} = ${if isString value then ''"${value}"'' else toString value}"
+        ) cfg.wezterm.settings)}
+
+        return config
+      '';
+    };
   };
 }

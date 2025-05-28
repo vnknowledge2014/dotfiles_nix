@@ -6,21 +6,8 @@
 
   # Cài đặt môi trường macOS cơ bản
   environment.systemPackages = with pkgs; [
-    coreutils
-    gnugrep
-    wget
-    curl
-    git
     m-cli  # Tiện ích CLI cho macOS
     mas    # Mac App Store CLI
-    jq
-    zsh
-    oh-my-zsh
-    findutils
-    gnused
-    gawk
-    ripgrep
-    fd
   ];
   
   # Thiết lập macOS cơ bản
@@ -47,9 +34,6 @@
       _FXShowPosixPathInTitle = true;
     };
   };
-  
-  # Các dịch vụ cơ bản
-  services.nix-daemon.enable = true;
   
   # Cấu hình shell
   programs.zsh.enable = true;

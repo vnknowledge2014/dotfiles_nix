@@ -31,10 +31,12 @@
       enable = true;
       zsh = {
         enable = true;
+        autosuggestions.enable = true;
+        syntaxHighlighting.enable = true;
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "ubuntu" "docker" ];
+          plugins = [ "git" "ubuntu" "docker" "zsh-autosuggestions" "zsh-syntax-highlighting"];
         };
         aliases = {
           ll = "ls -l";
@@ -51,16 +53,6 @@
   home.packages = with pkgs; [
 
   ];
-
-  # Cấu hình Editor
-  programs.vscode = {
-    enable = true;
-    package = pkgs.vscode;
-    extensions = with pkgs.vscode-extensions; [
-      ms-vscode.cpptools
-      ms-python.python
-    ];
-  };
   
   # Tích hợp với snapd
   home.activation.snapPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
@@ -103,6 +95,6 @@
   '';
   
   # Phiên bản Home Manager
-  home.stateVersion = "24.11";
+  home.stateVersion = "25.05";
   programs.home-manager.enable = true;
 }

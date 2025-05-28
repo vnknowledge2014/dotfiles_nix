@@ -19,11 +19,7 @@
     core = {
       enable = true;
       packages = with pkgs; [
-        curl
-        wget
-        jq
-        ripgrep
-        fd
+
       ];
     };
     
@@ -31,10 +27,12 @@
       enable = true;
       zsh = {
         enable = true;
+        autosuggestions.enable = true;
+        syntaxHighlighting.enable = true;
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "macos" "docker" ];
+          plugins = [ "git" "macos" "docker" "zsh-autosuggestions" "zsh-syntax-highlighting"];
         };
         aliases = {
           ll = "ls -l";
@@ -66,10 +64,10 @@
   };
   
   # Terminal configuration
-  programs.alacritty.enable = true;
+  programs.wezterm.enable = true;
   
   # Integracja z Homebrew
-  programs.zsh.initExtra = lib.mkIf config.programs.zsh.enable ''
+  programs.zsh.initContent = lib.mkIf config.programs.zsh.enable ''
     # Homebrew integration
     if [ -f /opt/homebrew/bin/brew ]; then
       eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -79,6 +77,6 @@
   '';
   
   # Phiên bản Home Manager
-  home.stateVersion = "24.11";
+  home.stateVersion = "25.05";
   programs.home-manager.enable = true;
 }
