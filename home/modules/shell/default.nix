@@ -48,10 +48,8 @@ in {
   config = mkIf cfg.enable {
     programs.zsh = mkIf cfg.zsh.enable {
       enable = true;
-      
       enableAutosuggestions = cfg.zsh.autosuggestions.enable;
       enableSyntaxHighlighting = cfg.zsh.syntaxHighlighting.enable;
-      
       oh-my-zsh = mkIf cfg.zsh.ohmyzsh.enable {
         enable = true;
         theme = cfg.zsh.ohmyzsh.theme;

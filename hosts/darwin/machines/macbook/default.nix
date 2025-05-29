@@ -33,7 +33,8 @@
     
     # Danh sách đầy đủ
     brews = [
-
+      "htop"
+      "eza"
     ];
     
     casks = [
