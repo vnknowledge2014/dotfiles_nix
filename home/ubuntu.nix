@@ -36,7 +36,7 @@
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "ubuntu" "docker" "zsh-autosuggestions" "zsh-syntax-highlighting"];
+          plugins = [ "git" "ubuntu" "docker" ];
         };
         aliases = {
           ll = "ls -l";

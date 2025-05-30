@@ -1,52 +1,65 @@
 { config, lib, pkgs, ... }:
 
+with lib;
+
 let
-  # Cấu hình Homebrew chung
+  # Common Homebrew configurations
   commonBrews = [
 
   ];
   
   commonCasks = [
-
+    
   ];
   
   commonMasApps = {
-    # Các ứng dụng Mac App Store chung
+    
   };
-  
-  # Cho phép ghi đè từ cấu hình máy
-  extraBrews = config.extraBrews or [];
-  extraCasks = config.extraCasks or [];
-  extraMasApps = config.extraMasApps or {};
 in
 {
-  # Cấu hình Homebrew
-  homebrew = {
-    enable = true;
-    onActivation = {
-      autoUpdate = true;
-      cleanup = "zap";
-      upgrade = true;
+  options = {
+    extraBrews = mkOption {
+      type = types.listOf types.str;
+      default = [];
+      description = "Additional Homebrew packages to install";
     };
-    
-    # Quản lý Brewfile
-    global = {
-      brewfile = true;
+
+    extraCasks = mkOption {
+      type = types.listOf types.str;
+      default = [];
+      description = "Additional Homebrew casks to install";
     };
-    
-    # Kết hợp các danh sách
-    brews = commonBrews ++ extraBrews;
-    casks = commonCasks ++ extraCasks;
-    masApps = commonMasApps // extraMasApps;
+
+    extraMasApps = mkOption {
+      type = types.attrsOf types.int;
+      default = {};
+      description = "Additional Mac App Store apps to install";
+    };
   };
 
-  # Tích hợp Homebrew vào môi trường
-  environment.shellInit = ''
-    # Tích hợp với Homebrew
-    if [ -f /opt/homebrew/bin/brew ]; then
-      eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [ -f /usr/local/bin/brew ]; then
-      eval "$(/usr/local/bin/brew shellenv)"
-    fi
-  '';
+  config = {
+    homebrew = {
+      enable = true;
+      onActivation = {
+        autoUpdate = true;
+        cleanup = "zap";
+        upgrade = true;
+      };
+      
+      global.brewfile = true;
+      
+      # Combine common and extra packages
+      brews = commonBrews ++ config.extraBrews;
+      casks = commonCasks ++ config.extraCasks;
+      masApps = commonMasApps // config.extraMasApps;
+    };
+
+    environment.shellInit = ''
+      if [ -f /opt/homebrew/bin/brew ]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      elif [ -f /usr/local/bin/brew ]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+      fi
+    '';
+  };
 }

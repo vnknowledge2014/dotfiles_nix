@@ -72,8 +72,8 @@ case $OS in
     
     # Cài đặt Nix nếu chưa có
     if ! command -v nix &> /dev/null; then
-      echo "Cài đặt Nix từ Determinate Systems..."
-      curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --determinate
+      echo "Cài đặt Lix fork từ Determinate Systems..."
+      curl -sSf -L https://install.lix.systems/lix | sh -s -- install
       
       # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -94,15 +94,20 @@ case $OS in
     
     # Cài đặt nix-darwin
     if ! command -v darwin-rebuild &> /dev/null; then
+      echo "Setup Xcode license accept"
+      sudo xcodebuild -license accept
+
       echo "Cài đặt nix-darwin..."
-      nix-build https://github.com/LnL7/nix-darwin/archive/master.tar.gz -A installer
-      ./result/bin/darwin-installer
-      . /etc/static/bashrc
+      sudo nix run nix-darwin -- switch --flake .#$HOSTNAME
     fi
     
     # Xây dựng cấu hình
     echo "Xây dựng cấu hình Darwin..."
-    darwin-rebuild switch --flake .#$HOSTNAME
+    sudo darwin-rebuild switch --flake .#$HOSTNAME
+
+    echo "Cài đặt các ngôn ngữ lập trình trên asdf"
+    chmod +x ./asdf-vm/planguage.sh
+    bash ./asdf-vm/planguage.sh
     ;;
     
   nixos)
@@ -110,8 +115,8 @@ case $OS in
     
     # Cài đặt Nix từ Determinate Systems nếu chưa có
     if ! command -v nix &> /dev/null; then
-      echo "Cài đặt Nix từ Determinate Systems..."
-      curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --determinate
+      echo "Cài đặt Lix fork từ Determinate Systems..."
+      curl -sSf -L https://install.lix.systems/lix | sh -s -- install
       
       # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -161,8 +166,8 @@ case $OS in
     
     # Cài đặt Nix nếu chưa có
     if ! command -v nix &> /dev/null; then
-      echo "Cài đặt Nix từ Determinate Systems..."
-      curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --determinate
+      echo "Cài đặt Lix fork từ Determinate Systems..."
+      curl -sSf -L https://install.lix.systems/lix | sh -s -- install
       
       # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh

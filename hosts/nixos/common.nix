@@ -6,6 +6,7 @@
   # Cấu hình Nix
   nix = {
     enable = true;
+    package = pkgs.lix;
     settings = {
       experimental-features = [ "nix-command" "flakes" ];
     };

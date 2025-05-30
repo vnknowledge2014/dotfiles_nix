@@ -32,7 +32,7 @@
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "macos" "docker" "zsh-autosuggestions" "zsh-syntax-highlighting"];
+          plugins = [ "git" "macos" "docker" ];
         };
         aliases = {
           ll = "ls -l";

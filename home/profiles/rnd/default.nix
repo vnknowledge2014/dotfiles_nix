@@ -21,14 +21,13 @@
     shell = {
       enable = true;
       zsh = {
-        
         autosuggestions.enable = true;
         syntaxHighlighting.enable = true;
         enable = true;
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "docker" "zsh-autosuggestions" "zsh-syntax-highlighting"];
+          plugins = [ "git" "docker" ];
         };
         aliases = {
           ll = "ls -l";

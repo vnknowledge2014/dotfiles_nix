@@ -1,0 +1,17 @@
+purescript 0.15.15 --home
+java oracle-24.0.1 --home
+gleam 1.10.0 --home
+bun 1.2.15 --home
+v weekly.2025.22 --home
+uv 0.7.8 --home
+python 3.13.3t --home
+ocaml 5.3.0 --home
+zig 0.14.1 --home
+lua 5.4.7 --home
+flutter 3.32.1-stable --home
+rust 1.87.0 --home
+deno 2.3.5 --home
+golang 1.24.3 --home
+erlang 28.0 --home
+haskell 9.12.2 --home
+elixir 1.18.4 --home

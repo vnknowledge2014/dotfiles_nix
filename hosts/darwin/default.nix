@@ -30,31 +30,6 @@
 
   ];
   
-  # Thiết lập macOS cơ bản
-  system.defaults = {
-    NSGlobalDomain = {
-      AppleShowAllExtensions = true;
-      AppleShowScrollBars = "Always";
-      NSAutomaticCapitalizationEnabled = false;
-      NSAutomaticDashSubstitutionEnabled = false;
-      NSAutomaticPeriodSubstitutionEnabled = false;
-      NSAutomaticQuoteSubstitutionEnabled = false;
-      NSAutomaticSpellingCorrectionEnabled = false;
-    };
-    
-    dock = {
-      autohide = true;
-      mru-spaces = false;
-      show-recents = false;
-    };
-    
-    finder = {
-      AppleShowAllExtensions = true;
-      FXEnableExtensionChangeWarning = false;
-      _FXShowPosixPathInTitle = true;
-    };
-  };
-  
   # Cấu hình shell
   programs.zsh.enable = true;
   

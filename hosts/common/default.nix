@@ -30,5 +30,8 @@
     bat
     tree
     fzf
+    tmux
+    starship
+    devbox
   ];
 }

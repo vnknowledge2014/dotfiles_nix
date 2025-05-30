@@ -27,12 +27,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Extensions
+    vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
+
     # Apps
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, 
-              home-manager, darwin, nixos-wsl, zen-browser, ... }@inputs:
+              home-manager, darwin, nixos-wsl, zen-browser, vscode-extensions, ... }@inputs:
     let
       # Import thư viện tiện ích
       lib = import ./lib { inherit nixpkgs; };

@@ -16,13 +16,12 @@
       enable = true;
       zsh = {
         enable = true;
-        
         autosuggestions.enable = true;
         syntaxHighlighting.enable = true;
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "docker" "zsh-autosuggestions" "zsh-syntax-highlighting"];
+          plugins = [ "git" "docker" ];
         };
         aliases = {
           ll = "ls -l";
