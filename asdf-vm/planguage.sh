@@ -126,18 +126,19 @@ main() {
     
     # Danh sách các plugin và URL
     declare -A plugins=(
-        ["bun"]=""
+        ["cmake"]="https://github.com/srivathsanmurali/asdf-cmake.git"
+        ["bun"]="https://github.com/cometkim/asdf-bun.git"
         ["deno"]="https://github.com/asdf-community/asdf-deno.git"
         ["rust"]="https://github.com/asdf-community/asdf-rust.git"
         ["zig"]="https://github.com/asdf-community/asdf-zig.git"
         ["ocaml"]="https://github.com/asdf-community/asdf-ocaml.git"
         ["golang"]="https://github.com/asdf-community/asdf-golang.git"
         ["uv"]="https://github.com/asdf-community/asdf-uv.git"
-        ["python"]=""
+        ["python"]="https://github.com/asdf-community/asdf-python.git"
         ["haskell"]="https://github.com/vic/asdf-haskell.git"
         ["erlang"]="https://github.com/asdf-vm/asdf-erlang.git"
         ["elixir"]="https://github.com/asdf-vm/asdf-elixir.git"
-        ["flutter"]=""
+        ["flutter"]="https://github.com/asdf-community/asdf-flutter.git"
         ["java"]="https://github.com/halcyon/asdf-java.git"
         ["lua"]="https://github.com/Stratus3D/asdf-lua.git"
         ["purescript"]="https://github.com/jrrom/asdf-purescript.git"

@@ -32,6 +32,10 @@
     "podman-compose"
     "asdf"
     "mpv"
+    "pkg-config" 
+    "openssl@3" 
+    "librdkafka" 
+    "zlib"
   ];
 
   extraCasks = [
@@ -62,6 +66,7 @@
     "NCalc Scientific Calculator +" = 1449106995;
     "OneDrive" = 823766827;
     "TeraBox: 1TB Cloud & AI Space" = 1509453185;
+    "Windows App" = 1295203466;
   };
 
   # Thiết lập macOS cơ bản

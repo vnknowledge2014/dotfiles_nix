@@ -53,6 +53,7 @@
           # Greeting message
           neofetch
           export PATH="''${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+          export DOCKER_HOST='unix:///var/folders/hf/z_4jqsxs05b28y3_qt8j7tmh0000gn/T/podman/podman-machine-default-api.sock'
           echo "Welcome to your macOS development environment, Mike!"
         '';
       };
@@ -442,8 +443,13 @@
       {
         # Your additional personal settings here
         # These will be merged with the base settings
-        "editor.fontSize" = 14;
         "aws.samcli.lambdaTimeout" = 91234;
+        "editor.fontSize" = 14;
+        "github.copilot.nextEditSuggestions.enabled" = true;
+        "editor.largeFileOptimizations" = true;
+        "editor.fontFamily" = "FiraCode Nerd Font";
+        "terminal.integrated.fontFamily" = "FiraCode Nerd Font Mono";
+        "editor.fontLigatures" = true;
         # Add more personal settings...
       };
 
