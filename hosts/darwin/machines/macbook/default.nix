@@ -53,6 +53,7 @@
     "apidog"
     "gitbutler"
     "cloudflare-warp"
+    "mountain-duck"
     "localsend"
     "ollama"
     "iina"
