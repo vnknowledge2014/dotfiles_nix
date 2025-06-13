@@ -450,6 +450,9 @@
         "editor.fontFamily" = "FiraCode Nerd Font";
         "terminal.integrated.fontFamily" = "FiraCode Nerd Font Mono";
         "editor.fontLigatures" = true;
+        "amazonQ.suppressPrompts" = {
+          "amazonQChatDisclaimer" = true;
+        };
         # Add more personal settings...
       };
 
