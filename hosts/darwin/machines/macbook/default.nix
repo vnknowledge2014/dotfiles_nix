@@ -36,6 +36,7 @@
     "openssl@3" 
     "librdkafka" 
     "zlib"
+    "p7zip"
   ];
 
   extraCasks = [
