@@ -467,6 +467,7 @@
             "amazonQChatDisclaimer" = true;
             "amazonQChatPairProgramming" = true;
           };
+          "amazonQ.workspaceIndex" = true;
           "vs-kubernetes" = {
             "vscode-kubernetes.helm-path-mac" = "/Users/mike/.vs-kubernetes/tools/helm/darwin-amd64/helm";
           };
