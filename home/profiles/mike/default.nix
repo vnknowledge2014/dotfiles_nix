@@ -449,12 +449,6 @@
         version = "0.9.0";
         sha256 = "sha256-k+fQO4gZIAUCDOKEr4ao3S/Ue0lCjl+oTC7+CUK/sdY=";
       }
-      {
-        name = "markdown-pdf";
-        publisher = "yzane";
-        version = "1.5.0";
-        sha256 = "sha256-aiifZgHXC4GUEbkKAbLc0p/jUZxp1jF/J1Y/KIyvLIE=";
-      }
       ] ++ (config.modules.editors.vscode.extensions or []); # Merge with base extensions
 
       userSettings = lib.recursiveUpdate 
