@@ -53,7 +53,8 @@
           # Greeting message
           neofetch
           export PATH="''${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
-          export DOCKER_HOST='unix:///var/folders/hf/z_4jqsxs05b28y3_qt8j7tmh0000gn/T/podman/podman-machine-default-api.sock'
+          # export DOCKER_HOST='unix:///var/folders/hf/z_4jqsxs05b28y3_qt8j7tmh0000gn/T/podman/podman-machine-default-api.sock'
+          # export DOCKER_HOST='unix:///var/run/docker.sock'
           echo "Welcome to your macOS development environment, Mike!"
         '';
       };
@@ -210,7 +211,8 @@
   # Cấu hình Editor
   programs.vscode = {
     enable = true;
-    extensions = with pkgs.vscode-extensions; [
+    profiles.default = {
+      extensions = with pkgs.vscode-extensions; [
       # Your additional personal extensions here
       github.copilot-chat
       github.copilot
@@ -418,11 +420,10 @@
         sha256 = "sha256-BozINc0qBMJpRW8KnqiejFtQIE2v4E49mTYyv4F/MCQ="; 
       }
       {
-        name = "amazon-q-vscode";  # Changed from Bun-for-Visual-Studio-Code
+        name = "amazon-q-vscode";
         publisher = "Amazonwebservices";
         version = "1.70.0";
         sha256 = "sha256-nMAhVl93CImy0tQ6naB2tBAcMVC6Elo2AfvQj3jaEc4=";
-
       }
       {
         name = "bun-vscode";
@@ -436,41 +437,64 @@
         version = "2.0.2";
         sha256 = "sha256-xdQdQraCQ5FByHHZjdyE1z0zEqZcJAJAi/t3OGVtbWU=";
       }
-    ] ++ (config.modules.editors.vscode.extensions or []); # Merge with base extensions
-
-    userSettings = lib.recursiveUpdate 
-      (config.modules.editors.vscode.userSettings or {})
       {
-        # Your additional personal settings here
-        # These will be merged with the base settings
-        "aws.samcli.lambdaTimeout" = 91234;
-        "editor.fontSize" = 14;
-        "github.copilot.nextEditSuggestions.enabled" = true;
-        "editor.largeFileOptimizations" = true;
-        "editor.fontFamily" = "FiraCode Nerd Font";
-        "terminal.integrated.fontFamily" = "FiraCode Nerd Font Mono";
-        "editor.fontLigatures" = true;
-        "amazonQ.suppressPrompts" = {
-          "amazonQChatDisclaimer" = true;
+        name = "windows-ai-studio";
+        publisher = "ms-windows-ai-studio";
+        version = "0.15.2025060503";
+        sha256 = "sha256-yBoRjRkxzOezDem79kvMjQsMQs7a0z7Sf2dOq2cxx3M=";
+      }
+      {
+        name = "coderabbit-vscode";
+        publisher = "CodeRabbit";
+        version = "0.9.0";
+        sha256 = "sha256-k+fQO4gZIAUCDOKEr4ao3S/Ue0lCjl+oTC7+CUK/sdY=";
+      }
+      {
+        name = "markdown-pdf";
+        publisher = "yzane";
+        version = "1.5.0";
+        sha256 = "sha256-aiifZgHXC4GUEbkKAbLc0p/jUZxp1jF/J1Y/KIyvLIE=";
+      }
+      ] ++ (config.modules.editors.vscode.extensions or []); # Merge with base extensions
+
+      userSettings = lib.recursiveUpdate 
+        (config.modules.editors.vscode.userSettings or {})
+        {
+          # Your additional personal settings here
+          # These will be merged with the base settings
+          "aws.samcli.lambdaTimeout" = 91234;
+          "editor.fontSize" = 14;
+          "github.copilot.nextEditSuggestions.enabled" = true;
+          "editor.largeFileOptimizations" = true;
+          "editor.fontFamily" = "FiraCode Nerd Font";
+          "terminal.integrated.fontFamily" = "FiraCode Nerd Font Mono";
+          "editor.fontLigatures" = true;
+          "amazonQ.suppressPrompts" = {
+            "amazonQChatDisclaimer" = true;
+            "amazonQChatPairProgramming" = true;
+          };
+          "vs-kubernetes" = {
+            "vscode-kubernetes.helm-path-mac" = "/Users/mike/.vs-kubernetes/tools/helm/darwin-amd64/helm";
+          };
+          # Add more personal settings...
         };
-        # Add more personal settings...
-      };
 
-    keybindings = [
-      {
-        key = "cmd+shift+[";
-        command = "workbench.action.previousEditor";
-      }
-      {
-        key = "cmd+shift+]";
-        command = "workbench.action.nextEditor";
-      }
-      {
-        key = "cmd+w";
-        command = "workbench.action.closeActiveEditor";
-      }
-      # Add more keybindings as needed...
-    ] ++ (config.modules.editors.vscode.keybindings or []); # Merge with base keybindings
+      keybindings = [
+        {
+          key = "cmd+shift+[";
+          command = "workbench.action.previousEditor";
+        }
+        {
+          key = "cmd+shift+]";
+          command = "workbench.action.nextEditor";
+        }
+        {
+          key = "cmd+w";
+          command = "workbench.action.closeActiveEditor";
+        }
+        # Add more keybindings as needed...
+      ] ++ (config.modules.editors.vscode.keybindings or []); # Merge with base keybindings
+    };
   };
 
   # Các cấu hình riêng khác
