@@ -128,6 +128,7 @@ main() {
     declare -A plugins=(
         ["cmake"]="https://github.com/srivathsanmurali/asdf-cmake.git"
         ["bun"]="https://github.com/cometkim/asdf-bun.git"
+        ["nodejs"]="https://github.com/asdf-vm/asdf-nodejs.git"
         ["deno"]="https://github.com/asdf-community/asdf-deno.git"
         ["rust"]="https://github.com/asdf-community/asdf-rust.git"
         ["zig"]="https://github.com/asdf-community/asdf-zig.git"
