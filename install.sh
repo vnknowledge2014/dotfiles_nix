@@ -108,7 +108,14 @@ case $OS in
     echo "Cài đặt các ngôn ngữ lập trình trên asdf"
     chmod +x ./asdf-vm/planguage.sh
     bash ./asdf-vm/planguage.sh
-    ;;
+
+    echo "Cài đặt tmux"
+    # cp ./ghostty-tmux/tmux.conf ~/.config/tmux/.tmux.conf
+
+    # echo "Kiểm tra nếu có cài đặt ghostty thì cài đặt config"
+    # if command -v ghostty &> /dev/null; then
+    #   echo "Cài đặt cấu hình ghostty..."
+    # ;;
     
   nixos)
     echo "Thiết lập NixOS..."
