@@ -408,12 +408,6 @@
         sha256 = "sha256-U4V+hXtDp7ll64k0wHxnBHszoMlK3BXBwaMf/snIics=";
       }
       {
-        name = "opentofu";
-        publisher = "gamunu";
-        version = "0.2.1";
-        sha256 = "sha256-OizdHTSGuwBRuD/qPXjmna6kZWfRp9EimhcFk3ICN9I=";
-      }
-      {
         name = "aws-toolkit-vscode";
         publisher = "AmazonWebServices";
         version = "2.2.0";
