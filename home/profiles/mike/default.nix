@@ -55,6 +55,10 @@
           export PATH="''${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
           export DOCKER_HOST='unix:///var/folders/hf/z_4jqsxs05b28y3_qt8j7tmh0000gn/T/podman/podman-machine-default-api.sock'
           # export DOCKER_HOST='unix:///Users/mike/.obstack/run/docker.sock'
+
+          # Rustup
+          source "$HOME/.cargo/env"
+
           echo "Welcome to your macOS development environment, Mike!"
         '';
       };
@@ -465,6 +469,7 @@
           "vs-kubernetes" = {
             "vscode-kubernetes.helm-path-mac" = "/Users/mike/.vs-kubernetes/tools/helm/darwin-amd64/helm";
           };
+          "rust-analyzer.rustcSource" = "discover";
           # Add more personal settings...
         };
 
@@ -491,7 +496,7 @@
     EDITOR = "nvim";
     VISUAL = "code";
     LANG = "en_US.UTF-8";
-    PATH = "$HOME/.local/bin:$PATH";
+    PATH = "$HOME/.cargo/bin:$HOME/.local/bin:$PATH";
   };
 
   # Đảm bảo thư mục LaunchAgents có quyền truy cập đúng

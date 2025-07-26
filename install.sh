@@ -115,7 +115,8 @@ case $OS in
     # echo "Kiểm tra nếu có cài đặt ghostty thì cài đặt config"
     # if command -v ghostty &> /dev/null; then
     #   echo "Cài đặt cấu hình ghostty..."
-    # ;;
+    # fi
+    ;;
     
   nixos)
     echo "Thiết lập NixOS..."

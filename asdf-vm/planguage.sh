@@ -31,26 +31,41 @@ print_error() {
 
 # Kiểm tra shell và cấu hình source cho rustup
 setup_rustup_shell() {
-    print_info "Đang kiểm tra shell hiện tại..."
+    print_info "Đang kiểm tra shell mặc định của user..."
     
-    local current_shell=$(basename "$SHELL")
+    local user_shell=$(basename "$SHELL")
     local config_file=""
     local source_line='source "$HOME/.cargo/env"'
     
-    case "$current_shell" in
+    # Phát hiện shell mặc định của user, không phải shell đang chạy script
+    case "$user_shell" in
         "bash")
             config_file="$HOME/.bashrc"
-            print_info "Phát hiện bash shell, sẽ cấu hình trong .bashrc"
+            print_info "Shell mặc định là bash, sẽ cấu hình trong .bashrc"
             ;;
         "zsh")
             config_file="$HOME/.zshrc"
-            print_info "Phát hiện zsh shell, sẽ cấu hình trong .zshrc"
+            print_info "Shell mặc định là zsh, sẽ cấu hình trong .zshrc"
             ;;
         *)
-            print_warning "Shell không được hỗ trợ: $current_shell, sử dụng .bashrc làm mặc định"
-            config_file="$HOME/.bashrc"
+            print_warning "Shell không được hỗ trợ: $user_shell, kiểm tra cả .bashrc và .zshrc"
+            # Ưu tiên zsh nếu file .zshrc tồn tại, nếu không thì dùng bash
+            if [ -f "$HOME/.zshrc" ]; then
+                config_file="$HOME/.zshrc"
+                print_info "Tìm thấy .zshrc, sẽ cấu hình trong .zshrc"
+            else
+                config_file="$HOME/.bashrc"
+                print_info "Không tìm thấy .zshrc, sẽ cấu hình trong .bashrc"
+            fi
             ;;
     esac
+    
+    # Kiểm tra xem file có phải là symlink không (do Nix quản lý)
+    if [ -L "$config_file" ]; then
+        print_warning "$config_file là symlink do Nix quản lý, bỏ qua cấu hình tự động"
+        print_info "Vui lòng thêm 'source \"\$HOME/.cargo/env\"' vào cấu hình Nix của bạn"
+        return 0
+    fi
     
     # Kiểm tra xem đã có cấu hình chưa
     if [ -f "$config_file" ] && grep -q "cargo/env" "$config_file"; then
@@ -77,7 +92,7 @@ install_rustup() {
     fi
     
     print_info "Đang cài đặt Rustup..."
-    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
+    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --no-modify-path -y; then
         print_success "Đã cài đặt Rustup thành công"
         
         # Source cargo env cho session hiện tại
@@ -130,44 +145,19 @@ add_plugin() {
     fi
 }
 
-# Hàm cài đặt phiên bản mới nhất
-install_latest() {
+# Hàm cài đặt phiên bản
+install_version() {
     local plugin_name=$1
-    local version=""
+    local version=$2
     
-    # Xử lý đặc biệt cho Java, Haskell và Elixir
-    if [[ "$plugin_name" =~ ^(java|haskell|elixir)$ ]]; then
-        print_info "Đang lấy danh sách phiên bản cho $plugin_name..."
-        if ! asdf list all "$plugin_name"; then
-            print_error "Không thể lấy danh sách phiên bản của $plugin_name"
-            return 1
-        fi
-        
-        echo
-        read -p "Nhập phiên bản $plugin_name bạn muốn cài đặt: " version
-        
-        if [ -z "$version" ]; then
-            print_error "Phiên bản không được để trống"
-            return 1
-        fi
-        
-        print_info "Đang cài đặt $plugin_name phiên bản $version..."
-    else
-        # Lấy phiên bản mới nhất từ asdf
-        version=$(asdf latest "$plugin_name")
-        if [ -z "$version" ]; then
-            print_error "Không thể lấy được phiên bản mới nhất của $plugin_name"
-            return 1
-        fi
-        print_info "Đang cài đặt $plugin_name phiên bản $version..."
-    fi
+    print_info "Đang cài đặt $plugin_name phiên bản $version..."
     
     if asdf install "$plugin_name" "$version"; then
         print_success "Đã cài đặt $plugin_name phiên bản $version"
         
         # Đặt phiên bản trong home directory
         if asdf set -u "$plugin_name" "$version" --home; then
-            print_success "Đã đặt $plugin_name $version làm phiên bản mặc định trong home directory"
+            print_success "Đã đặt $plugin_name $version làm phiên bản mặc định"
         else
             print_warning "Không thể đặt $plugin_name $version làm phiên bản mặc định"
         fi
@@ -177,8 +167,8 @@ install_latest() {
     fi
 }
 
-# Đọc danh sách plugins từ file JSON
-load_plugins() {
+# Xử lý plugins từ file JSON
+process_plugins() {
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     local plugins_file="$script_dir/plugins.json"
     
@@ -187,59 +177,50 @@ load_plugins() {
         exit 1
     fi
     
-    # Đọc JSON và chuyển thành associative array
-    while IFS="=" read -r key value; do
-        plugins["$key"]="$value"
-    done < <(jq -r '.plugins | to_entries[] | "\(.key)=\(.value)"' "$plugins_file")
-}
-
-# Main script
-main() {
-    print_info "Bắt đầu cài đặt Rustup và các plugin asdf..."
-    echo
+    local failed_plugins=()
+    local failed_installs=()
     
-    # Cài đặt Rustup
-    install_rustup
-    echo
-    
-    # Kiểm tra asdf
-    check_asdf
-    echo
-    
-    # Đọc danh sách plugins
-    declare -A plugins
-    load_plugins
-    
-    # Thêm tất cả các plugin
+    # Bước 1: Thêm các plugin
     print_info "Bước 1: Thêm các plugin..."
     echo
-    failed_plugins=()
     
-    for plugin in "${!plugins[@]}"; do
-        if ! add_plugin "$plugin" "${plugins[$plugin]}"; then
-            failed_plugins+=("$plugin")
+    while IFS='|' read -r plugin_name plugin_url; do
+        if ! add_plugin "$plugin_name" "$plugin_url"; then
+            failed_plugins+=("$plugin_name")
         fi
-    done
+    done < <(jq -r '.plugins | to_entries[] | "\(.key)|\(.value)"' "$plugins_file")
     
     echo
-    print_info "Bước 2: Cài đặt phiên bản mới nhất..."
+    print_info "Bước 2: Cài đặt phiên bản..."
     echo
     
-    # Cài đặt phiên bản mới nhất cho các plugin đã thêm thành công
-    failed_installs=()
-    
-    for plugin in "${!plugins[@]}"; do
+    # Bước 2: Cài đặt phiên bản
+    while IFS='|' read -r plugin_name plugin_url; do
         # Bỏ qua các plugin không thêm được
-        if [[ " ${failed_plugins[*]} " =~ " $plugin " ]]; then
-            print_warning "Bỏ qua cài đặt $plugin vì plugin không thể thêm được"
+        if [[ " ${failed_plugins[*]} " =~ " $plugin_name " ]]; then
+            print_warning "Bỏ qua cài đặt $plugin_name vì plugin không thể thêm được"
             continue
         fi
         
-        if ! install_latest "$plugin"; then
-            failed_installs+=("$plugin")
+        # Lấy phiên bản từ config hoặc latest
+        local version
+        version=$(jq -r ".versions.\"$plugin_name\" // empty" "$plugins_file")
+        
+        if [ -z "$version" ] || [ "$version" = "null" ]; then
+            # Lấy phiên bản mới nhất từ asdf
+            version=$(asdf latest "$plugin_name")
+            if [ -z "$version" ]; then
+                print_error "Không thể lấy được phiên bản mới nhất của $plugin_name"
+                failed_installs+=("$plugin_name")
+                continue
+            fi
+        fi
+        
+        if ! install_version "$plugin_name" "$version"; then
+            failed_installs+=("$plugin_name")
         fi
         echo
-    done
+    done < <(jq -r '.plugins | to_entries[] | "\(.key)|\(.value)"' "$plugins_file")
     
     # Tóm tắt kết quả
     echo
@@ -256,6 +237,23 @@ main() {
             print_error "Các ngôn ngữ không thể cài đặt được: ${failed_installs[*]}"
         fi
     fi
+}
+
+# Main script
+main() {
+    print_info "Bắt đầu cài đặt Rustup và các plugin asdf..."
+    echo
+    
+    # Cài đặt Rustup
+    install_rustup
+    echo
+    
+    # Kiểm tra asdf
+    check_asdf
+    echo
+    
+    # Xử lý plugins từ JSON
+    process_plugins
     
     echo
     print_info "Chạy 'asdf list' để xem các phiên bản đã cài đặt"
