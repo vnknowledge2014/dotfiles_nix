@@ -29,6 +29,44 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Kiểm tra shell và cấu hình source cho rustup
+setup_rustup_shell() {
+    print_info "Đang kiểm tra shell hiện tại..."
+    
+    local current_shell=$(basename "$SHELL")
+    local config_file=""
+    local source_line='source "$HOME/.cargo/env"'
+    
+    case "$current_shell" in
+        "bash")
+            config_file="$HOME/.bashrc"
+            print_info "Phát hiện bash shell, sẽ cấu hình trong .bashrc"
+            ;;
+        "zsh")
+            config_file="$HOME/.zshrc"
+            print_info "Phát hiện zsh shell, sẽ cấu hình trong .zshrc"
+            ;;
+        *)
+            print_warning "Shell không được hỗ trợ: $current_shell, sử dụng .bashrc làm mặc định"
+            config_file="$HOME/.bashrc"
+            ;;
+    esac
+    
+    # Kiểm tra xem đã có cấu hình chưa
+    if [ -f "$config_file" ] && grep -q "cargo/env" "$config_file"; then
+        print_warning "Cấu hình rustup đã tồn tại trong $config_file"
+        return 0
+    fi
+    
+    # Thêm cấu hình vào file shell
+    print_info "Đang thêm cấu hình rustup vào $config_file..."
+    echo "" >> "$config_file"
+    echo "# Rustup configuration" >> "$config_file"
+    echo "$source_line" >> "$config_file"
+    
+    print_success "Đã thêm cấu hình rustup vào $config_file"
+}
+
 # Cài đặt Rustup
 install_rustup() {
     print_info "Đang kiểm tra Rustup..."
@@ -41,8 +79,12 @@ install_rustup() {
     print_info "Đang cài đặt Rustup..."
     if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
         print_success "Đã cài đặt Rustup thành công"
-        # Source cargo env
+        
+        # Source cargo env cho session hiện tại
         source "$HOME/.cargo/env"
+        
+        # Cấu hình shell cho các session tương lai
+        setup_rustup_shell
     else
         print_error "Không thể cài đặt Rustup"
         return 1
