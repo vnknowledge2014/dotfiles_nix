@@ -29,6 +29,26 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Cài đặt Rustup
+install_rustup() {
+    print_info "Đang kiểm tra Rustup..."
+    
+    if command -v rustup &> /dev/null; then
+        print_warning "Rustup đã được cài đặt, bỏ qua..."
+        return 0
+    fi
+    
+    print_info "Đang cài đặt Rustup..."
+    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
+        print_success "Đã cài đặt Rustup thành công"
+        # Source cargo env
+        source "$HOME/.cargo/env"
+    else
+        print_error "Không thể cài đặt Rustup"
+        return 1
+    fi
+}
+
 # Kiểm tra asdf đã được cài đặt chưa
 check_asdf() {
     if ! command -v asdf &> /dev/null; then
@@ -115,37 +135,38 @@ install_latest() {
     fi
 }
 
+# Đọc danh sách plugins từ file JSON
+load_plugins() {
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local plugins_file="$script_dir/plugins.json"
+    
+    if [ ! -f "$plugins_file" ]; then
+        print_error "Không tìm thấy file plugins.json"
+        exit 1
+    fi
+    
+    # Đọc JSON và chuyển thành associative array
+    while IFS="=" read -r key value; do
+        plugins["$key"]="$value"
+    done < <(jq -r '.plugins | to_entries[] | "\(.key)=\(.value)"' "$plugins_file")
+}
+
 # Main script
 main() {
-    print_info "Bắt đầu cài đặt các plugin asdf và ngôn ngữ lập trình..."
+    print_info "Bắt đầu cài đặt Rustup và các plugin asdf..."
+    echo
+    
+    # Cài đặt Rustup
+    install_rustup
     echo
     
     # Kiểm tra asdf
     check_asdf
     echo
     
-    # Danh sách các plugin và URL
-    declare -A plugins=(
-        ["cmake"]="https://github.com/srivathsanmurali/asdf-cmake.git"
-        ["bun"]="https://github.com/cometkim/asdf-bun.git"
-        ["nodejs"]="https://github.com/asdf-vm/asdf-nodejs.git"
-        ["deno"]="https://github.com/asdf-community/asdf-deno.git"
-        ["rust"]="https://github.com/asdf-community/asdf-rust.git"
-        ["zig"]="https://github.com/asdf-community/asdf-zig.git"
-        ["ocaml"]="https://github.com/asdf-community/asdf-ocaml.git"
-        ["golang"]="https://github.com/asdf-community/asdf-golang.git"
-        ["uv"]="https://github.com/asdf-community/asdf-uv.git"
-        ["python"]="https://github.com/asdf-community/asdf-python.git"
-        ["haskell"]="https://github.com/vic/asdf-haskell.git"
-        ["erlang"]="https://github.com/asdf-vm/asdf-erlang.git"
-        ["elixir"]="https://github.com/asdf-vm/asdf-elixir.git"
-        ["flutter"]="https://github.com/asdf-community/asdf-flutter.git"
-        ["java"]="https://github.com/halcyon/asdf-java.git"
-        ["lua"]="https://github.com/Stratus3D/asdf-lua.git"
-        ["purescript"]="https://github.com/jrrom/asdf-purescript.git"
-        ["v"]="https://github.com/jthegedus/asdf-v"
-        ["gleam"]="https://github.com/asdf-community/asdf-gleam.git"
-    )
+    # Đọc danh sách plugins
+    declare -A plugins
+    load_plugins
     
     # Thêm tất cả các plugin
     print_info "Bước 1: Thêm các plugin..."
