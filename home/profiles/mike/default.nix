@@ -49,6 +49,19 @@
             source ${pkgs.fzf}/share/fzf/completion.zsh
             source ${pkgs.fzf}/share/fzf/key-bindings.zsh
           fi
+
+          # Auto-start tmux (an toàn)
+          if command -v tmux &> /dev/null && [ -z "$TMUX" ] && [ -n "$PS1" ]; then
+            # Chỉ chạy khi không trong tmux và là interactive shell
+            source ~/.config/tmux/.tmux.conf
+            if tmux has-session 2>/dev/null; then
+              # Có session sẵn, attach vào
+              tmux attach-session
+            else
+              # Không có session, tạo mới
+              tmux new-session
+            fi
+          fi
           
           neofetch
           export PATH="''${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"

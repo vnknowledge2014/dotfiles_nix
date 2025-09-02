@@ -151,7 +151,7 @@ dotfiles/
    echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf
    
    # Cài đặt home-manager
-   nix-shell -p nixFlakes --run "nix run github:nix-community/home-manager/release-24.11 -- switch --flake .#username@hostname"
+   nix-shell -p nixFlakes --run "nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#username@hostname"
    ```
 
 ### NixOS trên WSL
@@ -430,7 +430,7 @@ darwin-rebuild switch --flake .#hostname
 ```bash
 cd dotfiles
 git pull
-nix run home-manager/release-24.11 -- switch --flake .#username@hostname
+nix run home-manager/release-25.05 -- switch --flake .#username@hostname
 ```
 
 ## FAQ & Troubleshooting

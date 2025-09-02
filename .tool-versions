@@ -15,3 +15,4 @@ golang 1.24.3 --home
 erlang 28.0 --home
 haskell 9.12.2 --home
 elixir 1.18.4 --home
+nodejs 24.4.1 --home

@@ -72,8 +72,8 @@ case $OS in
     
     # Cài đặt Nix nếu chưa có
     if ! command -v nix &> /dev/null; then
-      echo "Cài đặt Lix fork từ Determinate Systems..."
-      curl -sSf -L https://install.lix.systems/lix | sh -s -- install
+      echo "Cài đặt Nix..."
+      sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install)
       
       # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -114,12 +114,12 @@ case $OS in
     ;;
     
   nixos)
-    echo "Thiết lập NixOS..."
+    echo "Thiết lập Nix | NixOS..."
     
-    # Cài đặt Nix từ Determinate Systems nếu chưa có
+    # Cài đặt Nix từ Nix nếu chưa có
     if ! command -v nix &> /dev/null; then
-      echo "Cài đặt Lix fork từ Determinate Systems..."
-      curl -sSf -L https://install.lix.systems/lix | sh -s -- install
+      echo "Cài đặt Nix..."
+      sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
       
       # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -169,8 +169,8 @@ case $OS in
     
     # Cài đặt Nix nếu chưa có
     if ! command -v nix &> /dev/null; then
-      echo "Cài đặt Lix fork từ Determinate Systems..."
-      curl -sSf -L https://install.lix.systems/lix | sh -s -- install
+      echo "Cài đặt Nix..."
+      sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
       
       # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -182,7 +182,7 @@ case $OS in
     
     # Cài đặt home-manager
     echo "Cài đặt home-manager..."
-    nix-shell -p nixFlakes --run "nix run github:nix-community/home-manager/release-24.11 -- switch --flake .#$USERNAME@$HOSTNAME"
+    nix-shell -p nixFlakes --run "nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME"
     ;;
     
   *)
