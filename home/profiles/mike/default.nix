@@ -50,7 +50,6 @@
             source ${pkgs.fzf}/share/fzf/key-bindings.zsh
           fi
           
-          # Greeting message
           neofetch
           export PATH="''${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
           export DOCKER_HOST='unix:///var/folders/hf/z_4jqsxs05b28y3_qt8j7tmh0000gn/T/podman/podman-machine-default-api.sock'
@@ -58,8 +57,10 @@
 
           # Rustup
           source "$HOME/.cargo/env"
-
+          
+          # Greeting message
           echo "Welcome to your macOS development environment, Mike!"
+          echo "Remember to stay hydrated and take breaks while coding!"
         '';
       };
     };
@@ -470,6 +471,8 @@
             "vscode-kubernetes.helm-path-mac" = "/Users/mike/.vs-kubernetes/tools/helm/darwin-amd64/helm";
           };
           "rust-analyzer.rustcSource" = "discover";
+          "explorer.fileNesting.enabled" = true;
+          "workbench.colorTheme" = "SynthWave '84";
           # Add more personal settings...
         };
 

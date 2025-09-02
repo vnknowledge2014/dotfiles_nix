@@ -37,6 +37,7 @@
     "librdkafka" 
     "zlib"
     "p7zip"
+    "pkg-config"
   ];
 
   extraCasks = [
