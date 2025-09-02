@@ -110,12 +110,7 @@ case $OS in
     bash ./asdf-vm/planguage.sh
 
     echo "Cài đặt tmux"
-    # cp ./ghostty-tmux/tmux.conf ~/.config/tmux/.tmux.conf
-
-    # echo "Kiểm tra nếu có cài đặt ghostty thì cài đặt config"
-    # if command -v ghostty &> /dev/null; then
-    #   echo "Cài đặt cấu hình ghostty..."
-    # fi
+    cp ./ghostty-tmux/.tmux.conf ~/.config/tmux/.tmux.conf
     ;;
     
   nixos)
