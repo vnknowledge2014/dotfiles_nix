@@ -63,6 +63,18 @@ bash ./asdf-vm/planguage.sh
 
 # Enter development shell with nix formatting tools
 nix develop
+
+# Format Nix files
+nixpkgs-fmt .
+
+# Check Nix syntax with nil language server
+nil check
+```
+
+### Tmux Setup (macOS)
+```bash
+# Copy tmux configuration to config directory
+cp ./ghostty-tmux/.tmux.conf ~/.config/tmux/.tmux.conf
 ```
 
 ## Configuration Structure
@@ -70,8 +82,13 @@ nix develop
 ### Dynamic System Detection
 The system uses environment variables and file detection to automatically determine:
 - Hostname (from `$HOSTNAME`, `/etc/hostname`, or `$HOST`)
-- Username (from `$USER` or `$USERNAME`) 
+- Username (from `$USER` or `$USERNAME`)
 - Platform (Darwin, NixOS, WSL, Ubuntu)
+
+System detection logic is implemented in `lib/default.nix:46` and includes:
+- WSL detection via `/proc/sys/kernel/osrelease` containing "microsoft"
+- Ubuntu detection via `/etc/os-release` containing "Ubuntu"
+- NixOS detection via `/etc/NIXOS` file existence
 
 ### User Profiles
 User configurations are stored in `home/profiles/username/`. To add a new user:
@@ -89,17 +106,36 @@ Platform-specific machine configs are in `hosts/platform/machines/hostname/`. To
 Home Manager modules are organized in `home/modules/`:
 - **core/**: Essential packages and configurations
 - **dev/**: Development tools (Git configuration in `git.nix`)
-- **shell/**: Shell configuration and aliases  
+- **shell/**: Shell configuration and aliases
 - **editors/**: Editor configurations
 - **terminal/**: Terminal emulator settings
 
+### Programming Language Management
+The system integrates `asdf-vm` for programming language version management:
+- **`asdf-vm/planguage.sh`**: Automated installation script for multiple programming languages
+- **`asdf-vm/plugins.json`**: Configuration file defining asdf plugins and specific versions
+- **Rustup integration**: Automatic Rustup installation with shell configuration
+- **Supported languages**: Node.js, Python, Go, Rust, Java, Haskell, Elixir, and many others
+
+Plugin configuration supports both automatic latest version installation and pinned versions for specific tools.
+
 ## Platform-Specific Notes
 
-**macOS**: Integrates Homebrew for packages not available in Nix. Brew packages are defined in machine-specific configs.
+**macOS**:
+- Integrates Homebrew for packages not available in Nix
+- Homebrew packages defined in machine-specific configs (`hosts/darwin/machines/hostname/`)
+- Includes Xcode license acceptance automation
+- Tmux configuration copied to `~/.config/tmux/` during installation
 
-**Ubuntu**: Uses Home Manager with optional Snapd integration for additional packages.
+**Ubuntu**:
+- Uses Home Manager with optional Snapd integration for additional packages
+- Requires manual apt package installation for build dependencies
+- Nix experimental features must be enabled manually
 
-**WSL**: Special WSL-optimized NixOS configuration with Windows integration features.
+**WSL**:
+- Special WSL-optimized NixOS configuration with Windows integration features
+- Automatic WSL detection via kernel release information
+- Uses pre-configured WSL hostname
 
 ## Git Configuration
 
@@ -113,3 +149,11 @@ Git settings are split between:
 - The system supports both static configurations (predefined hostnames) and dynamic detection
 - Homebrew on macOS and Snapd on Ubuntu are optional package managers integrated with the Nix setup
 - Shell configuration files may be managed by Nix and appear as symlinks
+- Install script is interactive and prompts for confirmation before applying changes
+- User profiles are created from template if they don't exist during installation
+- Hardware configuration is auto-generated for new NixOS machines using `nixos-generate-config`
+
+## Additional Scripts
+
+- **`scripts/add-rustup-to-nix.sh`**: Additional Rust toolchain integration script
+- **`.tool-versions`**: asdf version file for managing tool versions in the repository root

@@ -2,6 +2,15 @@
 
 set -e
 
+# Kiểm tra đang chạy từ thư mục đúng
+if [[ ! -f "flake.nix" ]]; then
+  echo "Lỗi: Script phải được chạy từ thư mục gốc của dotfiles (chứa file flake.nix)"
+  echo "Hướng dẫn:"
+  echo "  cd /path/to/dotfiles"
+  echo "  ./install.sh"
+  exit 1
+fi
+
 echo "Cài Đặt Dotfiles Đa Nền Tảng"
 echo "============================="
 echo ""
@@ -58,9 +67,14 @@ if [[ ! -d "home/profiles/$USERNAME" ]]; then
   read -p "Nhập tên đầy đủ: " FULLNAME
   read -p "Nhập email: " EMAIL
   
-  # Cập nhật thông tin
-  sed -i "s/Your Name/$FULLNAME/g" "home/profiles/$USERNAME/default.nix"
-  sed -i "s/your\.email@example\.com/$EMAIL/g" "home/profiles/$USERNAME/default.nix"
+  # Cập nhật thông tin (sử dụng cú pháp tương thích với macOS)
+  if [[ "$OS" == "darwin" ]]; then
+    sed -i '' "s/Your Name/$FULLNAME/g" "home/profiles/$USERNAME/default.nix"
+    sed -i '' "s/your\.email@example\.com/$EMAIL/g" "home/profiles/$USERNAME/default.nix"
+  else
+    sed -i "s/Your Name/$FULLNAME/g" "home/profiles/$USERNAME/default.nix"
+    sed -i "s/your\.email@example\.com/$EMAIL/g" "home/profiles/$USERNAME/default.nix"
+  fi
   
   echo "Đã tạo profile cho $USERNAME."
 fi
@@ -97,20 +111,64 @@ case $OS in
       echo "Setup Xcode license accept"
       sudo xcodebuild -license accept
 
+      # Backup existing /etc files that nix-darwin will manage
+      echo "Backing up existing /etc files..."
+      if [[ -f /etc/zshrc ]]; then
+        sudo mv /etc/zshrc /etc/zshrc.before-nix-darwin
+        echo "Backed up /etc/zshrc to /etc/zshrc.before-nix-darwin"
+      fi
+      if [[ -f /etc/zprofile ]]; then
+        sudo mv /etc/zprofile /etc/zprofile.before-nix-darwin
+        echo "Backed up /etc/zprofile to /etc/zprofile.before-nix-darwin"
+      fi
+      if [[ -f /etc/bashrc ]]; then
+        sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
+        echo "Backed up /etc/bashrc to /etc/bashrc.before-nix-darwin"
+      fi
+
       echo "Cài đặt nix-darwin..."
       sudo nix run nix-darwin -- switch --flake .#$HOSTNAME
+
+      # Tải lại PATH sau khi cài đặt nix-darwin
+      if [[ -f /etc/static/bashrc ]]; then
+        source /etc/static/bashrc
+      fi
     fi
     
+    # Kiểm tra cấu hình máy tồn tại
+    if [[ ! -d "hosts/darwin/machines/$HOSTNAME" ]]; then
+      echo "Cảnh báo: Không tìm thấy cấu hình cho máy $HOSTNAME"
+      echo "Tạo cấu hình từ template..."
+      mkdir -p "hosts/darwin/machines/$HOSTNAME"
+      cp "hosts/darwin/machines/template/default.nix" "hosts/darwin/machines/$HOSTNAME/default.nix"
+      echo "Đã tạo cấu hình cho $HOSTNAME từ template"
+    fi
+
     # Xây dựng cấu hình
     echo "Xây dựng cấu hình Darwin..."
-    sudo darwin-rebuild switch --flake .#$HOSTNAME
+    if sudo darwin-rebuild switch --flake .#$HOSTNAME; then
+      echo "Xây dựng cấu hình Darwin thành công"
+    else
+      echo "Lỗi: Không thể xây dựng cấu hình Darwin. Vui lòng kiểm tra lại cấu hình."
+      exit 1
+    fi
 
     echo "Cài đặt các ngôn ngữ lập trình trên asdf"
-    chmod +x ./asdf-vm/planguage.sh
-    bash ./asdf-vm/planguage.sh
+    if [[ -f "./asdf-vm/planguage.sh" ]]; then
+      chmod +x ./asdf-vm/planguage.sh
+      bash ./asdf-vm/planguage.sh
+    else
+      echo "Cảnh báo: Không tìm thấy file asdf-vm/planguage.sh"
+    fi
 
     echo "Cài đặt tmux"
-    cp ./ghostty-tmux/.tmux.conf ~/.config/tmux/.tmux.conf
+    if [[ -f "./ghostty-tmux/.tmux.conf" ]]; then
+      mkdir -p ~/.config/tmux
+      cp ./ghostty-tmux/.tmux.conf ~/.config/tmux/.tmux.conf
+      echo "Đã cài đặt cấu hình tmux"
+    else
+      echo "Cảnh báo: Không tìm thấy file ghostty-tmux/.tmux.conf"
+    fi
     ;;
     
   nixos)
@@ -182,7 +240,12 @@ case $OS in
     
     # Cài đặt home-manager
     echo "Cài đặt home-manager..."
-    nix-shell -p nixFlakes --run "nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME"
+    if nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME; then
+      echo "Cài đặt home-manager thành công"
+    else
+      echo "Lỗi: Không thể cài đặt home-manager. Thử lại với nix-shell..."
+      nix-shell -p nixFlakes --run "nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME"
+    fi
     ;;
     
   *)
