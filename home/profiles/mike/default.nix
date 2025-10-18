@@ -487,7 +487,7 @@
           "explorer.fileNesting.enabled" = true;
           "workbench.colorTheme" = "SynthWave '84";
           "[json]" = {
-            "editor.defaultFormatter" = "esbenp.prettier-vscode"
+            "editor.defaultFormatter" = "esbenp.prettier-vscode";
           };
           # Add more personal settings...
         };
