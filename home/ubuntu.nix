@@ -103,7 +103,7 @@
       
       # Add Docker's official GPG key
       /usr/bin/sudo /usr/bin/install -m 0755 -d /etc/apt/keyrings
-      /usr/bin/curl -fsSL https://download.docker.com/linux/ubuntu/gpg | /usr/bin/sudo /usr/bin/gpg --dearmor -o /etc/apt/keyrings/docker.gpg 2>/dev/null || true
+      /usr/bin/curl -fsSL https://download.docker.com/linux/ubuntu/gpg | /usr/bin/sudo /usr/bin/gpg --yes --dearmor -o /etc/apt/keyrings/docker.gpg 2>/dev/null || true
       /usr/bin/sudo /usr/bin/chmod a+r /etc/apt/keyrings/docker.gpg
       
       # Add repository
