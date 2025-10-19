@@ -539,7 +539,7 @@
     EDITOR = "nvim";
     VISUAL = "code";
     LANG = "en_US.UTF-8";
-    PATH = "$HOME/.cargo/bin:$HOME/.local/bin:$PATH";
+    PATH = "$HOME/.cargo/bin:$HOME/.local/bin:/snap/bin:$PATH";
   };
 
   # Phiên bản Home Manager
