@@ -96,26 +96,6 @@
     fi
   '';
   
-  # Tích hợp với Flatpak
-  home.activation.flatpakPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    if [[ -x /usr/bin/flatpak ]]; then
-      echo "Cài đặt các gói flatpak..."
-      
-      if ! /usr/bin/flatpak list | grep -q "io.podman_desktop.PodmanDesktop" 2>/dev/null; then
-        echo "Đang cài đặt Podman Desktop..."
-        if /usr/bin/flatpak install -y flathub io.podman_desktop.PodmanDesktop 2>&1; then
-          echo "✓ Đã cài đặt Podman Desktop"
-        else
-          echo "⚠️  Không thể cài đặt Podman Desktop qua Flatpak"
-          echo "Bạn có thể cài thủ công sau: flatpak install flathub io.podman_desktop.PodmanDesktop"
-        fi
-      else
-        echo "✓ Podman Desktop đã được cài đặt"
-      fi
-    else
-      echo "Flatpak không khả dụng, bỏ qua cài đặt Podman Desktop"
-    fi
-  '';
   
   # Cấu hình Docker repository
   home.activation.dockerSetup = lib.hm.dag.entryBefore ["writeBoundary"] ''
