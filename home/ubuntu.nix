@@ -103,8 +103,12 @@
       
       if ! /usr/bin/flatpak list | grep -q "io.podman_desktop.PodmanDesktop" 2>/dev/null; then
         echo "Đang cài đặt Podman Desktop..."
-        /usr/bin/flatpak install -y flathub io.podman_desktop.PodmanDesktop
-        echo "✓ Đã cài đặt Podman Desktop"
+        if /usr/bin/flatpak install -y flathub io.podman_desktop.PodmanDesktop 2>&1; then
+          echo "✓ Đã cài đặt Podman Desktop"
+        else
+          echo "⚠️  Không thể cài đặt Podman Desktop qua Flatpak"
+          echo "Bạn có thể cài thủ công sau: flatpak install flathub io.podman_desktop.PodmanDesktop"
+        fi
       else
         echo "✓ Podman Desktop đã được cài đặt"
       fi

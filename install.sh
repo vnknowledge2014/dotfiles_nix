@@ -223,7 +223,7 @@ case $OS in
     # Cài đặt dependencies trước
     echo "Cài đặt build dependencies..."
     sudo apt update
-    sudo apt install -y build-essential curl git zsh flatpak gnome-software-plugin-flatpak gpg \
+    sudo apt install -y build-essential curl git zsh flatpak gnome-software-plugin-flatpak gnupg2 \
       autoconf libssl-dev libncurses-dev libreadline-dev zlib1g-dev \
       libbz2-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev
     
