@@ -75,7 +75,7 @@
       for pkg in $SNAP_PACKAGES; do
         if ! $SNAP_CMD list 2>/dev/null | grep -q "^$pkg "; then
           echo "Đang cài đặt $pkg..."
-          if sudo $SNAP_CMD install $pkg 2>&1; then
+          if $SNAP_CMD install $pkg 2>&1; then
             echo "✓ Đã cài đặt $pkg"
           else
             echo "✗ Lỗi khi cài đặt $pkg"
