@@ -166,13 +166,20 @@
         "docker-compose-plugin"
       )
       
+      MISSING_PACKAGES=()
       for pkg in "''${APT_PACKAGES[@]}"; do
-        if ! dpkg -l | grep -q "^ii  $pkg"; then
-          echo "Đang cài đặt $pkg..."
-          /usr/bin/sudo apt update
-          /usr/bin/sudo apt install -y $pkg
+        if ! dpkg -s "$pkg" &>/dev/null; then
+          MISSING_PACKAGES+=("$pkg")
         fi
       done
+      
+      if [ ''${#MISSING_PACKAGES[@]} -gt 0 ]; then
+        echo "Cài đặt các gói còn thiếu: ''${MISSING_PACKAGES[*]}"
+        /usr/bin/sudo apt update
+        /usr/bin/sudo apt install -y "''${MISSING_PACKAGES[@]}"
+      else
+        echo "Tất cả các gói đã được cài đặt"
+      fi
       
       # Add user to docker group
       if command -v docker &> /dev/null; then
