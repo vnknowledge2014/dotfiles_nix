@@ -56,16 +56,26 @@
   
   # Tích hợp với snapd
   home.activation.snapPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    if command -v snap > /dev/null 2>&1; then
+    # Kiểm tra snap bằng cách tìm file thực thi
+    SNAP_CMD=""
+    if [[ -x /usr/bin/snap ]]; then
+      SNAP_CMD="/usr/bin/snap"
+    elif [[ -x /snap/bin/snap ]]; then
+      SNAP_CMD="/snap/bin/snap"
+    elif command -v snap > /dev/null 2>&1; then
+      SNAP_CMD="snap"
+    fi
+    
+    if [[ -n "$SNAP_CMD" ]]; then
       echo "Cài đặt các gói snap..."
       
       # Danh sách snap packages
       SNAP_PACKAGES="code spotify slack"
       
       for pkg in $SNAP_PACKAGES; do
-        if ! snap list 2>/dev/null | grep -q "^$pkg "; then
+        if ! $SNAP_CMD list 2>/dev/null | grep -q "^$pkg "; then
           echo "Đang cài đặt $pkg..."
-          if sudo snap install $pkg; then
+          if sudo $SNAP_CMD install $pkg 2>&1; then
             echo "✓ Đã cài đặt $pkg"
           else
             echo "✗ Lỗi khi cài đặt $pkg"
