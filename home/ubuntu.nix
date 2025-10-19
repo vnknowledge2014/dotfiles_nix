@@ -67,7 +67,7 @@
       echo "Cài đặt các gói snap..."
       
       # Danh sách snap packages
-      SNAP_PACKAGES="spotify podman-desktop ghostty"
+      SNAP_PACKAGES="spotify ghostty"
       SNAP_CLASSIC="ghostty"
       
       for pkg in $SNAP_PACKAGES; do
@@ -93,6 +93,28 @@
       done
     else
       echo "Snap không khả dụng trên hệ thống này"
+    fi
+  '';
+  
+  # Tích hợp với Flatpak
+  home.activation.flatpakPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    if command -v flatpak &> /dev/null; then
+      echo "Cài đặt các gói flatpak..."
+      
+      if ! flatpak remotes | grep -q flathub; then
+        echo "Thêm Flathub repository..."
+        flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      fi
+      
+      if ! flatpak list | grep -q "io.podman_desktop.PodmanDesktop"; then
+        echo "Đang cài đặt Podman Desktop..."
+        flatpak install -y flathub io.podman_desktop.PodmanDesktop
+        echo "✓ Đã cài đặt Podman Desktop"
+      else
+        echo "✓ Podman Desktop đã được cài đặt"
+      fi
+    else
+      echo "Flatpak không khả dụng, bỏ qua cài đặt Podman Desktop"
     fi
   '';
   
@@ -127,6 +149,7 @@
         "curl"
         "git"
         "zsh"
+        "flatpak"
         "docker-ce"
         "docker-ce-cli"
         "containerd.io"

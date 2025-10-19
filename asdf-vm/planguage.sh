@@ -108,11 +108,81 @@ install_rustup() {
 
 # Kiểm tra asdf đã được cài đặt chưa
 check_asdf() {
-    if ! command -v asdf &> /dev/null; then
-        print_error "asdf chưa được cài đặt. Vui lòng cài đặt asdf trước khi chạy script này."
-        echo "Tham khảo: https://asdf-vm.com/guide/getting-started.html"
+    if command -v asdf &> /dev/null; then
+        print_success "asdf đã được cài đặt"
+        return 0
+    fi
+    
+    print_warning "asdf chưa được cài đặt."
+    echo
+    read -p "Nhập link tải asdf (ví dụ: https://github.com/asdf-vm/asdf/releases/download/v0.18.0/asdf-v0.18.0-linux-amd64.tar.gz): " asdf_url
+    
+    if [ -z "$asdf_url" ]; then
+        print_error "Link không được để trống"
         exit 1
     fi
+    
+    print_info "Đang tải và cài đặt asdf..."
+    
+    local temp_dir=$(mktemp -d)
+    cd "$temp_dir"
+    
+    if curl -fsSL "$asdf_url" -o asdf.tar.gz; then
+        print_success "Đã tải asdf"
+    else
+        print_error "Không thể tải asdf từ $asdf_url"
+        exit 1
+    fi
+    
+    if tar -xzf asdf.tar.gz; then
+        print_success "Đã giải nén asdf"
+    else
+        print_error "Không thể giải nén asdf"
+        exit 1
+    fi
+    
+    local asdf_bin=$(find . -name "asdf" -type f -executable | head -1)
+    if [ -z "$asdf_bin" ]; then
+        print_error "Không tìm thấy file thực thi asdf"
+        exit 1
+    fi
+    
+    if sudo cp "$asdf_bin" /usr/local/bin/asdf && sudo chmod +x /usr/local/bin/asdf; then
+        print_success "Đã cài đặt asdf vào /usr/local/bin"
+    else
+        print_error "Không thể cài đặt asdf"
+        exit 1
+    fi
+    
+    cd - > /dev/null
+    rm -rf "$temp_dir"
+    
+    # Cấu hình shell
+    local user_shell=$(basename "$SHELL")
+    local config_file=""
+    
+    case "$user_shell" in
+        "bash") config_file="$HOME/.bashrc" ;;
+        "zsh") config_file="$HOME/.zshrc" ;;
+        *)
+            if [ -f "$HOME/.zshrc" ]; then
+                config_file="$HOME/.zshrc"
+            else
+                config_file="$HOME/.bashrc"
+            fi
+            ;;
+    esac
+    
+    if [ -L "$config_file" ]; then
+        print_warning "$config_file là symlink do Nix quản lý"
+        print_info "Vui lòng thêm asdf vào cấu hình Nix của bạn"
+    elif [ -f "$config_file" ] && ! grep -q "asdf" "$config_file"; then
+        echo "" >> "$config_file"
+        echo "# ASDF configuration" >> "$config_file"
+        echo 'export PATH="/usr/local/bin:$PATH"' >> "$config_file"
+        print_success "Đã thêm cấu hình asdf vào $config_file"
+    fi
+    
     print_success "asdf đã được cài đặt"
 }
 
