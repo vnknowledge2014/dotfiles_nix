@@ -299,13 +299,26 @@ case $OS in
       echo "✓ Docker đã được cài đặt"
     fi
     
+    # Cài đặt Ghostty
+    echo ""
+    echo "Cài đặt Ghostty..."
+    if ! command -v ghostty &>/dev/null; then
+      wget https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.2.2-0-ppa1/ghostty_1.2.2-0.ppa1_amd64_25.10.deb
+      sudo dpkg -i ghostty_1.2.2-0.ppa1_amd64_25.10.deb
+      sudo apt-get install -f -y
+      rm ghostty_1.2.2-0.ppa1_amd64_25.10.deb
+      echo "✓ Đã cài đặt Ghostty"
+    else
+      echo "✓ Ghostty đã được cài đặt"
+    fi
+    
     # Cài đặt Snap packages
     echo ""
     echo "Cài đặt Snap packages..."
-    for pkg in spotify ghostty code; do
+    for pkg in spotify code; do
       if ! snap list | grep -q "^$pkg "; then
         echo "Đang cài đặt $pkg..."
-        if [[ "$pkg" == "ghostty" || "$pkg" == "code" ]]; then
+        if [[ "$pkg" == "code" ]]; then
           sudo snap install $pkg --classic
         else
           sudo snap install $pkg
