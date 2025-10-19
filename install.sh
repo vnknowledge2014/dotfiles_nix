@@ -232,6 +232,10 @@ case $OS in
       
       # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    else
+      echo "Nix đã được cài đặt, bỏ qua bước cài đặt Nix"
+      # Tải lại environment
+      . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
     fi
     
     # Bật flakes
