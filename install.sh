@@ -303,9 +303,11 @@ case $OS in
     echo ""
     echo "Cài đặt Ghostty..."
     if ! command -v ghostty &>/dev/null; then
-      sudo apt install -y libgtk4-layer-shell0
+      sudo apt --fix-broken install -y
+      sudo apt update
+      sudo apt install -y libgtk4-layer-shell0 || true
       wget https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.2.2-0-ppa1/ghostty_1.2.2-0.ppa1_amd64_25.10.deb
-      sudo dpkg -i ghostty_1.2.2-0.ppa1_amd64_25.10.deb
+      sudo dpkg -i ghostty_1.2.2-0.ppa1_amd64_25.10.deb || true
       sudo apt-get install -f -y
       rm ghostty_1.2.2-0.ppa1_amd64_25.10.deb
       echo "✓ Đã cài đặt Ghostty"
