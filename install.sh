@@ -278,6 +278,44 @@ case $OS in
       echo "Cảnh báo: Không tìm thấy file ghostty-tmux/.tmux.conf"
     fi
     
+    # Cài đặt Docker
+    echo ""
+    echo "Cài đặt Docker..."
+    if ! command -v docker &>/dev/null; then
+      echo "Thiết lập Docker repository..."
+      sudo install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      sudo chmod a+r /etc/apt/keyrings/docker.gpg
+      
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      
+      sudo apt update
+      sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      
+      sudo usermod -aG docker $USER
+      echo "✓ Đã cài đặt Docker"
+      echo "⚠️  Vui lòng logout và login lại để áp dụng docker group"
+    else
+      echo "✓ Docker đã được cài đặt"
+    fi
+    
+    # Cài đặt Snap packages
+    echo ""
+    echo "Cài đặt Snap packages..."
+    for pkg in spotify ghostty code; do
+      if ! snap list | grep -q "^$pkg "; then
+        echo "Đang cài đặt $pkg..."
+        if [[ "$pkg" == "ghostty" || "$pkg" == "code" ]]; then
+          sudo snap install $pkg --classic
+        else
+          sudo snap install $pkg
+        fi
+        echo "✓ Đã cài đặt $pkg"
+      else
+        echo "✓ $pkg đã được cài đặt"
+      fi
+    done
+    
     # Cài đặt Podman Desktop qua Flatpak
     echo ""
     echo "Cài đặt Podman Desktop..."

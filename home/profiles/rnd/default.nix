@@ -90,7 +90,7 @@
     editors = {
       enable = true;
       neovim.enable = true;
-      vscode.enable = true;
+      vscode.enable = false;  # Sử dụng Snap thay vì Nix
     };
   };
 
@@ -255,8 +255,8 @@
     '';
   };
 
-  # Cấu hình Editor
-  programs.vscode = {
+  # Cấu hình Editor (disabled - dùng Snap)
+  # programs.vscode = {
     enable = true;
     profiles.default = {
       extensions = with pkgs.vscode-extensions; [
@@ -532,7 +532,7 @@
         }
       ] ++ (config.modules.editors.vscode.keybindings or []);
     };
-  };
+  }; */
 
   # Các cấu hình riêng khác
   home.sessionVariables = {
