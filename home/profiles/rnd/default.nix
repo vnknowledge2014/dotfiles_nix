@@ -97,7 +97,7 @@
   # Các package cá nhân
   home.packages = with pkgs; [
     # Fonts
-    (nerdfonts.override { fonts = [ "FiraCode" ]; })
+    nerd-fonts.fira-code
     
     # CLI utilities
     atuin

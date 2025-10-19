@@ -243,7 +243,7 @@ case $OS in
       echo "Cài đặt home-manager thành công"
     else
       echo "Lỗi: Không thể cài đặt home-manager. Thử lại với nix-shell..."
-      nix-shell -p nixFlakes --run "nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME"
+      nix-shell -p nixVersions.stable --run "nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME"
     fi
     
     # Cài đặt các ngôn ngữ lập trình trên asdf
