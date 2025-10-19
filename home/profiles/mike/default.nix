@@ -489,6 +489,11 @@
           "[json]" = {
             "editor.defaultFormatter" = "esbenp.prettier-vscode";
           };
+          "yaml.schemas" = {
+            "file:///Users/mike/.vscode/extensions/continue.continue-1.2.9-darwin-x64/config-yaml-schema.json" = [
+              ".continue/**/*.yaml"
+            ];
+          };
           # Add more personal settings...
         };
 
