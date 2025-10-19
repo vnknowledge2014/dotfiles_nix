@@ -385,7 +385,7 @@
           name = "cpptools";
           publisher = "ms-vscode";
           version = "1.26.1";
-          sha256 = "sha256-uVE7sEO8XN3ArFpElUw25/BKyCOzF1EmZ5nHBkdoL/0=";
+          sha256 = "sha256-jMCTL3t3Imdzi6mL0kn/ad2P2aIlvzt6F+CgNRDz/SA=";
         }
         {
           name = "explorer";
