@@ -67,8 +67,8 @@
       echo "Cài đặt các gói snap..."
       
       # Danh sách snap packages
-      SNAP_PACKAGES="code spotify slack podman-desktop ghostty"
-      SNAP_CLASSIC="code ghostty"
+      SNAP_PACKAGES="spotify slack podman-desktop ghostty"
+      SNAP_CLASSIC="ghostty"
       
       for pkg in $SNAP_PACKAGES; do
         if ! $SNAP_CMD list 2>/dev/null | grep -q "^$pkg "; then
