@@ -101,14 +101,9 @@
     if command -v flatpak &> /dev/null; then
       echo "Cài đặt các gói flatpak..."
       
-      if ! flatpak remotes | grep -q flathub; then
-        echo "Thêm Flathub repository..."
-        flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-      fi
-      
-      if ! flatpak list | grep -q "io.podman_desktop.PodmanDesktop"; then
+      if ! flatpak list | grep -q "io.podman_desktop.PodmanDesktop" 2>/dev/null; then
         echo "Đang cài đặt Podman Desktop..."
-        flatpak install -y flathub io.podman_desktop.PodmanDesktop
+        flatpak install -y flathub io.podman_desktop.PodmanDesktop 2>&1 | tail -5
         echo "✓ Đã cài đặt Podman Desktop"
       else
         echo "✓ Podman Desktop đã được cài đặt"
@@ -149,7 +144,7 @@
         "curl"
         "git"
         "zsh"
-        "flatpak"
+        "gnome-software-plugin-flatpak"
         "autoconf"
         "libssl-dev"
         "libncurses-dev"
@@ -168,7 +163,7 @@
       
       MISSING_PACKAGES=()
       for pkg in "''${APT_PACKAGES[@]}"; do
-        if ! dpkg -s "$pkg" &>/dev/null; then
+        if ! dpkg -s "$pkg" &>/dev/null 2>&1; then
           MISSING_PACKAGES+=("$pkg")
         fi
       done
@@ -176,9 +171,19 @@
       if [ ''${#MISSING_PACKAGES[@]} -gt 0 ]; then
         echo "Cài đặt các gói còn thiếu: ''${MISSING_PACKAGES[*]}"
         /usr/bin/sudo apt update
-        /usr/bin/sudo apt install -y "''${MISSING_PACKAGES[@]}"
+        /usr/bin/sudo apt install -y "''${MISSING_PACKAGES[@]}" 2>&1 | grep -v "^Selecting\|^Preparing\|^Unpacking\|^Setting up" || true
+        echo "✓ Đã cài đặt các gói còn thiếu"
       else
-        echo "Tất cả các gói đã được cài đặt"
+        echo "✓ Tất cả các gói đã được cài đặt"
+      fi
+      
+      # Setup Flatpak repository
+      if command -v flatpak &>/dev/null; then
+        if ! flatpak remotes | grep -q flathub 2>/dev/null; then
+          echo "Thêm Flathub repository..."
+          /usr/bin/sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          echo "✓ Đã thêm Flathub repository"
+        fi
       fi
       
       # Add user to docker group
