@@ -59,15 +59,23 @@
     if command -v snap > /dev/null 2>&1; then
       echo "Cài đặt các gói snap..."
       
-      # Danh sách các gói snap
-      PACKAGES=(${lib.concatStringsSep " " (map (x: "\"${x}\"") (["code" "spotify" "slack"] ++ (config.extraSnaps or [])))})
+      # Danh sách snap packages
+      SNAP_PACKAGES="code spotify slack"
       
-      for pkg in "''${PACKAGES[@]}"; do
-        if ! snap list | grep -q "^$pkg"; then
+      for pkg in $SNAP_PACKAGES; do
+        if ! snap list 2>/dev/null | grep -q "^$pkg "; then
           echo "Đang cài đặt $pkg..."
-          sudo snap install $pkg
+          if sudo snap install $pkg; then
+            echo "✓ Đã cài đặt $pkg"
+          else
+            echo "✗ Lỗi khi cài đặt $pkg"
+          fi
+        else
+          echo "✓ $pkg đã được cài đặt"
         fi
       done
+    else
+      echo "Snap không khả dụng trên hệ thống này"
     fi
   '';
   
