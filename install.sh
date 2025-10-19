@@ -223,14 +223,15 @@ case $OS in
     # Cài đặt dependencies trước
     echo "Cài đặt build dependencies..."
     sudo apt update
-    sudo apt install -y build-essential curl git zsh gnome-software-plugin-flatpak \
+    sudo apt install -y build-essential curl git zsh flatpak gnome-software-plugin-flatpak \
       autoconf libssl-dev libncurses-dev libreadline-dev zlib1g-dev \
-      libbz2-dev libsqlite3-dev libffi-dev liblzma-dev
+      libbz2-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev
     
     # Setup Flatpak
-    if command -v flatpak &>/dev/null; then
-      sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    fi
+    echo "Thiết lập Flatpak..."
+    sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    echo "Đã thiết lập Flatpak"
+    echo ""
     
     # Kiểm tra Nix đã được cài đặt chưa (kiểm tra thư mục /nix)
     if [[ -d "/nix" && -f "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]]; then
