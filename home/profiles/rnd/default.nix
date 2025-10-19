@@ -349,7 +349,7 @@
           name = "python";
           publisher = "ms-python";
           version = "2025.7.2025052901";
-          sha256 = "sha256-hZZqSDlHdBvvHcA24NZ23X0xgKd2RAyc1xLJagnd4T0=";
+          sha256 = "sha256-HcRazlwUjiRowLKNQU0frvyDDOXBTAGxl0W/68e6A1w=";
         }
         {
           name = "vscode-fp-ts-codegen";

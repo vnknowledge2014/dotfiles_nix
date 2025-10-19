@@ -67,7 +67,7 @@
       echo "Cài đặt các gói snap..."
       
       # Danh sách snap packages
-      SNAP_PACKAGES="spotify slack podman-desktop ghostty"
+      SNAP_PACKAGES="spotify podman-desktop ghostty"
       SNAP_CLASSIC="ghostty"
       
       for pkg in $SNAP_PACKAGES; do
