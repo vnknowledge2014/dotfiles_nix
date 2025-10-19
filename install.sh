@@ -220,6 +220,18 @@ case $OS in
   ubuntu)
     echo "Thiết lập Ubuntu..."
     
+    # Cài đặt dependencies trước
+    echo "Cài đặt build dependencies..."
+    sudo apt update
+    sudo apt install -y build-essential curl git zsh gnome-software-plugin-flatpak \
+      autoconf libssl-dev libncurses-dev libreadline-dev zlib1g-dev \
+      libbz2-dev libsqlite3-dev libffi-dev liblzma-dev
+    
+    # Setup Flatpak
+    if command -v flatpak &>/dev/null; then
+      sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    fi
+    
     # Kiểm tra Nix đã được cài đặt chưa (kiểm tra thư mục /nix)
     if [[ -d "/nix" && -f "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]]; then
       echo "Nix đã được cài đặt, bỏ qua bước cài đặt Nix"

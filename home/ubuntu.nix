@@ -136,24 +136,10 @@
   # Cấu hình các gói Ubuntu bổ sung
   home.activation.aptPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
     if command -v apt &>/dev/null; then
-      echo "Kiểm tra các gói Ubuntu cơ bản..."
+      echo "Kiểm tra Docker packages..."
       
-      # Danh sách các gói apt cần thiết
-      APT_PACKAGES=(
-        "build-essential"
-        "curl"
-        "git"
-        "zsh"
-        "gnome-software-plugin-flatpak"
-        "autoconf"
-        "libssl-dev"
-        "libncurses-dev"
-        "libreadline-dev"
-        "zlib1g-dev"
-        "libbz2-dev"
-        "libsqlite3-dev"
-        "libffi-dev"
-        "liblzma-dev"
+      # Danh sách các gói Docker
+      DOCKER_PACKAGES=(
         "docker-ce"
         "docker-ce-cli"
         "containerd.io"
@@ -162,28 +148,16 @@
       )
       
       MISSING_PACKAGES=()
-      for pkg in "''${APT_PACKAGES[@]}"; do
+      for pkg in "''${DOCKER_PACKAGES[@]}"; do
         if ! dpkg -s "$pkg" &>/dev/null 2>&1; then
           MISSING_PACKAGES+=("$pkg")
         fi
       done
       
       if [ ''${#MISSING_PACKAGES[@]} -gt 0 ]; then
-        echo "Cài đặt các gói còn thiếu: ''${MISSING_PACKAGES[*]}"
-        /usr/bin/sudo apt update
-        /usr/bin/sudo apt install -y "''${MISSING_PACKAGES[@]}" 2>&1 | grep -v "^Selecting\|^Preparing\|^Unpacking\|^Setting up" || true
-        echo "✓ Đã cài đặt các gói còn thiếu"
-      else
-        echo "✓ Tất cả các gói đã được cài đặt"
-      fi
-      
-      # Setup Flatpak repository
-      if command -v flatpak &>/dev/null; then
-        if ! flatpak remotes | grep -q flathub 2>/dev/null; then
-          echo "Thêm Flathub repository..."
-          /usr/bin/sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          echo "✓ Đã thêm Flathub repository"
-        fi
+        echo "Cài đặt Docker packages: ''${MISSING_PACKAGES[*]}"
+        /usr/bin/sudo apt install -y "''${MISSING_PACKAGES[@]}"
+        echo "✓ Đã cài đặt Docker packages"
       fi
       
       # Add user to docker group
