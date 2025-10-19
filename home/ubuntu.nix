@@ -98,12 +98,12 @@
   
   # Tích hợp với Flatpak
   home.activation.flatpakPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    if command -v flatpak &> /dev/null; then
+    if [[ -x /usr/bin/flatpak ]]; then
       echo "Cài đặt các gói flatpak..."
       
-      if ! flatpak list | grep -q "io.podman_desktop.PodmanDesktop" 2>/dev/null; then
+      if ! /usr/bin/flatpak list | grep -q "io.podman_desktop.PodmanDesktop" 2>/dev/null; then
         echo "Đang cài đặt Podman Desktop..."
-        flatpak install -y flathub io.podman_desktop.PodmanDesktop 2>&1 | tail -5
+        /usr/bin/flatpak install -y flathub io.podman_desktop.PodmanDesktop
         echo "✓ Đã cài đặt Podman Desktop"
       else
         echo "✓ Podman Desktop đã được cài đặt"
