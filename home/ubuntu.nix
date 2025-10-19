@@ -102,17 +102,17 @@
       echo "Thiết lập Docker repository..."
       
       # Add Docker's official GPG key
-      /usr/bin/sudo install -m 0755 -d /etc/apt/keyrings
-      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | /usr/bin/sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg 2>/dev/null || true
-      /usr/bin/sudo chmod a+r /etc/apt/keyrings/docker.gpg
+      /usr/bin/sudo /usr/bin/install -m 0755 -d /etc/apt/keyrings
+      /usr/bin/curl -fsSL https://download.docker.com/linux/ubuntu/gpg | /usr/bin/sudo /usr/bin/gpg --dearmor -o /etc/apt/keyrings/docker.gpg 2>/dev/null || true
+      /usr/bin/sudo /usr/bin/chmod a+r /etc/apt/keyrings/docker.gpg
       
       # Add repository
       echo \
-        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        "deb [arch=$(/usr/bin/dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
         $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-        /usr/bin/sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        /usr/bin/sudo /usr/bin/tee /etc/apt/sources.list.d/docker.list > /dev/null
       
-      /usr/bin/sudo apt update
+      /usr/bin/sudo /usr/bin/apt update
     fi
   '';
   
