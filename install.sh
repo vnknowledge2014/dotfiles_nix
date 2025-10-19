@@ -225,15 +225,15 @@ case $OS in
     sudo apt update
     sudo apt install -y curl git build-essential
     
-    # Cài đặt Nix nếu chưa có
-    if ! command -v nix &> /dev/null; then
-      echo "Cài đặt Nix..."
-      sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
-      
+    # Kiểm tra Nix đã được cài đặt chưa (kiểm tra thư mục /nix)
+    if [[ -d "/nix" && -f "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]]; then
+      echo "Nix đã được cài đặt, bỏ qua bước cài đặt Nix"
       # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
     else
-      echo "Nix đã được cài đặt, bỏ qua bước cài đặt Nix"
+      echo "Cài đặt Nix..."
+      sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
+      
       # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
     fi
