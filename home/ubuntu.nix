@@ -49,10 +49,7 @@
     editors.enable = true;
   };
   
-  # Các gói cơ bản cho Ubuntu
-  home.packages = with pkgs; [
-
-  ];
+  # Packages được định nghĩa trong profile
   
   # Tích hợp với snapd
   home.activation.snapPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
@@ -70,15 +67,25 @@
       echo "Cài đặt các gói snap..."
       
       # Danh sách snap packages
-      SNAP_PACKAGES="code spotify slack"
+      SNAP_PACKAGES="code spotify slack podman-desktop ghostty"
+      SNAP_CLASSIC="code ghostty"
       
       for pkg in $SNAP_PACKAGES; do
         if ! $SNAP_CMD list 2>/dev/null | grep -q "^$pkg "; then
           echo "Đang cài đặt $pkg..."
-          if $SNAP_CMD install $pkg 2>&1; then
-            echo "✓ Đã cài đặt $pkg"
+          
+          if echo "$SNAP_CLASSIC" | grep -q "$pkg"; then
+            if $SNAP_CMD install $pkg --classic 2>&1; then
+              echo "✓ Đã cài đặt $pkg"
+            else
+              echo "✗ Lỗi khi cài đặt $pkg"
+            fi
           else
-            echo "✗ Lỗi khi cài đặt $pkg"
+            if $SNAP_CMD install $pkg 2>&1; then
+              echo "✓ Đã cài đặt $pkg"
+            else
+              echo "✗ Lỗi khi cài đặt $pkg"
+            fi
           fi
         else
           echo "✓ $pkg đã được cài đặt"
@@ -86,6 +93,26 @@
       done
     else
       echo "Snap không khả dụng trên hệ thống này"
+    fi
+  '';
+  
+  # Cấu hình Docker repository
+  home.activation.dockerSetup = lib.hm.dag.entryBefore ["writeBoundary"] ''
+    if ! command -v docker &> /dev/null; then
+      echo "Thiết lập Docker repository..."
+      
+      # Add Docker's official GPG key
+      sudo install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg 2>/dev/null || true
+      sudo chmod a+r /etc/apt/keyrings/docker.gpg
+      
+      # Add repository
+      echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      
+      sudo apt update
     fi
   '';
   
@@ -100,6 +127,11 @@
         "curl"
         "git"
         "zsh"
+        "docker-ce"
+        "docker-ce-cli"
+        "containerd.io"
+        "docker-buildx-plugin"
+        "docker-compose-plugin"
       )
       
       for pkg in "''${APT_PACKAGES[@]}"; do
@@ -109,6 +141,15 @@
           sudo apt install -y $pkg
         fi
       done
+      
+      # Add user to docker group
+      if command -v docker &> /dev/null; then
+        if ! groups | grep -q docker; then
+          echo "Thêm user vào docker group..."
+          sudo usermod -aG docker $USER
+          echo "⚠️  Vui lòng logout và login lại để áp dụng docker group."
+        fi
+      fi
     fi
   '';
   

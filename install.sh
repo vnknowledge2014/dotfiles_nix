@@ -220,11 +220,6 @@ case $OS in
   ubuntu)
     echo "Thiết lập Ubuntu..."
     
-    # Cài đặt các gói cần thiết
-    echo "Cài đặt các gói cần thiết..."
-    sudo apt update
-    sudo apt install -y curl git build-essential
-    
     # Kiểm tra Nix đã được cài đặt chưa (kiểm tra thư mục /nix)
     if [[ -d "/nix" && -f "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]]; then
       echo "Nix đã được cài đặt, bỏ qua bước cài đặt Nix"
@@ -249,6 +244,25 @@ case $OS in
     else
       echo "Lỗi: Không thể cài đặt home-manager. Thử lại với nix-shell..."
       nix-shell -p nixFlakes --run "nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME"
+    fi
+    
+    # Cài đặt các ngôn ngữ lập trình trên asdf
+    echo "Cài đặt các ngôn ngữ lập trình trên asdf"
+    if [[ -f "./asdf-vm/planguage.sh" ]]; then
+      chmod +x ./asdf-vm/planguage.sh
+      bash ./asdf-vm/planguage.sh
+    else
+      echo "Cảnh báo: Không tìm thấy file asdf-vm/planguage.sh"
+    fi
+    
+    # Cài đặt tmux
+    echo "Cài đặt tmux"
+    if [[ -f "./ghostty-tmux/.tmux.conf" ]]; then
+      mkdir -p ~/.config/tmux
+      cp ./ghostty-tmux/.tmux.conf ~/.config/tmux/.tmux.conf
+      echo "Đã cài đặt cấu hình tmux"
+    else
+      echo "Cảnh báo: Không tìm thấy file ghostty-tmux/.tmux.conf"
     fi
     ;;
     
