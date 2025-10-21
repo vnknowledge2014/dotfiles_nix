@@ -72,6 +72,9 @@
 
           # Rustup
           source "$HOME/.cargo/env"
+
+          # Bun and OpenCode
+          export PATH="/home/rnd/.bun/bin:$PATH"
           
           # Greeting message
           echo "Welcome to your Ubuntu development environment, RND!"
