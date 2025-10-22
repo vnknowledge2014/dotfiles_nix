@@ -1,13 +1,13 @@
 {
   "plugins": {
+    "python": "https://github.com/asdf-community/asdf-python.git",
     "bun": "https://github.com/cometkim/asdf-bun.git",
     "nodejs": "https://github.com/asdf-vm/asdf-nodejs.git",
     "deno": "https://github.com/asdf-community/asdf-deno.git",
+    "uv": "https://github.com/asdf-community/asdf-uv.git",
     "zig": "https://github.com/asdf-community/asdf-zig.git",
     "ocaml": "https://github.com/asdf-community/asdf-ocaml.git",
     "golang": "https://github.com/asdf-community/asdf-golang.git",
-    "uv": "https://github.com/asdf-community/asdf-uv.git",
-    "python": "https://github.com/asdf-community/asdf-python.git",
     "erlang": "https://github.com/asdf-vm/asdf-erlang.git",
     "flutter": "https://github.com/asdf-community/asdf-flutter.git",
     "lua": "https://github.com/Stratus3D/asdf-lua.git",
@@ -20,6 +20,8 @@
     "elixir": "https://github.com/asdf-vm/asdf-elixir.git"
   },
   "versions": {
+    "python": "3.13.3",
+    "zig": "0.15.2",
     "cmake": "4.0.3",
     "java": "openjdk-24.0.1",
     "haskell": "9.12.2",

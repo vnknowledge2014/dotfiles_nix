@@ -3,8 +3,6 @@
 # ASDF Auto Install Script
 # Tự động cài đặt các plugin và phiên bản mới nhất của các ngôn ngữ lập trình
 
-set -e  # Dừng script nếu có lỗi
-
 # Màu sắc cho output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -226,7 +224,7 @@ install_version() {
         print_success "Đã cài đặt $plugin_name phiên bản $version"
         
         # Đặt phiên bản trong home directory
-        if asdf set -u "$plugin_name" "$version" --home; then
+        if asdf set "$plugin_name" "$version" --home; then
             print_success "Đã đặt $plugin_name $version làm phiên bản mặc định"
         else
             print_warning "Không thể đặt $plugin_name $version làm phiên bản mặc định"
@@ -278,12 +276,19 @@ process_plugins() {
         
         if [ -z "$version" ] || [ "$version" = "null" ]; then
             # Lấy phiên bản mới nhất từ asdf
-            version=$(asdf latest "$plugin_name")
-            if [ -z "$version" ]; then
+            version=$(asdf latest "$plugin_name" 2>&1)
+            if [ -z "$version" ] || [[ "$version" == *"unable to load"* ]] || [[ "$version" == *"error"* ]] || [[ "$version" == *"exit status"* ]]; then
                 print_error "Không thể lấy được phiên bản mới nhất của $plugin_name"
                 failed_installs+=("$plugin_name")
                 continue
             fi
+        fi
+        
+        # Kiểm tra version hợp lệ trước khi cài
+        if [[ "$version" == *"unable"* ]] || [[ "$version" == *"error"* ]] || [[ "$version" == *"exit status"* ]]; then
+            print_error "Phiên bản không hợp lệ cho $plugin_name: $version"
+            failed_installs+=("$plugin_name")
+            continue
         fi
         
         if ! install_version "$plugin_name" "$version"; then
