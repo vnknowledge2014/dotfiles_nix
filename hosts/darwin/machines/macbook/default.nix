@@ -113,7 +113,7 @@
   # Cấu hình các dịch vụ đặc thù
   services = {
     # Các dịch vụ đặc thù cho máy macbook
-    yabai = {
+    /* yabai = {
       enable = true;
       package = pkgs.yabai;
       enableScriptingAddition = true;
@@ -150,6 +150,7 @@
         yabai -m rule --add app="^Finder$" manage=off
       '';
     };
+    */
   };
 
   # Cấu hình macOS đặc thù
