@@ -57,13 +57,13 @@
     "cloudflare-warp"
     "mountain-duck"
     "localsend"
-    "ollama"
+    "ollama-app"
     "iina"
     "zalo"
   ];
 
   extraMasApps = {
-    "Xcode" = 497799835;
+    # "Xcode" = 497799835;
     "Telegram" = 747648890;
     "Focus - Pomodoro & Focus Timer" = 1554411065;
     "NCalc Scientific Calculator +" = 1449106995;
