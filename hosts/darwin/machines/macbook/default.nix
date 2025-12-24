@@ -69,7 +69,7 @@
     "NCalc Scientific Calculator +" = 1449106995;
     "OneDrive" = 823766827;
     "TeraBox: 1TB Cloud & AI Space" = 1509453185;
-    "Windows App" = 1295203466;
+    # "Windows App" = 1295203466;  # Removed - causes installation issues
   };
 
   # Thiết lập macOS cơ bản
@@ -113,44 +113,6 @@
   # Cấu hình các dịch vụ đặc thù
   services = {
     # Các dịch vụ đặc thù cho máy macbook
-    /* yabai = {
-      enable = true;
-      package = pkgs.yabai;
-      enableScriptingAddition = true;
-      config = {
-        mouse_follows_focus = "off";
-        focus_follows_mouse = "off";
-        window_placement = "second_child";
-        window_opacity = "off";
-        window_topmost = "off";
-        window_shadow = "on";
-        window_border = "off";
-        split_ratio = 0.50;
-        auto_balance = "off";
-        mouse_modifier = "fn";
-        mouse_action1 = "move";
-        mouse_action2 = "resize";
-        layout = "bsp";
-        top_padding = 10;
-        bottom_padding = 10;
-        left_padding = 10;
-        right_padding = 10;
-        window_gap = 10;
-      };
-      extraConfig = ''
-        # Làm mờ cửa sổ không tập trung
-        yabai -m config window_opacity on
-        yabai -m config active_window_opacity 1.0
-        yabai -m config normal_window_opacity 0.9
-        
-        # Loại trừ các ứng dụng
-        yabai -m rule --add app="^System Preferences$" manage=off
-        yabai -m rule --add app="^System Settings$" manage=off
-        yabai -m rule --add app="^Calculator$" manage=off
-        yabai -m rule --add app="^Finder$" manage=off
-      '';
-    };
-    */
   };
 
   # Cấu hình macOS đặc thù

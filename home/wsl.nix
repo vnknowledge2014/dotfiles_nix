@@ -42,7 +42,6 @@
           ll = "ls -l";
           la = "ls -la";
           explorer = "explorer.exe";
-          code = "code.exe";
         };
       };
     };
@@ -75,15 +74,6 @@
       fi
     fi
   '';
-  
-  # Tích hợp VSCode giữa WSL và Windows
-  programs.vscode = {
-    enable = true;
-    extensions = with pkgs.vscode-extensions; [
-      ms-vscode-remote.remote-wsl
-    ];
-  };
-  
   # Cấu hình cho Git để làm việc tốt hơn với Windows
   programs.git.extraConfig = {
     core.autocrlf = "input";

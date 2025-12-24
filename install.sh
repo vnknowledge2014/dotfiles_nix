@@ -169,6 +169,38 @@ case $OS in
     else
       echo "Cảnh báo: Không tìm thấy file ghostty-tmux/.tmux.conf"
     fi
+
+    # Cài đặt Antigravity
+    echo ""
+    echo "Cài đặt Antigravity..."
+    if [[ -d "/Applications/Antigravity.app" ]]; then
+      echo "✓ Antigravity đã được cài đặt"
+    else
+      # Phát hiện kiến trúc CPU
+      ARCH=$(uname -m)
+      if [[ "$ARCH" == "arm64" ]]; then
+        ANTIGRAVITY_URL="https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.13.3-4533425205018624/darwin-arm/Antigravity.dmg"
+        echo "Phát hiện Mac M Series (ARM64)"
+      else
+        ANTIGRAVITY_URL="https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.13.3-4533425205018624/darwin-x64/Antigravity.dmg"
+        echo "Phát hiện Mac Intel (x64)"
+      fi
+      
+      echo "Đang tải Antigravity..."
+      curl -L -o /tmp/Antigravity.dmg "$ANTIGRAVITY_URL"
+      
+      echo "Đang mount DMG..."
+      hdiutil attach /tmp/Antigravity.dmg -nobrowse -quiet
+      
+      echo "Đang cài đặt Antigravity..."
+      cp -R "/Volumes/Antigravity/Antigravity.app" /Applications/
+      
+      echo "Đang unmount DMG..."
+      hdiutil detach "/Volumes/Antigravity" -quiet
+      
+      rm /tmp/Antigravity.dmg
+      echo "✓ Đã cài đặt Antigravity"
+    fi
     ;;
     
   nixos)
@@ -319,14 +351,10 @@ case $OS in
     # Cài đặt Snap packages
     echo ""
     echo "Cài đặt Snap packages..."
-    for pkg in spotify code; do
+    for pkg in spotify; do
       if ! snap list | grep -q "^$pkg "; then
         echo "Đang cài đặt $pkg..."
-        if [[ "$pkg" == "code" ]]; then
-          sudo snap install $pkg --classic
-        else
-          sudo snap install $pkg
-        fi
+        sudo snap install $pkg
         echo "✓ Đã cài đặt $pkg"
       else
         echo "✓ $pkg đã được cài đặt"
@@ -344,6 +372,50 @@ case $OS in
       else
         echo "⚠️  Không thể cài đặt Podman Desktop qua Flatpak"
         echo "Bạn có thể cài thủ công sau: flatpak install flathub io.podman_desktop.PodmanDesktop"
+      fi
+    fi
+    
+    # Cài đặt Antigravity
+    echo ""
+    echo "Cài đặt Antigravity..."
+    if [[ -d "/opt/antigravity" ]] || command -v antigravity &>/dev/null; then
+      echo "✓ Antigravity đã được cài đặt"
+    else
+      echo "Đang tải Antigravity cho Linux..."
+      ANTIGRAVITY_URL="https://antigravity.google/download/linux"
+      
+      # Tải file
+      wget -O /tmp/antigravity-linux.tar.gz "$ANTIGRAVITY_URL" || curl -L -o /tmp/antigravity-linux.tar.gz "$ANTIGRAVITY_URL"
+      
+      if [[ -f /tmp/antigravity-linux.tar.gz ]]; then
+        echo "Đang cài đặt Antigravity..."
+        sudo mkdir -p /opt/antigravity
+        sudo tar -xzf /tmp/antigravity-linux.tar.gz -C /opt/antigravity --strip-components=1 2>/dev/null || \
+          sudo tar -xf /tmp/antigravity-linux.tar.gz -C /opt/antigravity --strip-components=1
+        
+        # Tạo symlink
+        if [[ -f /opt/antigravity/antigravity ]]; then
+          sudo ln -sf /opt/antigravity/antigravity /usr/local/bin/antigravity
+        elif [[ -f /opt/antigravity/Antigravity ]]; then
+          sudo ln -sf /opt/antigravity/Antigravity /usr/local/bin/antigravity
+        fi
+        
+        # Tạo desktop entry
+        cat << EOF | sudo tee /usr/share/applications/antigravity.desktop > /dev/null
+[Desktop Entry]
+Name=Antigravity
+Comment=AI-powered code editor
+Exec=/opt/antigravity/antigravity %F
+Icon=/opt/antigravity/resources/app/resources/linux/code.png
+Type=Application
+Categories=Development;IDE;
+StartupNotify=true
+EOF
+        
+        rm /tmp/antigravity-linux.tar.gz
+        echo "✓ Đã cài đặt Antigravity"
+      else
+        echo "⚠️  Không thể tải Antigravity. Vui lòng cài đặt thủ công từ: https://antigravity.google/download/linux"
       fi
     fi
     ;;

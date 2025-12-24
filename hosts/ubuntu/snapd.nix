@@ -3,7 +3,6 @@
 let
   # Cấu hình Snapd chung
   commonSnaps = [
-    "code" 
     "spotify"
   ];
   

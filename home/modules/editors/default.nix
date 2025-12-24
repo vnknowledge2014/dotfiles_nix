@@ -9,10 +9,6 @@ in {
     neovim = {
       enable = mkEnableOption "Enable Neovim configuration";
     };
-    
-    vscode = {
-      enable = mkEnableOption "Enable VSCode configuration";
-    };
   };
 
   config = mkIf cfg.enable {
@@ -21,12 +17,6 @@ in {
       enable = true;
       viAlias = true;
       vimAlias = true;
-    };
-    
-    # VSCode configuration
-    programs.vscode = mkIf cfg.vscode.enable {
-      enable = true;
-      package = pkgs.vscode;
     };
   };
 }

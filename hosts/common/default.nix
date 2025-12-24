@@ -15,7 +15,6 @@
   environment.systemPackages = with pkgs; [
     neovim
     wezterm
-    vscode
     htop
     eza
     wget
