@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Dotfiles Update Script
-# Cập nhật dotfiles từ remote repository
+# Cập nhật tất cả: git, nix flake, rebuild, homebrew, snap, flatpak, asdf
 
 set -e
 
@@ -16,9 +16,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 
 print_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
-print_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
-print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+print_success() { echo -e "${GREEN}[OK]${NC} $1"; }
+print_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
+print_error() { echo -e "${RED}[ERR]${NC} $1"; }
+print_section() { echo ""; echo -e "${BLUE}═══ $1 ═══${NC}"; }
 
 # Header
 echo ""
@@ -29,105 +30,160 @@ echo ""
 
 cd "$DOTFILES_DIR"
 
-# Kiểm tra có thay đổi local không
-print_info "Kiểm tra thay đổi local..."
+# Detect OS
+detect_os() {
+  if [[ "$(uname)" == "Darwin" ]]; then echo "darwin"
+  elif [[ -f /etc/NIXOS ]]; then
+    grep -q "microsoft" /proc/sys/kernel/osrelease 2>/dev/null && echo "nixos-wsl" || echo "nixos"
+  elif grep -q "Ubuntu" /etc/os-release 2>/dev/null; then echo "ubuntu"
+  else echo "unknown"; fi
+}
+
+OS=$(detect_os)
+HOSTNAME=$(hostname -s)
+USERNAME=$(whoami)
+
+echo "Hệ thống: $OS | Host: $HOSTNAME | User: $USERNAME"
+
+# ============================================================================
+# 1. GIT: Pull dotfiles mới nhất
+# ============================================================================
+print_section "Git Pull"
+
 if [[ -n $(git status --porcelain) ]]; then
     print_warning "Có thay đổi local chưa commit"
-    echo ""
     git status --short
     echo ""
-    
-    read -p "Bạn muốn: (s)tash changes / (c)ommit / (a)bort? " choice
+    read -p "Bạn muốn: (s)tash / (c)ommit / (a)bort? " choice
     case $choice in
-        s|S)
-            print_info "Stashing local changes..."
-            git stash push -m "Auto-stash before update $(date +%Y%m%d_%H%M%S)"
-            print_success "Đã stash changes"
-            ;;
-        c|C)
-            read -p "Nhập commit message: " commit_msg
-            git add -A
-            git commit -m "${commit_msg:-Auto-commit before update}"
-            print_success "Đã commit changes"
-            ;;
-        a|A)
-            print_info "Hủy update"
-            exit 0
-            ;;
-        *)
-            print_error "Lựa chọn không hợp lệ"
-            exit 1
-            ;;
+        s|S) git stash push -m "Auto-stash $(date +%Y%m%d_%H%M%S)"; print_success "Stashed" ;;
+        c|C) read -p "Commit message: " msg; git add -A; git commit -m "${msg:-Auto-commit}"; print_success "Committed" ;;
+        a|A) print_info "Hủy"; exit 0 ;;
+        *) print_error "Lựa chọn không hợp lệ"; exit 1 ;;
     esac
 fi
 
-# Fetch từ remote
-print_info "Fetching từ remote..."
 git fetch origin
-
-# Kiểm tra có update không
 LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse @{u} 2>/dev/null || echo "")
 
-if [[ -z "$REMOTE" ]]; then
-    print_warning "Không có upstream branch"
-    exit 0
-fi
-
-if [[ "$LOCAL" == "$REMOTE" ]]; then
-    print_success "Dotfiles đã up-to-date!"
-    exit 0
-fi
-
-# Pull changes
-print_info "Pulling updates..."
-if git pull --rebase origin main 2>/dev/null || git pull --rebase origin master 2>/dev/null; then
-    print_success "Đã pull updates thành công"
+if [[ -n "$REMOTE" && "$LOCAL" != "$REMOTE" ]]; then
+    git pull --rebase origin main 2>/dev/null || git pull --rebase origin master 2>/dev/null
+    print_success "Pulled updates"
 else
-    print_error "Có conflict khi pull. Vui lòng resolve thủ công."
-    exit 1
+    print_success "Git đã up-to-date"
 fi
 
-# Rebuild hệ thống
-echo ""
-read -p "Rebuild hệ thống ngay? [Y/n] " rebuild
-if [[ ! "$rebuild" =~ ^[Nn]$ ]]; then
-    print_info "Rebuilding..."
-    
-    OS=$(uname)
-    HOSTNAME=$(hostname -s)
-    
-    if [[ "$OS" == "Darwin" ]]; then
-        if darwin-rebuild switch --flake .#$HOSTNAME; then
-            print_success "Đã rebuild Darwin thành công"
-        else
-            print_error "Rebuild thất bại"
-            exit 1
-        fi
-    elif [[ -f /etc/NIXOS ]]; then
-        if sudo nixos-rebuild switch --flake .#$HOSTNAME; then
-            print_success "Đã rebuild NixOS thành công"
-        else
-            print_error "Rebuild thất bại"
-            exit 1
-        fi
+# ============================================================================
+# 2. NIX FLAKE: Cập nhật inputs (nixpkgs, home-manager, etc.)
+# ============================================================================
+print_section "Nix Flake Update"
+
+if command -v nix &>/dev/null; then
+    read -p "Cập nhật Nix flake inputs (nixpkgs, home-manager, ...)? [Y/n] " update_flake
+    if [[ ! "$update_flake" =~ ^[Nn]$ ]]; then
+        nix flake update
+        print_success "Flake inputs đã cập nhật"
     else
-        print_info "Ubuntu: Chạy home-manager switch..."
-        if nix run home-manager -- switch --flake .#$(whoami)@$HOSTNAME; then
-            print_success "Đã apply home-manager thành công"
-        else
-            print_error "Home-manager switch thất bại"
-            exit 1
-        fi
+        print_info "Bỏ qua flake update"
     fi
+else
+    print_warning "Nix chưa cài đặt"
 fi
 
-# Chạy health check
-echo ""
-print_info "Chạy health check..."
+# ============================================================================
+# 3. REBUILD: Áp dụng config mới
+# ============================================================================
+print_section "Nix Rebuild"
+
+case $OS in
+    darwin)
+        print_info "darwin-rebuild switch..."
+        if sudo darwin-rebuild switch --flake .#$HOSTNAME; then
+            print_success "Darwin rebuild thành công"
+        else
+            print_error "Darwin rebuild thất bại"
+            exit 1
+        fi
+        ;;
+    nixos|nixos-wsl)
+        FLAKE_TARGET=$([[ "$OS" == "nixos-wsl" ]] && echo "wsl" || echo "$HOSTNAME")
+        print_info "nixos-rebuild switch --flake .#$FLAKE_TARGET..."
+        if sudo nixos-rebuild switch --flake .#$FLAKE_TARGET; then
+            print_success "NixOS rebuild thành công"
+        else
+            print_error "NixOS rebuild thất bại"
+            exit 1
+        fi
+        ;;
+    ubuntu)
+        print_info "home-manager switch..."
+        if nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME; then
+            print_success "Home Manager switch thành công"
+        else
+            print_error "Home Manager switch thất bại"
+            exit 1
+        fi
+        ;;
+esac
+
+# ============================================================================
+# 4. HOMEBREW (macOS only)
+# ============================================================================
+if [[ "$OS" == "darwin" ]] && command -v brew &>/dev/null; then
+    print_section "Homebrew"
+    brew update
+    brew upgrade
+    brew cleanup
+    print_success "Homebrew đã cập nhật"
+fi
+
+# ============================================================================
+# 5. SNAP (Ubuntu only)
+# ============================================================================
+if [[ "$OS" == "ubuntu" ]] && command -v snap &>/dev/null; then
+    print_section "Snap"
+    sudo snap refresh
+    print_success "Snap đã cập nhật"
+fi
+
+# ============================================================================
+# 6. FLATPAK (Ubuntu only)
+# ============================================================================
+if [[ "$OS" == "ubuntu" ]] && command -v flatpak &>/dev/null; then
+    print_section "Flatpak"
+    flatpak update -y
+    print_success "Flatpak đã cập nhật"
+fi
+
+# ============================================================================
+# 7. ASDF (tất cả OS)
+# ============================================================================
+if command -v asdf &>/dev/null; then
+    print_section "asdf Plugins"
+    asdf plugin update --all 2>/dev/null && print_success "asdf plugins đã cập nhật" || print_warning "Không thể cập nhật asdf plugins"
+fi
+
+# ============================================================================
+# 8. NIX GC: Dọn rác (tùy chọn)
+# ============================================================================
+print_section "Nix Garbage Collection"
+read -p "Dọn Nix store (xóa generations cũ > 30 ngày)? [y/N] " gc_choice
+if [[ "$gc_choice" =~ ^[Yy]$ ]]; then
+    nix-collect-garbage --delete-older-than 30d
+    print_success "Nix store đã được dọn dẹp"
+else
+    print_info "Bỏ qua"
+fi
+
+# ============================================================================
+# 9. HEALTH CHECK
+# ============================================================================
+print_section "Health Check"
 if [[ -f "$SCRIPT_DIR/verify.sh" ]]; then
     bash "$SCRIPT_DIR/verify.sh"
 fi
 
 echo ""
-print_success "Update hoàn tất!"
+print_success "═══ UPDATE HOÀN TẤT! ═══"
+echo ""
