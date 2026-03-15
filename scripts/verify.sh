@@ -58,10 +58,15 @@ else
 fi
 
 # 2. Kiểm tra Home Manager
+# Home Manager có thể chạy dưới dạng CLI riêng HOẶC module tích hợp trong nix-darwin/NixOS
 if command -v home-manager &>/dev/null; then
-    check_pass "Home Manager installed"
+    check_pass "Home Manager installed (standalone CLI)"
+elif command -v darwin-rebuild &>/dev/null && darwin-rebuild --list-generations &>/dev/null; then
+    check_pass "Home Manager installed (nix-darwin module)"
+elif [[ -d "/nix/var/nix/profiles/per-user/$USER" ]]; then
+    check_pass "Home Manager installed (NixOS module)"
 else
-    check_warn "Home Manager CLI not available" "Enable 'programs.home-manager.enable = true;' in configuration"
+    check_warn "Home Manager not detected" "Run: ./install.sh to bootstrap"
 fi
 
 # 3. Kiểm tra Shell
@@ -84,8 +89,10 @@ fi
 echo ""
 echo "=== Git ==="
 if command -v git &>/dev/null; then
-    GIT_USER=$(git config --global user.name 2>/dev/null)
-    GIT_EMAIL=$(git config --global user.email 2>/dev/null)
+    # Dùng 'git config' (không --global) để đọc từ tất cả sources:
+    # ~/.gitconfig, ~/.config/git/config (Home Manager), repo .git/config
+    GIT_USER=$(git config user.name 2>/dev/null)
+    GIT_EMAIL=$(git config user.email 2>/dev/null)
     if [[ -n "$GIT_USER" && -n "$GIT_EMAIL" ]]; then
         check_pass "Git configured ($GIT_USER)"
     else
