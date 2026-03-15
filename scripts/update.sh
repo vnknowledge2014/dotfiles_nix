@@ -165,7 +165,16 @@ if command -v asdf &>/dev/null; then
 fi
 
 # ============================================================================
-# 8. NIX GC: Dọn rác (tùy chọn)
+# 8. RUSTUP (tất cả OS)
+# ============================================================================
+if command -v rustup &>/dev/null; then
+    print_section "Rustup"
+    rustup update && print_success "Rust toolchain đã cập nhật"
+    rustup self update 2>/dev/null && print_success "Rustup đã cập nhật" || true
+fi
+
+# ============================================================================
+# 9. NIX GC: Dọn rác (tùy chọn)
 # ============================================================================
 print_section "Nix Garbage Collection"
 read -p "Dọn Nix store (xóa generations cũ > 30 ngày)? [y/N] " gc_choice
