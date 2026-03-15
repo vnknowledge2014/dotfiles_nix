@@ -31,4 +31,8 @@
   
   # Cấu hình bảo mật cơ bản
   security.sudo.wheelNeedsPassword = true;
+
+  # ZFS Support
+  boot.supportedFilesystems = [ "zfs" ];
+  # Note: networking.hostId must be set in machine-specific config (e.g., generated via `head -c 4 /dev/urandom | od -A n -t x4`)
 }

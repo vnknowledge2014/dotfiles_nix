@@ -1,25 +1,46 @@
 # Dotfiles Đa Nền Tảng
 
-Dự án này cung cấp bộ cấu hình dotfiles đa nền tảng, tự động phát hiện và thiết lập môi trường phù hợp cho NixOS, macOS, Ubuntu và WSL. Dự án được thiết kế để dễ dàng chia sẻ trong team và duy trì môi trường phát triển nhất quán.
+Dự án cung cấp bộ cấu hình dotfiles đa nền tảng với các tính năng:
 
-## Tính Năng Chính
-
-- **Tự động phát hiện hệ thống** - Tự động phát hiện và áp dụng cấu hình phù hợp
-- **Hỗ trợ đa nền tảng** - NixOS, NixOS trên WSL, macOS và Ubuntu
-- **Tích hợp liền mạch** - Nix, Homebrew, Home Manager và Snapd
-- **Module hóa** - Các cấu hình được tổ chức thành module nhỏ, dễ tùy chỉnh
-- **Động và mở rộng** - Dễ dàng thêm máy mới và người dùng mới
-- **Một lệnh thiết lập** - Cài đặt và cấu hình toàn bộ hệ thống với một lệnh duy nhất
+- **Tự động phát hiện hệ thống** - NixOS, macOS, Ubuntu, WSL
+- **Preset System** - 8 preset ngôn ngữ lập trình (minimal → all)
+- **Multi-machine per user** - 1 user, nhiều máy, mỗi máy config riêng
+- **Health Check & Auto-Update** - Giám sát và cập nhật tự động
 
 ## Cài Đặt Nhanh
 
 ```bash
-# Clone repository
-git clone https://github.com/username/dotfiles.git
-cd dotfiles
+# Clone và cài đặt
+git clone https://github.com/vnknowledge2014/dotfiles_nix.git
+cd dotfiles_nix
 
-# Cài đặt tự động (phát hiện hệ thống và thiết lập)
-./install.sh
+# Cài đặt với interactive mode
+./install.sh --interactive
+
+# Hoặc với preset cụ thể
+./install.sh --preset web-developer
+./install.sh --preset all
+```
+
+## Preset Ngôn Ngữ
+
+| Preset | Ngôn ngữ | Rustup |
+|--------|----------|--------|
+| `minimal` | Python | ❌ |
+| `web-developer` | Node.js, Bun, Deno, Python | ❌ |
+| `data-scientist` | Python, UV, Julia | ❌ |
+| `devops-engineer` | Python, Go, Node.js | ❌ |
+| `mobile-developer` | Flutter, Node.js | ❌ |
+| `systems-developer` | Zig, Go | ✅ |
+| `functional-developer` | Haskell, OCaml, Elixir, Erlang, Gleam, PureScript | ❌ |
+| `all` | Tất cả ngôn ngữ | ✅ |
+
+```bash
+# Xem chi tiết presets
+./asdf-vm/planguage.sh --list-presets
+
+# Cài preset + thêm ngôn ngữ
+./install.sh --preset web-developer --add rust,go
 ```
 
 ## Cấu Trúc Dự Án
@@ -27,496 +48,158 @@ cd dotfiles
 ```
 dotfiles/
 ├── flake.nix                    # Cấu hình flake chính
-├── install.sh                   # Script cài đặt tự động
-├── README.md                    # Tài liệu này
-├── lib/                         # Thư viện tiện ích
-│   └── default.nix              # Hàm tiện ích và phát hiện hệ thống
-├── hosts/                       # Cấu hình theo máy
-│   ├── common/                  # Cấu hình chung cho tất cả hệ thống
-│   │   └── default.nix          # Cấu hình Nix và package cơ bản
-│   ├── nixos/                   # Cấu hình NixOS
-│   │   ├── common.nix           # Cấu hình chung cho NixOS
-│   │   └── machines/            # Cấu hình theo máy cụ thể
-│   │       └── legion/          # Ví dụ: cấu hình cho máy Legion
-│   ├── wsl/                     # Cấu hình WSL
-│   │   └── default.nix          # Cấu hình NixOS trên WSL
-│   ├── darwin/                  # Cấu hình macOS
-│   │   ├── default.nix          # Entry point cho cấu hình Darwin
-│   │   ├── base.nix             # Cấu hình cơ bản cho macOS
-│   │   ├── homebrew.nix         # Cấu hình Homebrew
-│   │   ├── xcode.nix            # Cấu hình XCode
-│   │   └── machines/            # Cấu hình theo máy macOS
-│   │       └── macbook/         # Ví dụ: cấu hình cho máy MacBook
-│   └── ubuntu/                  # Cấu hình Ubuntu
-│       └── snapd.nix            # Cấu hình Snapd
-├── home/                        # Cấu hình Home Manager
-│   ├── modules/                 # Các module cấu hình
-│   │   ├── core/                # Cấu hình cốt lõi 
-│   │   ├── dev/                 # Công cụ phát triển
-│   │   │   └── git.nix          # Cấu hình Git
-│   │   ├── shell/               # Cấu hình Shell
-│   │   ├── editors/             # Cấu hình Editor
-│   │   └── terminal/            # Cấu hình Terminal
-│   ├── nixos.nix                # Entry cho NixOS
+├── install.sh                   # Script cài đặt (hỗ trợ --preset, --interactive)
+├── versions.json                # Quản lý version tools (Antigravity, Ghostty)
+├── asdf-vm/
+│   ├── plugins.json             # Unified: asdf + rustup + presets
+│   └── planguage.sh             # Script cài ngôn ngữ
+├── home/
 │   ├── darwin.nix               # Entry cho macOS
 │   ├── ubuntu.nix               # Entry cho Ubuntu
-│   ├── wsl.nix                  # Entry cho WSL
-│   └── profiles/                # Hồ sơ người dùng
-│       ├── rnd/                 # Profile cho user rnd
-│       ├── mike/                # Profile cho user mike
-│       └── template/            # Template để thêm người dùng mới
-└── scripts/                     # Scripts hữu ích
-    ├── add-user.sh              # Thêm người dùng mới
-    └── add-machine.sh           # Thêm máy mới
+│   ├── nixos.nix                # Entry cho NixOS
+│   └── profiles/
+│       └── {username}/
+│           ├── default.nix      # Config chung của user
+│           └── machines/        # Config riêng từng máy
+│               └── {hostname}.nix
+├── scripts/
+│   ├── verify.sh                # Health check
+│   ├── update.sh                # Auto-update
+│   ├── add-user.sh              # Thêm user mới
+│   └── add-machine.sh           # Thêm máy mới
+└── hosts/
+    ├── darwin/machines/         # Config macOS machines
+    └── nixos/machines/          # Config NixOS machines
 ```
 
-## Hướng Dẫn Cài Đặt Chi Tiết
+## Multi-Machine Per User
 
-### NixOS
+Mỗi user có thể có config khác nhau cho từng máy:
 
-1. Clone repository:
-   ```bash
-   git clone https://github.com/username/dotfiles.git
-   cd dotfiles
-   ```
+```
+home/profiles/mike/
+├── default.nix           # Config chung (shell, git, editor...)
+└── machines/
+    ├── macbook.nix       # Override cho MacBook (OrbStack DOCKER_HOST)
+    └── ubuntu-pc.nix     # Override cho Ubuntu PC (Docker Engine)
+```
 
-2. Cài đặt tự động:
-   ```bash
-   ./install.sh
-   ```
+System tự động detect hostname và import machine config tương ứng.
 
-3. Hoặc cài đặt thủ công:
-   ```bash
-   # Bật Nix flakes nếu chưa có
-   sudo mkdir -p /etc/nix
-   echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
+## Scripts Tiện Ích
 
-   # Xây dựng cấu hình
-   sudo nixos-rebuild switch --flake .#hostname
-   ```
+### Health Check
+```bash
+./scripts/verify.sh
+# Kiểm tra: Nix, Shell, Git, asdf, Rust, Docker, Editors, Terminal
+```
 
-### macOS
+### Auto-Update
+```bash
+./scripts/update.sh
+# Tự động: git pull → handle conflicts → rebuild → verify
+```
 
-1. Clone repository:
-   ```bash
-   git clone https://github.com/username/dotfiles.git
-   cd dotfiles
-   ```
+## Các Tính Năng Mới (Phase 7+)
 
-2. Cài đặt tự động:
-   ```bash
-   ./install.sh
-   ```
+### 🔐 Secrets Management
+Sử dụng **SOPS** & **Age** để mã hóa secrets.
+- Config: `.sops.yaml`
+- Key location: `~/.config/sops/age/keys.txt`
+- Giải mã tự động qua module `secrets`.
 
-3. Hoặc cài đặt thủ công:
-   ```bash
-   # Cài đặt Nix nếu chưa có
-   sh <(curl -L https://nixos.org/nix/install) --daemon
-   
-   # Cài đặt Homebrew nếu chưa có
-   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-   
-   # Cài đặt nix-darwin nếu chưa có
-   nix-build https://github.com/LnL7/nix-darwin/archive/master.tar.gz -A installer
-   ./result/bin/darwin-installer
-   
-   # Xây dựng cấu hình
-   darwin-rebuild switch --flake .#hostname
-   ```
+### 🏥 Dotfiles Doctor
+Script kiểm tra sức khỏe hệ thống và đề xuất sửa lỗi:
+```bash
+./scripts/verify.sh
+```
 
-### Ubuntu
+### 🚀 Remote Deploy (Mới)
+Deploy dotfiles lên máy khác qua SSH:
+```bash
+./scripts/remote-deploy.sh user@host preset_name
+```
 
-1. Clone repository:
-   ```bash
-   git clone https://github.com/username/dotfiles.git
-   cd dotfiles
-   ```
+### 🔙 System Rollback
+Khôi phục cấu hình về phiên bản trước (Nix Generation):
+```bash
+./scripts/rollback.sh
+```
 
-2. Cài đặt tự động:
-   ```bash
-   ./install.sh
-   ```
+## Tools Được Cài Đặt
 
-3. Hoặc cài đặt thủ công:
-   ```bash
-   # Cài đặt các gói cần thiết
-   sudo apt update
-   sudo apt install -y curl git build-essential
-   
-   # Cài đặt Nix nếu chưa có
-   sh <(curl -L https://nixos.org/nix/install) --daemon
-   
-   # Bật flakes
-   mkdir -p ~/.config/nix
-   echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf
-   
-   # Cài đặt home-manager
-   nix-shell -p nixFlakes --run "nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#username@hostname"
-   ```
+### Editors
+- **Antigravity** - AI-powered code editor:
+  - **macOS**: Cài vào `/Applications` (via `install.sh`).
+  - **Ubuntu/NixOS**: Quản lý native qua **Nix Module** (`home-manager` / `nixos-rebuild`).
+  - **Config**: Declarative alias/path setup trong `macbook.nix` (macOS).
+- **Neovim** - Terminal editor.
 
-### NixOS trên WSL
+### File Systems
+- **OpenZFS**:
+  - **macOS**: Cài qua Homebrew Cask `openzfs`.
+  - **Ubuntu**: Cài `zfsutils-linux`.
+  - **NixOS**: Enable `boot.supportedFilesystems = ["zfs"]` (Yêu cầu set `networking.hostId` trong machine config).
 
-1. Clone repository:
-   ```bash
-   git clone https://github.com/username/dotfiles.git
-   cd dotfiles
-   ```
-
-2. Cài đặt tự động:
-   ```bash
-   ./install.sh
-   ```
-
-3. Hoặc cài đặt thủ công:
-   ```bash
-   # Bật flakes
-   sudo mkdir -p /etc/nix
-   echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
-   
-   # Xây dựng cấu hình
-   sudo nixos-rebuild switch --flake .#wsl
-   ```
-
-## Quản Lý Hệ Thống và Người Dùng Động
-
-### Phát Hiện Hệ Thống
-
-Dự án tự động phát hiện hostname, username và hệ điều hành. Bạn có thể ghi đè bằng biến môi trường:
+### Thêm User Mới
 
 ```bash
-HOSTNAME=custom-hostname USERNAME=custom-username ./install.sh
+./scripts/add-user.sh alice "Alice" "alice@example.com"
+# Tạo profile mới từ template
 ```
 
-### Thêm Người Dùng Mới
+## Cấu Hình Machine-Specific
 
-1. Sử dụng script:
-   ```bash
-   ./scripts/add-user.sh new-username "Full Name" "email@example.com"
-   ```
-
-2. Hoặc thủ công:
-   ```bash
-   # Tạo thư mục profile mới
-   cp -r home/profiles/template home/profiles/new-username
-   
-   # Chỉnh sửa thông tin cá nhân
-   vim home/profiles/new-username/default.nix
-   ```
-
-### Thêm Máy Mới
-
-1. Sử dụng script:
-   ```bash
-   ./scripts/add-machine.sh new-hostname nixos
-   ```
-
-2. Hoặc thủ công cho NixOS:
-   ```bash
-   # Tạo thư mục cấu hình mới
-   mkdir -p hosts/nixos/machines/new-hostname
-   
-   # Tạo cấu hình phần cứng
-   nixos-generate-config --dir hosts/nixos/machines/new-hostname
-   ```
-
-3. Hoặc thủ công cho macOS:
-   ```bash
-   # Tạo thư mục cấu hình mới
-   mkdir -p hosts/darwin/machines/new-hostname
-   
-   # Tạo file cấu hình
-   cp hosts/darwin/machines/template/default.nix hosts/darwin/machines/new-hostname/default.nix
-   ```
-
-## Tùy Chỉnh Cấu Hình
-
-### Cấu Hình Git
-
-Cấu hình Git chung được định nghĩa trong `home/modules/dev/git.nix`:
+Tạo file `home/profiles/{username}/machines/{hostname}.nix`:
 
 ```nix
-{ config, lib, pkgs, ... }:
-
-with lib;
-let cfg = config.modules.dev.git;
-in {
-  options.modules.dev.git = {
-    enable = mkEnableOption "Enable git configuration";
-    
-    aliases = mkOption {
-      type = types.attrsOf types.str;
-      default = {
-        co = "checkout";
-        ci = "commit";
-        st = "status";
-        br = "branch";
-        hist = "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short";
-      };
-      description = "Git aliases";
-    };
-    
-    extraConfig = mkOption {
-      type = types.attrsOf types.anything;
-      default = {
-        init.defaultBranch = "main";
-        pull.rebase = false;
-      };
-      description = "Extra git configuration";
-    };
-  };
-
-  config = mkIf cfg.enable {
-    programs.git = {
-      enable = true;
-      aliases = cfg.aliases;
-      extraConfig = cfg.extraConfig;
-    };
-  };
+{ config, lib, pkgs, hostname, ... }:
+{
+  # Docker runtime cho máy này
+  programs.zsh.initExtra = lib.mkAfter ''
+    export DOCKER_HOST='unix:///path/to/docker.sock'
+  '';
+  
+  # Packages riêng cho máy này
+  home.packages = with pkgs; [ some-machine-specific-tool ];
 }
 ```
 
-Cấu hình Git cá nhân được định nghĩa trong profile của từng người dùng:
+## Cập Nhật Version Tools
 
-```nix
-# Trong home/profiles/username/default.nix
-programs.git = {
-  userName = "Your Name";
-  userEmail = "your.email@example.com";
-};
+Edit `versions.json` để cập nhật URL cho Antigravity, Ghostty:
+
+```json
+{
+  "tools": {
+    "antigravity": {
+      "version": "1.13.3",
+      "darwin-arm": "https://...",
+      "darwin-x64": "https://...",
+      "linux": "https://..."
+    }
+  }
+}
 ```
 
-### Thêm Package Riêng
+## FAQ
 
-Thêm package riêng trong profile cá nhân:
+### Preset nào nên chọn?
+- **Web developer**: `web-developer` (Node.js, Python, Deno, Bun)
+- **Mobile dev**: `mobile-developer` (Flutter, Node.js)
+- **Systems/Embedded**: `systems-developer` (Zig, Go, Rust)
+- **Không biết chọn gì**: `all` (cài tất cả)
 
-```nix
-# Trong home/profiles/username/default.nix
-home.packages = with pkgs; [
-  # Thêm các package riêng tại đây
-  nodejs
-  yarn
-  docker
-];
-```
-
-### Tùy Chỉnh Homebrew trên macOS
-
-Cấu hình Homebrew trong file cấu hình máy macOS:
-
-```nix
-# Trong hosts/darwin/machines/macbook/default.nix
-homebrew = {
-  enable = true;
-  onActivation = {
-    autoUpdate = true;
-    cleanup = "zap";
-    upgrade = true;
-  };
-  
-  # Quản lý Brewfile
-  global = {
-    brewfile = true;
-  };
-  
-  # Danh sách đầy đủ
-  brews = [
-    "mas"      # Mac App Store CLI
-    "python"
-    "go"
-    "node" 
-    "yarn"
-  ];
-  
-  casks = [
-    "google-chrome"
-    "firefox"
-    "visual-studio-code"
-    "docker"
-  ];
-  
-  masApps = {
-    "Xcode" = 497799835;
-  };
-};
-```
-
-### Tùy Chỉnh Snapd trên Ubuntu
-
-Thêm package Snap trong `home/ubuntu.nix`:
-
-```nix
-# Tích hợp với snapd
-home.activation.snapPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
-  if command -v snap > /dev/null 2>&1; then
-    echo "Cài đặt các gói snap..."
-    
-    # Danh sách các gói snap
-    PACKAGES=(${lib.concatStringsSep " " (map (x: "\"${x}\"") (["code" "spotify" "slack"] ++ (config.extraSnaps or [])))})
-    
-    for pkg in "''${PACKAGES[@]}"; do
-      if ! snap list | grep -q "^$pkg"; then
-        echo "Đang cài đặt $pkg..."
-        sudo snap install $pkg
-      fi
-    done
-  fi
-'';
-```
-
-## Module Hóa và Tùy Biến
-
-Hệ thống dotfiles này được thiết kế theo mô hình module hóa, giúp dễ dàng tùy biến và mở rộng:
-
-1. **Module Core**: Cấu hình cốt lõi và package cơ bản
-2. **Module Shell**: Cấu hình ZSH, oh-my-zsh, và shell aliases
-3. **Module Dev**: Công cụ phát triển, bao gồm Git
-4. **Module Editors**: Cấu hình editor như VSCode, Neovim
-5. **Module Terminal**: Cấu hình terminal emulator
-
-Mỗi module có thể được bật/tắt và tùy chỉnh trong profile cá nhân:
-
-```nix
-# Trong home/profiles/username/default.nix
-modules = {
-  core = {
-    enable = true;
-    packages = with pkgs; [ ... ];
-  };
-  
-  shell = {
-    enable = true;
-    zsh = {
-      enable = true;
-      autosuggestions.enable = true;
-      syntaxHighlighting.enable = true;
-      ohmyzsh = {
-        enable = true;
-        theme = "robbyrussell";
-        plugins = [ "git" "docker" ];
-      };
-      aliases = {
-        # Sử dụng lib.mkForce để ưu tiên hơn cấu hình mặc định
-        ll = lib.mkForce "eza -l --icons";
-        la = lib.mkForce "eza -la --icons";
-      };
-    };
-  };
-  
-  dev.git.enable = true;
-  editors.enable = true;
-};
-```
-
-## Cập Nhật Hệ Thống
-
-### NixOS
-
+### Làm sao để thêm ngôn ngữ vào preset?
 ```bash
-cd dotfiles
-git pull
-sudo nixos-rebuild switch --flake .#hostname
+./install.sh --preset web-developer --add rust,go
 ```
 
-### macOS
-
+### Machine config không được load?
+Kiểm tra hostname khớp với tên file:
 ```bash
-cd dotfiles
-git pull
-darwin-rebuild switch --flake .#hostname
+hostname -s  # Phải khớp với tên file trong machines/
 ```
-
-### Ubuntu
-
-```bash
-cd dotfiles
-git pull
-nix run home-manager/release-25.05 -- switch --flake .#username@hostname
-```
-
-## FAQ & Troubleshooting
-
-### Nix flakes không hoạt động
-
-Đảm bảo đã bật tính năng thử nghiệm:
-
-```bash
-# NixOS
-sudo mkdir -p /etc/nix
-echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
-
-# macOS / Ubuntu
-mkdir -p ~/.config/nix
-echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf
-```
-
-### Không tìm thấy host hoặc user
-
-Kiểm tra cấu hình flake.nix và đảm bảo hostname và username khớp với cấu hình hoặc sử dụng cấu hình động.
-
-### Xung đột Homebrew
-
-Nếu gặp xung đột giữa Nix và Homebrew, đảm bảo đường dẫn đúng:
-
-```bash
-export PATH=/usr/local/bin:$PATH  # Homebrew Intel
-# hoặc
-export PATH=/opt/homebrew/bin:$PATH  # Homebrew Apple Silicon
-```
-
-### Lỗi trên Ubuntu
-
-Đảm bảo đã cài đặt các gói tiên quyết:
-
-```bash
-sudo apt update
-sudo apt install -y curl git build-essential
-```
-
-### Xung đột trong cấu hình shell aliases
-
-Nếu gặp lỗi xung đột định nghĩa cho cùng một alias, sử dụng `lib.mkForce` để chỉ định ưu tiên:
-
-```nix
-aliases = {
-  ll = lib.mkForce "eza -l --icons";
-  la = lib.mkForce "eza -la --icons";
-};
-```
-
-### Lỗi về nix.settings.auto-optimise-store
-
-Nếu gặp lỗi về `nix.settings.auto-optimise-store`, hãy thay thế bằng cấu hình an toàn hơn:
-
-```nix
-nix = {
-  settings = {
-    experimental-features = [ "nix-command" "flakes" ];
-    # auto-optimise-store = true;  # Thiết lập gây lỗi, đã bị xóa
-  };
-  
-  # Sử dụng thiết lập được khuyến nghị
-  optimise = {
-    automatic = true;
-    dates = [ "weekly" ];
-  };
-};
-```
-
-### Không thể tìm thấy đường dẫn cho cấu hình máy
-
-Đảm bảo bạn đã tạo cấu hình cho máy cụ thể trong thư mục tương ứng:
-
-```bash
-# Cho NixOS
-mkdir -p hosts/nixos/machines/your-hostname
-
-# Cho macOS
-mkdir -p hosts/darwin/machines/your-hostname
-```
-
-## Đóng Góp
-
-Vui lòng đóng góp và báo lỗi qua GitHub Issues hoặc gửi Pull Request.
 
 ## Giấy Phép
 

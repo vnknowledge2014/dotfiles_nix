@@ -2,6 +2,107 @@
 
 set -e
 
+# ============================================================================
+# Dotfiles Đa Nền Tảng — Bootstrap & Install Script
+# ============================================================================
+# Vai trò:
+#   1. Bootstrap: Cài Nix, Homebrew, nix-darwin (nếu chưa có)
+#   2. Rebuild:   Gọi darwin-rebuild / nixos-rebuild / home-manager switch
+#   3. ASDF:      Cài ngôn ngữ lập trình qua asdf (với preset system)
+#   4. Extras:    Các tool mà Nix không quản lý được (Docker APT, Snap, Flatpak, .deb, .dmg)
+#
+# Mọi config (tmux, shell, editor, starship, ...) được Nix/Home Manager quản lý.
+# Script này KHÔNG copy config files — chỉ bootstrap và cài tool ngoài Nix.
+# ============================================================================
+
+# Preset và Extra Languages (từ command line)
+LANG_PRESET=""
+EXTRA_LANGS=""
+INTERACTIVE_MODE=false
+
+# Hàm hiển thị menu chọn preset
+show_preset_menu() {
+  echo ""
+  echo "╔═══════════════════════════════════════════════════════════╗"
+  echo "║           CHỌN PRESET NGÔN NGỮ LẬP TRÌNH                  ║"
+  echo "╠═══════════════════════════════════════════════════════════╣"
+  echo "║  1. minimal            - Chỉ Python cơ bản                ║"
+  echo "║  2. web-developer      - Node.js, Bun, Deno, Python       ║"
+  echo "║  3. data-scientist     - Python, UV, Julia                ║"
+  echo "║  4. devops-engineer    - Python, Go, Node.js              ║"
+  echo "║  5. mobile-developer   - Flutter, Node.js                 ║"
+  echo "║  6. systems-developer  - Zig, Go, Rust                    ║"
+  echo "║  7. functional-dev     - Haskell, OCaml, Elixir, Gleam    ║"
+  echo "║  8. all                - Tất cả ngôn ngữ                  ║"
+  echo "║  0. Bỏ qua (không cài ngôn ngữ qua asdf)                  ║"
+  echo "╚═══════════════════════════════════════════════════════════╝"
+  echo ""
+  read -p "Chọn preset (0-8): " choice
+  
+  case $choice in
+    1) LANG_PRESET="minimal" ;;
+    2) LANG_PRESET="web-developer" ;;
+    3) LANG_PRESET="data-scientist" ;;
+    4) LANG_PRESET="devops-engineer" ;;
+    5) LANG_PRESET="mobile-developer" ;;
+    6) LANG_PRESET="systems-developer" ;;
+    7) LANG_PRESET="functional-developer" ;;
+    8) LANG_PRESET="all" ;;
+    0) LANG_PRESET="" ;;
+    *) 
+      echo "Lựa chọn không hợp lệ, sử dụng mặc định (all)"
+      LANG_PRESET="all"
+      ;;
+  esac
+  
+  if [[ -n "$LANG_PRESET" ]]; then
+    echo ""
+    read -p "Thêm ngôn ngữ ngoài preset? (ví dụ: rust,java) [Enter để bỏ qua]: " EXTRA_LANGS
+  fi
+  
+  echo ""
+  echo "Preset đã chọn: ${LANG_PRESET:-"(không cài)"}"
+  [[ -n "$EXTRA_LANGS" ]] && echo "Ngôn ngữ thêm: $EXTRA_LANGS"
+  echo ""
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --preset)
+      LANG_PRESET="$2"
+      shift 2
+      ;;
+    --add)
+      EXTRA_LANGS="$2"
+      shift 2
+      ;;
+    --interactive|-i)
+      INTERACTIVE_MODE=true
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: $0 [OPTIONS]"
+      echo ""
+      echo "Options:"
+      echo "  --preset PRESET  Chọn preset ngôn ngữ lập trình"
+      echo "                   (minimal, web-developer, data-scientist, all, ...)"
+      echo "  --add LANGS      Thêm ngôn ngữ ngoài preset (cách nhau bởi dấu phẩy)"
+      echo "  --interactive    Chế độ tương tác, hiển thị menu chọn preset"
+      echo "  --help           Hiển thị hướng dẫn này"
+      echo ""
+      echo "Ví dụ:"
+      echo "  $0 --preset web-developer"
+      echo "  $0 --preset minimal --add rust,go"
+      echo "  $0 --interactive"
+      exit 0
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
 # Kiểm tra đang chạy từ thư mục đúng
 if [[ ! -f "flake.nix" ]]; then
   echo "Lỗi: Script phải được chạy từ thư mục gốc của dotfiles (chứa file flake.nix)"
@@ -15,7 +116,15 @@ echo "Cài Đặt Dotfiles Đa Nền Tảng"
 echo "============================="
 echo ""
 
-# Phát hiện hệ điều hành
+# Nếu chế độ interactive → hiện menu chọn preset
+if [[ "$INTERACTIVE_MODE" == true ]]; then
+  show_preset_menu
+fi
+
+# ============================================================================
+# PHÁT HIỆN HỆ THỐNG
+# ============================================================================
+
 detect_os() {
   if [[ "$(uname)" == "Darwin" ]]; then
     echo "darwin"
@@ -32,7 +141,6 @@ detect_os() {
   fi
 }
 
-# Lấy hostname và username
 HOSTNAME=${HOSTNAME:-$(hostname -s)}
 USERNAME=${USERNAME:-$(whoami)}
 OS=$(detect_os)
@@ -55,19 +163,19 @@ fi
 export HOSTNAME=$HOSTNAME
 export USERNAME=$USERNAME
 
-# Kiểm tra profile người dùng
+# ============================================================================
+# TẠO USER PROFILE (nếu chưa có)
+# ============================================================================
+
 if [[ ! -d "home/profiles/$USERNAME" ]]; then
   echo "Profile cho $USERNAME không tồn tại. Tạo từ template..."
   
-  # Tạo thư mục profile
   mkdir -p "home/profiles/$USERNAME"
   cp -r home/profiles/template/* "home/profiles/$USERNAME/"
   
-  # Tùy chỉnh thông tin
   read -p "Nhập tên đầy đủ: " FULLNAME
   read -p "Nhập email: " EMAIL
   
-  # Cập nhật thông tin (sử dụng cú pháp tương thích với macOS)
   if [[ "$OS" == "darwin" ]]; then
     sed -i '' "s/Your Name/$FULLNAME/g" "home/profiles/$USERNAME/default.nix"
     sed -i '' "s/your\.email@example\.com/$EMAIL/g" "home/profiles/$USERNAME/default.nix"
@@ -79,26 +187,29 @@ if [[ ! -d "home/profiles/$USERNAME" ]]; then
   echo "Đã tạo profile cho $USERNAME."
 fi
 
-# Thiết lập theo OS
+# ============================================================================
+# BOOTSTRAP + REBUILD (theo OS)
+# ============================================================================
+
 case $OS in
   darwin)
-    echo "Thiết lập macOS..."
+    echo ""
+    echo "═══════════════════════════════════════"
+    echo "  BOOTSTRAP macOS"
+    echo "═══════════════════════════════════════"
     
-    # Cài đặt Nix nếu chưa có
+    # --- Bootstrap: Nix ---
     if ! command -v nix &> /dev/null; then
       echo "Cài đặt Nix..."
       sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install)
-      
-      # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
     fi
     
-    # Cài đặt Homebrew nếu chưa có
+    # --- Bootstrap: Homebrew ---
     if ! command -v brew &> /dev/null; then
       echo "Cài đặt Homebrew..."
       /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       
-      # Thêm Homebrew vào PATH
       if [[ -f /opt/homebrew/bin/brew ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
       elif [[ -f /usr/local/bin/brew ]]; then
@@ -106,211 +217,134 @@ case $OS in
       fi
     fi
     
-    # Cài đặt nix-darwin
+    # --- Bootstrap: nix-darwin ---
     if ! command -v darwin-rebuild &> /dev/null; then
       echo "Setup Xcode license accept"
       sudo xcodebuild -license accept
 
-      # Backup existing /etc files that nix-darwin will manage
       echo "Backing up existing /etc files..."
-      if [[ -f /etc/zshrc ]]; then
-        sudo mv /etc/zshrc /etc/zshrc.before-nix-darwin
-        echo "Backed up /etc/zshrc to /etc/zshrc.before-nix-darwin"
-      fi
-      if [[ -f /etc/zprofile ]]; then
-        sudo mv /etc/zprofile /etc/zprofile.before-nix-darwin
-        echo "Backed up /etc/zprofile to /etc/zprofile.before-nix-darwin"
-      fi
-      if [[ -f /etc/bashrc ]]; then
-        sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
-        echo "Backed up /etc/bashrc to /etc/bashrc.before-nix-darwin"
-      fi
+      [[ -f /etc/zshrc ]] && sudo mv /etc/zshrc /etc/zshrc.before-nix-darwin
+      [[ -f /etc/zprofile ]] && sudo mv /etc/zprofile /etc/zprofile.before-nix-darwin
+      [[ -f /etc/bashrc ]] && sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
 
       echo "Cài đặt nix-darwin..."
       sudo nix run nix-darwin -- switch --flake .#$HOSTNAME
 
-      # Tải lại PATH sau khi cài đặt nix-darwin
-      if [[ -f /etc/static/bashrc ]]; then
-        source /etc/static/bashrc
-      fi
+      [[ -f /etc/static/bashrc ]] && source /etc/static/bashrc
     fi
     
-    # Kiểm tra cấu hình máy tồn tại
+    # --- Tạo machine config nếu chưa có ---
     if [[ ! -d "hosts/darwin/machines/$HOSTNAME" ]]; then
-      echo "Cảnh báo: Không tìm thấy cấu hình cho máy $HOSTNAME"
-      echo "Tạo cấu hình từ template..."
+      echo "Tạo cấu hình cho máy $HOSTNAME từ template..."
       mkdir -p "hosts/darwin/machines/$HOSTNAME"
       cp "hosts/darwin/machines/template/default.nix" "hosts/darwin/machines/$HOSTNAME/default.nix"
-      echo "Đã tạo cấu hình cho $HOSTNAME từ template"
     fi
 
-    # Xây dựng cấu hình
+    # --- Rebuild ---
+    echo ""
     echo "Xây dựng cấu hình Darwin..."
     if sudo darwin-rebuild switch --flake .#$HOSTNAME; then
-      echo "Xây dựng cấu hình Darwin thành công"
+      echo "✓ Xây dựng cấu hình Darwin thành công"
     else
-      echo "Lỗi: Không thể xây dựng cấu hình Darwin. Vui lòng kiểm tra lại cấu hình."
+      echo "Lỗi: Không thể xây dựng cấu hình Darwin."
       exit 1
-    fi
-
-    echo "Cài đặt các ngôn ngữ lập trình trên asdf"
-    if [[ -f "./asdf-vm/planguage.sh" ]]; then
-      chmod +x ./asdf-vm/planguage.sh
-      bash ./asdf-vm/planguage.sh
-    else
-      echo "Cảnh báo: Không tìm thấy file asdf-vm/planguage.sh"
-    fi
-
-    echo "Cài đặt tmux"
-    if [[ -f "./ghostty-tmux/.tmux.conf" ]]; then
-      mkdir -p ~/.config/tmux
-      cp ./ghostty-tmux/.tmux.conf ~/.config/tmux/.tmux.conf
-      echo "Đã cài đặt cấu hình tmux"
-    else
-      echo "Cảnh báo: Không tìm thấy file ghostty-tmux/.tmux.conf"
-    fi
-
-    # Cài đặt Antigravity
-    echo ""
-    echo "Cài đặt Antigravity..."
-    if [[ -d "/Applications/Antigravity.app" ]]; then
-      echo "✓ Antigravity đã được cài đặt"
-    else
-      # Phát hiện kiến trúc CPU
-      ARCH=$(uname -m)
-      if [[ "$ARCH" == "arm64" ]]; then
-        ANTIGRAVITY_URL="https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.13.3-4533425205018624/darwin-arm/Antigravity.dmg"
-        echo "Phát hiện Mac M Series (ARM64)"
-      else
-        ANTIGRAVITY_URL="https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.13.3-4533425205018624/darwin-x64/Antigravity.dmg"
-        echo "Phát hiện Mac Intel (x64)"
-      fi
-      
-      echo "Đang tải Antigravity..."
-      curl -L -o /tmp/Antigravity.dmg "$ANTIGRAVITY_URL"
-      
-      echo "Đang mount DMG..."
-      hdiutil attach /tmp/Antigravity.dmg -nobrowse -quiet
-      
-      echo "Đang cài đặt Antigravity..."
-      cp -R "/Volumes/Antigravity/Antigravity.app" /Applications/
-      
-      echo "Đang unmount DMG..."
-      hdiutil detach "/Volumes/Antigravity" -quiet
-      
-      rm /tmp/Antigravity.dmg
-      echo "✓ Đã cài đặt Antigravity"
     fi
     ;;
     
   nixos)
-    echo "Thiết lập Nix | NixOS..."
+    echo ""
+    echo "═══════════════════════════════════════"
+    echo "  BOOTSTRAP NixOS"
+    echo "═══════════════════════════════════════"
     
-    # Cài đặt Nix từ Nix nếu chưa có
+    # --- Bootstrap: Nix (thường đã có sẵn trên NixOS) ---
     if ! command -v nix &> /dev/null; then
       echo "Cài đặt Nix..."
       sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
-      
-      # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
     fi
     
-    # Kiểm tra cấu hình máy
+    # --- Tạo machine config nếu chưa có ---
     if [[ ! -d "hosts/nixos/machines/$HOSTNAME" ]]; then
-      echo "Cấu hình cho $HOSTNAME không tồn tại. Tạo từ template..."
-      
-      # Tạo thư mục cấu hình
+      echo "Tạo cấu hình cho $HOSTNAME..."
       mkdir -p "hosts/nixos/machines/$HOSTNAME"
-      
-      # Tạo cấu hình phần cứng
       echo "Tạo cấu hình phần cứng..."
       sudo nixos-generate-config --dir "hosts/nixos/machines/$HOSTNAME"
-      
       echo "Đã tạo cấu hình cho $HOSTNAME."
     fi
     
-    # Xây dựng cấu hình
+    # --- Rebuild ---
+    echo ""
     echo "Xây dựng cấu hình NixOS..."
     sudo nixos-rebuild switch --flake .#$HOSTNAME
+    echo "✓ Xây dựng cấu hình NixOS thành công"
     ;;
     
   nixos-wsl)
-    echo "Thiết lập NixOS trên WSL..."
+    echo ""
+    echo "═══════════════════════════════════════"
+    echo "  BOOTSTRAP NixOS on WSL"
+    echo "═══════════════════════════════════════"
     
-    # Đảm bảo flakes được bật
+    # --- Bật flakes ---
     if ! grep -q "experimental-features" /etc/nix/nix.conf 2>/dev/null; then
       echo "Bật Nix flakes..."
       sudo mkdir -p /etc/nix
       echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
     fi
     
-    # Xây dựng cấu hình
+    # --- Rebuild ---
+    echo ""
     echo "Xây dựng cấu hình NixOS WSL..."
     sudo nixos-rebuild switch --flake .#wsl
+    echo "✓ Xây dựng cấu hình NixOS WSL thành công"
     ;;
     
   ubuntu)
-    echo "Thiết lập Ubuntu..."
+    echo ""
+    echo "═══════════════════════════════════════"
+    echo "  BOOTSTRAP Ubuntu"
+    echo "═══════════════════════════════════════"
     
-    # Cài đặt dependencies trước
+    # --- APT dependencies (Nix không quản lý APT) ---
     echo "Cài đặt build dependencies..."
     sudo apt update
     sudo apt install -y build-essential curl git zsh flatpak gnome-software-plugin-flatpak gnupg2 \
       autoconf libssl-dev libncurses-dev libreadline-dev zlib1g-dev \
-      libbz2-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev
+      libbz2-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev \
+      zfsutils-linux
     
-    # Setup Flatpak
+    # --- Flatpak ---
     echo "Thiết lập Flatpak..."
     sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-    echo "Đã thiết lập Flatpak"
-    echo ""
     
-    # Kiểm tra Nix đã được cài đặt chưa (kiểm tra thư mục /nix)
+    # --- Bootstrap: Nix ---
     if [[ -d "/nix" && -f "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]]; then
-      echo "Nix đã được cài đặt, bỏ qua bước cài đặt Nix"
-      # Tải lại environment
+      echo "Nix đã được cài đặt, bỏ qua"
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
     else
       echo "Cài đặt Nix..."
       sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
-      
-      # Tải lại environment
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
     fi
     
-    # Bật flakes
+    # --- Bật flakes ---
     mkdir -p ~/.config/nix
     echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf
     
-    # Cài đặt home-manager
+    # --- Rebuild: Home Manager ---
+    echo ""
     echo "Cài đặt home-manager..."
     if nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME; then
-      echo "Cài đặt home-manager thành công"
+      echo "✓ Home Manager switch thành công"
     else
-      echo "Lỗi: Không thể cài đặt home-manager. Thử lại với nix-shell..."
+      echo "Thử lại với nix-shell..."
       nix-shell -p nixVersions.stable --run "nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME"
     fi
     
-    # Cài đặt các ngôn ngữ lập trình trên asdf
-    echo "Cài đặt các ngôn ngữ lập trình trên asdf"
-    if [[ -f "./asdf-vm/planguage.sh" ]]; then
-      chmod +x ./asdf-vm/planguage.sh
-      bash ./asdf-vm/planguage.sh
-    else
-      echo "Cảnh báo: Không tìm thấy file asdf-vm/planguage.sh"
-    fi
+    # --- Platform-specific extras (Nix không quản lý được) ---
     
-    # Cài đặt tmux
-    echo "Cài đặt tmux"
-    if [[ -f "./ghostty-tmux/.tmux.conf" ]]; then
-      mkdir -p ~/.config/tmux
-      cp ./ghostty-tmux/.tmux.conf ~/.config/tmux/.tmux.conf
-      echo "Đã cài đặt cấu hình tmux"
-    else
-      echo "Cảnh báo: Không tìm thấy file ghostty-tmux/.tmux.conf"
-    fi
-    
-    # Cài đặt Docker
+    # Docker Engine (APT)
     echo ""
     echo "Cài đặt Docker..."
     if ! command -v docker &>/dev/null; then
@@ -331,7 +365,7 @@ case $OS in
       echo "✓ Docker đã được cài đặt"
     fi
     
-    # Cài đặt Ghostty
+    # Ghostty (.deb — chưa có trong nixpkgs cho Ubuntu non-NixOS)
     echo ""
     echo "Cài đặt Ghostty..."
     if ! command -v ghostty &>/dev/null; then
@@ -339,16 +373,24 @@ case $OS in
       sudo apt --fix-broken install -y
       sudo apt update
       sudo apt install -y libgtk4-layer-shell0
-      wget https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.2.2-0-ppa1/ghostty_1.2.2-0.ppa1_amd64_25.10.deb
-      sudo dpkg -i ghostty_1.2.2-0.ppa1_amd64_25.10.deb
+      
+      VERSIONS_FILE="./versions.json"
+      if [[ -f "$VERSIONS_FILE" ]] && command -v jq &>/dev/null; then
+        GHOSTTY_URL=$(jq -r '.tools.ghostty["ubuntu-deb"]' "$VERSIONS_FILE")
+      else
+        GHOSTTY_URL="https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.2.2-0-ppa1/ghostty_1.2.2-0.ppa1_amd64_25.10.deb"
+      fi
+      
+      wget -O /tmp/ghostty.deb "$GHOSTTY_URL" || curl -L -o /tmp/ghostty.deb "$GHOSTTY_URL"
+      sudo dpkg -i /tmp/ghostty.deb
       sudo apt-get install -f -y
-      rm ghostty_1.2.2-0.ppa1_amd64_25.10.deb
+      rm /tmp/ghostty.deb
       echo "✓ Đã cài đặt Ghostty"
     else
       echo "✓ Ghostty đã được cài đặt"
     fi
     
-    # Cài đặt Snap packages
+    # Snap packages (Nix không quản lý Snap)
     echo ""
     echo "Cài đặt Snap packages..."
     for pkg in spotify; do
@@ -361,7 +403,7 @@ case $OS in
       fi
     done
     
-    # Cài đặt Podman Desktop qua Flatpak
+    # Podman Desktop (Flatpak — Nix không quản lý Flatpak)
     echo ""
     echo "Cài đặt Podman Desktop..."
     if flatpak list | grep -q "io.podman_desktop.PodmanDesktop" 2>/dev/null; then
@@ -375,49 +417,10 @@ case $OS in
       fi
     fi
     
-    # Cài đặt Antigravity
+    # Antigravity trên Ubuntu → quản lý qua Nix module
     echo ""
-    echo "Cài đặt Antigravity..."
-    if [[ -d "/opt/antigravity" ]] || command -v antigravity &>/dev/null; then
-      echo "✓ Antigravity đã được cài đặt"
-    else
-      echo "Đang tải Antigravity cho Linux..."
-      ANTIGRAVITY_URL="https://antigravity.google/download/linux"
-      
-      # Tải file
-      wget -O /tmp/antigravity-linux.tar.gz "$ANTIGRAVITY_URL" || curl -L -o /tmp/antigravity-linux.tar.gz "$ANTIGRAVITY_URL"
-      
-      if [[ -f /tmp/antigravity-linux.tar.gz ]]; then
-        echo "Đang cài đặt Antigravity..."
-        sudo mkdir -p /opt/antigravity
-        sudo tar -xzf /tmp/antigravity-linux.tar.gz -C /opt/antigravity --strip-components=1 2>/dev/null || \
-          sudo tar -xf /tmp/antigravity-linux.tar.gz -C /opt/antigravity --strip-components=1
-        
-        # Tạo symlink
-        if [[ -f /opt/antigravity/antigravity ]]; then
-          sudo ln -sf /opt/antigravity/antigravity /usr/local/bin/antigravity
-        elif [[ -f /opt/antigravity/Antigravity ]]; then
-          sudo ln -sf /opt/antigravity/Antigravity /usr/local/bin/antigravity
-        fi
-        
-        # Tạo desktop entry
-        cat << EOF | sudo tee /usr/share/applications/antigravity.desktop > /dev/null
-[Desktop Entry]
-Name=Antigravity
-Comment=AI-powered code editor
-Exec=/opt/antigravity/antigravity %F
-Icon=/opt/antigravity/resources/app/resources/linux/code.png
-Type=Application
-Categories=Development;IDE;
-StartupNotify=true
-EOF
-        
-        rm /tmp/antigravity-linux.tar.gz
-        echo "✓ Đã cài đặt Antigravity"
-      else
-        echo "⚠️  Không thể tải Antigravity. Vui lòng cài đặt thủ công từ: https://antigravity.google/download/linux"
-      fi
-    fi
+    echo "Antigravity sẽ được cài đặt và quản lý thông qua Home Manager (module editors.antigravity)."
+    echo "Vui lòng chạy 'home-manager switch' nếu chưa thấy editor."
     ;;
     
   *)
@@ -426,5 +429,38 @@ EOF
     ;;
 esac
 
+# ============================================================================
+# ASDF LANGUAGES (chung cho tất cả OS)
+# ============================================================================
+
 echo ""
-echo "Thiết lập hoàn tất! Vui lòng khởi động lại terminal hoặc đăng xuất và đăng nhập lại."
+echo "═══════════════════════════════════════"
+echo "  CÀI ĐẶT NGÔN NGỮ LẬP TRÌNH (asdf)"
+echo "═══════════════════════════════════════"
+
+if [[ -f "./asdf-vm/planguage.sh" ]]; then
+  chmod +x ./asdf-vm/planguage.sh
+  PLANG_ARGS=""
+  [[ -n "$LANG_PRESET" ]] && PLANG_ARGS="$PLANG_ARGS --preset $LANG_PRESET"
+  [[ -n "$EXTRA_LANGS" ]] && PLANG_ARGS="$PLANG_ARGS --add $EXTRA_LANGS"
+  bash ./asdf-vm/planguage.sh $PLANG_ARGS
+else
+  echo "Cảnh báo: Không tìm thấy file asdf-vm/planguage.sh"
+fi
+
+
+# ============================================================================
+# HOÀN TẤT
+# ============================================================================
+
+echo ""
+echo "═══════════════════════════════════════"
+echo "  ✓ THIẾT LẬP HOÀN TẤT!"
+echo "═══════════════════════════════════════"
+echo ""
+echo "Vui lòng khởi động lại terminal hoặc đăng xuất và đăng nhập lại."
+echo ""
+echo "Các lệnh hữu ích:"
+echo "  ./scripts/verify.sh       — Kiểm tra sức khỏe hệ thống"
+echo "  ./scripts/update.sh       — Cập nhật dotfiles"
+echo "  ./scripts/rollback.sh     — Khôi phục phiên bản trước"

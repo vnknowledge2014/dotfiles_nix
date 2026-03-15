@@ -1,0 +1,14 @@
+{
+    "tools": {
+        "antigravity": {
+            "version": "1.13.3",
+            "darwin-arm": "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.13.3-4533425205018624/darwin-arm/Antigravity.dmg",
+            "darwin-x64": "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.13.3-4533425205018624/darwin-x64/Antigravity.dmg",
+            "linux": "https://antigravity.google/download/linux"
+        },
+        "ghostty": {
+            "version": "1.2.2",
+            "ubuntu-deb": "https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.2.2-0-ppa1/ghostty_1.2.2-0.ppa1_amd64_25.10.deb"
+        }
+    }
+}

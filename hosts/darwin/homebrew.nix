@@ -9,7 +9,7 @@ let
   ];
   
   commonCasks = [
-    
+    "openzfs"
   ];
   
   commonMasApps = {

@@ -16,7 +16,9 @@ in {
   config = mkIf cfg.enable {
     home.packages = with pkgs; [
       # Các công cụ cơ bản 
-
+      # Secrets Management
+      sops
+      age
     ] ++ cfg.packages;
   };
 }

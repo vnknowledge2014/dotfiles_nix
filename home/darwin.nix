@@ -1,14 +1,20 @@
 { config, lib, pkgs, system, inputs, hostname, username, ... }:
 
+let
+  # Check if machine-specific config exists
+  machineConfigPath = ./profiles/${username}/machines/${hostname}.nix;
+  hasMachineConfig = builtins.pathExists machineConfigPath;
+in
 {
-  # Import các module cơ bản
+  # Import các module cơ bản và machine-specific config nếu tồn tại
   imports = [ 
     ./modules/core
     ./modules/shell
     ./modules/dev/git.nix
     ./modules/editors
+    ./modules/terminal
     ./profiles/${username} 
-  ];
+  ] ++ lib.optional hasMachineConfig machineConfigPath;
   
   # Thông tin cơ bản
   home.username = username;
@@ -23,26 +29,9 @@
       ];
     };
     
-    shell = {
-      enable = true;
-      zsh = {
-        enable = true;
-        autosuggestions.enable = true;
-        syntaxHighlighting.enable = true;
-        ohmyzsh = {
-          enable = true;
-          theme = "robbyrussell";
-          plugins = [ "git" "macos" "docker" ];
-        };
-        aliases = {
-          ll = "ls -l";
-          la = "ls -la";
-        };
-      };
-    };
-    
     dev.git.enable = true;
     editors.enable = true;
+    terminal.enable = true;
   };
   
   # Các gói cơ bản cho macOS

@@ -22,6 +22,10 @@
     automountOptions = "metadata,umask=22,fmask=11";
   };
   
+  # ZFS support
+  boot.supportedFilesystems = [ "zfs" ];
+  networking.hostId = "8425e349";
+
   # Các tùy chỉnh bổ sung cho WSL
   environment.systemPackages = with pkgs; [
     wslu  # Tiện ích WSL

@@ -19,44 +19,72 @@
 
   # Cấu hình Homebrew
   extraBrews = [
+    # CLI tools
     "atuin"
     "yazi"
     "lazygit"
     "lazydocker"
+    "btop"
+    "ast-grep"
+    "tree-sitter"
+    
+    # Kubernetes
     "kubernetes-cli"
     "k9s"
-    "btop"
-    "posting"
-    "podman-tui"
+    
+    # Container
     "podman"
     "podman-compose"
-    "asdf"
+    "podman-tui"
+    
+    # Media
     "mpv"
-    "pkg-config" 
-    "openssl@3" 
-    "librdkafka" 
+    "ffmpeg"
+    "yt-dlp"
+    
+    # Dev tools
+    "asdf"
+    "posting"
+    "gnupg"
+    "smartmontools"
+    "tesseract"
+    
+    # Build dependencies
+    "pkg-config"
+    "openssl@3"
+    "librdkafka"
     "zlib"
     "p7zip"
-    "pkg-config"
   ];
 
   extraCasks = [
-    "font-fira-code-nerd-font"
-    "gotiengviet"
-    "ghostty"
+    # Editors & Dev
+    "antigravity"
     "trae"
     "zed"
+    "gitbutler"
+    "postman"
+    "apidog"
+    
+    # Browsers
     "brave-browser"
     "arc"
     "zen"
+    
+    # Terminal & Fonts
+    "ghostty"
+    "font-fira-code-nerd-font"
+    
+    # Container & Cloud
     "orbstack"
     "podman-desktop"
-    "postman"
-    "apidog"
-    "gitbutler"
+    
+    # Utilities
+    "gotiengviet"
     "cloudflare-warp"
     "mountain-duck"
     "localsend"
+    "rustdesk"
     "ollama-app"
     "iina"
     "zalo"
@@ -69,6 +97,7 @@
     "NCalc Scientific Calculator +" = 1449106995;
     "OneDrive" = 823766827;
     "TeraBox: 1TB Cloud & AI Space" = 1509453185;
+    "The Unarchiver" = 425424353;
     # "Windows App" = 1295203466;  # Removed - causes installation issues
   };
 

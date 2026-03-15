@@ -11,6 +11,10 @@ in {
     };
   };
 
+  imports = [
+    ./antigravity.nix
+  ];
+
   config = mkIf cfg.enable {
     # Neovim configuration
     programs.neovim = mkIf cfg.neovim.enable {

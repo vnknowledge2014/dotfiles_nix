@@ -1,30 +1,158 @@
 {
-  "plugins": {
-    "python": "https://github.com/asdf-community/asdf-python.git",
-    "bun": "https://github.com/cometkim/asdf-bun.git",
-    "nodejs": "https://github.com/asdf-vm/asdf-nodejs.git",
-    "deno": "https://github.com/asdf-community/asdf-deno.git",
-    "uv": "https://github.com/asdf-community/asdf-uv.git",
-    "zig": "https://github.com/asdf-community/asdf-zig.git",
-    "ocaml": "https://github.com/asdf-community/asdf-ocaml.git",
-    "golang": "https://github.com/asdf-community/asdf-golang.git",
-    "erlang": "https://github.com/asdf-vm/asdf-erlang.git",
-    "flutter": "https://github.com/asdf-community/asdf-flutter.git",
-    "lua": "https://github.com/Stratus3D/asdf-lua.git",
-    "purescript": "https://github.com/jrrom/asdf-purescript.git",
-    "v": "https://github.com/jthegedus/asdf-v",
-    "gleam": "https://github.com/asdf-community/asdf-gleam.git",
-    "cmake": "https://github.com/srivathsanmurali/asdf-cmake.git",
-    "java": "https://github.com/halcyon/asdf-java.git",
-    "haskell": "https://github.com/vic/asdf-haskell.git",
-    "elixir": "https://github.com/asdf-vm/asdf-elixir.git"
+  "asdf": {
+    "python": {
+      "repo": "https://github.com/asdf-community/asdf-python.git",
+      "version": "3.13.3"
+    },
+    "bun": {
+      "repo": "https://github.com/cometkim/asdf-bun.git",
+      "version": "latest"
+    },
+    "nodejs": {
+      "repo": "https://github.com/asdf-vm/asdf-nodejs.git",
+      "version": "latest"
+    },
+    "deno": {
+      "repo": "https://github.com/asdf-community/asdf-deno.git",
+      "version": "latest"
+    },
+    "uv": {
+      "repo": "https://github.com/asdf-community/asdf-uv.git",
+      "version": "latest"
+    },
+    "zig": {
+      "repo": "https://github.com/asdf-community/asdf-zig.git",
+      "version": "0.14.1"
+    },
+    "ocaml": {
+      "repo": "https://github.com/asdf-community/asdf-ocaml.git",
+      "version": "latest"
+    },
+    "golang": {
+      "repo": "https://github.com/asdf-community/asdf-golang.git",
+      "version": "latest"
+    },
+    "erlang": {
+      "repo": "https://github.com/asdf-vm/asdf-erlang.git",
+      "version": "latest"
+    },
+    "flutter": {
+      "repo": "https://github.com/asdf-community/asdf-flutter.git",
+      "version": "latest"
+    },
+    "lua": {
+      "repo": "https://github.com/Stratus3D/asdf-lua.git",
+      "version": "latest"
+    },
+    "purescript": {
+      "repo": "https://github.com/jrrom/asdf-purescript.git",
+      "version": "latest"
+    },
+    "v": {
+      "repo": "https://github.com/jthegedus/asdf-v",
+      "version": "latest"
+    },
+    "gleam": {
+      "repo": "https://github.com/asdf-community/asdf-gleam.git",
+      "version": "latest"
+    },
+    "cmake": {
+      "repo": "https://github.com/srivathsanmurali/asdf-cmake.git",
+      "version": "latest"
+    },
+    "java": {
+      "repo": "https://github.com/halcyon/asdf-java.git",
+      "version": "openjdk-24.0.1"
+    },
+    "haskell": {
+      "repo": "https://github.com/vic/asdf-haskell.git",
+      "version": "9.12.2"
+    },
+    "elixir": {
+      "repo": "https://github.com/asdf-vm/asdf-elixir.git",
+      "version": "1.18.4"
+    }
   },
-  "versions": {
-    "python": "3.13.3",
-    "zig": "0.15.2",
-    "cmake": "4.0.3",
-    "java": "openjdk-24.0.1",
-    "haskell": "9.12.2",
-    "elixir": "1.18.4"
+  "rustup": {
+    "enabled": true,
+    "install_url": "https://sh.rustup.rs",
+    "default_toolchain": "stable",
+    "components": [
+      "rustfmt",
+      "clippy",
+      "rust-analyzer"
+    ]
+  },
+  "presets": {
+    "minimal": {
+      "description": "Chỉ Python cơ bản",
+      "asdf": [
+        "python"
+      ],
+      "rustup": false
+    },
+    "web-developer": {
+      "description": "Frontend/Backend Web Development",
+      "asdf": [
+        "nodejs",
+        "bun",
+        "deno",
+        "python"
+      ],
+      "rustup": false
+    },
+    "data-scientist": {
+      "description": "Data Science và Machine Learning",
+      "asdf": [
+        "python",
+        "uv",
+        "julia"
+      ],
+      "rustup": false
+    },
+    "devops-engineer": {
+      "description": "DevOps và Infrastructure",
+      "asdf": [
+        "python",
+        "golang",
+        "nodejs"
+      ],
+      "rustup": false
+    },
+    "mobile-developer": {
+      "description": "Mobile App Development",
+      "asdf": [
+        "flutter",
+        "nodejs"
+      ],
+      "rustup": false
+    },
+    "systems-developer": {
+      "description": "Systems Programming",
+      "asdf": [
+        "zig",
+        "golang"
+      ],
+      "rustup": true
+    },
+    "functional-developer": {
+      "description": "Functional Programming",
+      "asdf": [
+        "haskell",
+        "ocaml",
+        "elixir",
+        "erlang",
+        "gleam",
+        "purescript"
+      ],
+      "rustup": false
+    },
+    "all": {
+      "description": "Tất cả ngôn ngữ và công cụ",
+      "asdf": [
+        "*"
+      ],
+      "rustup": true
+    }
   }
 }
