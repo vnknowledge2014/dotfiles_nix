@@ -5,7 +5,7 @@
 
 {
   # Docker runtime - OrbStack for this machine
-  programs.zsh.initExtra = lib.mkAfter ''
+  programs.zsh.initContent = lib.mkAfter ''
     # export DOCKER_HOST='unix:///var/folders/hf/z_4jqsxs05b28y3_qt8j7tmh0000gn/T/podman/podman-machine-default-api.sock'
     export DOCKER_HOST='unix:///Users/mike/.orbstack/run/docker.sock'
 
@@ -21,6 +21,6 @@
 
   # Machine-specific session variables
   home.sessionVariables = {
-    # DOCKER_HOST already set in initExtra
+    # DOCKER_HOST already set in initContent
   };
 }

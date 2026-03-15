@@ -7,7 +7,7 @@
 {
   # Docker runtime configuration
   # Uncomment and modify as needed:
-  # programs.zsh.initExtra = lib.mkAfter ''
+  # programs.zsh.initContent = lib.mkAfter ''
   #   export DOCKER_HOST='unix:///path/to/docker.sock'
   # '';
 
