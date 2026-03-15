@@ -122,13 +122,6 @@
     {
       # Cấu hình NixOS
       nixosConfigurations = {
-        # Cấu hình Legion
-        legion = mkNixOS {
-          hostname = "legion";
-          username = "rnd";
-          system = "x86_64-linux";
-        };
-        
         # Cấu hình WSL
         wsl = mkNixOS {
           hostname = "wsl";
