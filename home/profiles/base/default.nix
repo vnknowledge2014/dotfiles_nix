@@ -86,11 +86,94 @@
     enableZshIntegration = true;
     settings = {
       add_newline = true;
+
       character = {
         success_symbol = "[➜](bold green)";
         error_symbol = "[✗](bold red)";
       };
-      # ... (giữ lại các settings khác nếu cần, hoặc dùng default)
+
+      directory = {
+        truncation_length = 8;
+        truncate_to_repo = true;
+        style = "bold blue";
+      };
+
+      git_branch = {
+        symbol = "🌱 ";
+        truncation_length = 20;
+        truncation_symbol = "";
+        style = "bold purple";
+      };
+
+      git_commit = {
+        commit_hash_length = 8;
+        style = "bold green";
+      };
+
+      git_state = {
+        format = "[\\\\($state( $progress_current of $progress_total)\\\\)]($style) ";
+        cherry_pick = "[🍒 PICKING](bold red)";
+      };
+
+      git_status = {
+        conflicted = "🏳 ";
+        ahead = "🏎💨 ";
+        behind = "😰 ";
+        diverged = "😵 ";
+        untracked = "🤷 ";
+        stashed = "📦 ";
+        modified = "📝 ";
+        staged = "[++\\\\($count\\\\)](green)";
+        renamed = "👅 ";
+        deleted = "🗑 ";
+      };
+
+      golang = {
+        symbol = "🐹 ";
+        style = "bold cyan";
+      };
+
+      nodejs = {
+        symbol = "⬢ ";
+        style = "bold green";
+      };
+
+      python = {
+        symbol = "🐍 ";
+        pyenv_version_name = true;
+        style = "bold yellow";
+      };
+
+      rust = {
+        symbol = "🦀 ";
+        style = "bold red";
+      };
+
+      nix_shell = {
+        symbol = "❄️ ";
+        style = "bold blue";
+        format = "via [$symbol$state( \\\\($name\\\\))]($style) ";
+      };
+
+      time = {
+        disabled = false;
+        format = "🕙 [$time]($style) ";
+        time_format = "%T";
+        style = "bright-black";
+      };
+
+      cmd_duration = {
+        min_time = 500;
+        format = "took [$duration](bold yellow)";
+      };
+
+      memory_usage = {
+        disabled = false;
+        threshold = -1;
+        symbol = "🧠 ";
+        style = "bold dimmed white";
+        format = "$symbol[$ram( | $swap)]($style) ";
+      };
     };
   };
 
