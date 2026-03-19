@@ -64,6 +64,11 @@
     jq
     
     # Container tools
+    colima
+    docker-client
+    docker-compose
+    nerdctl
+    incus
     lazydocker
     
     # Kubernetes

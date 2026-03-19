@@ -18,6 +18,11 @@
   ];
 
   # Cấu hình Homebrew
+  # Machine-specific Homebrew config
+  extraTaps = [
+    "slp/krunkit" # Cho Colima AI (GPU Accelerated model runner)
+  ];
+  
   extraBrews = [
     # CLI tools
     "atuin"
@@ -37,6 +42,8 @@
     "docker"
     "docker-compose"
     "docker-buildx"
+    "incus"
+    "krunkit"
     
     # Media
     "mpv"

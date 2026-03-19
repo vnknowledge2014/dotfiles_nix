@@ -24,6 +24,12 @@ in
       description = "Additional Homebrew packages to install";
     };
 
+    extraTaps = mkOption {
+      type = types.listOf types.str;
+      default = [];
+      description = "Additional Homebrew taps to add";
+    };
+
     extraCasks = mkOption {
       type = types.listOf types.str;
       default = [];
@@ -48,10 +54,12 @@ in
       
       global.brewfile = true;
       
+      
       # Combine common and extra packages
       brews = commonBrews ++ config.extraBrews;
       casks = commonCasks ++ config.extraCasks;
       masApps = commonMasApps // config.extraMasApps;
+      taps = config.extraTaps;
     };
 
     environment.shellInit = ''
