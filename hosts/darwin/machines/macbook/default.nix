@@ -109,8 +109,8 @@ in
     "Focus - Pomodoro & Focus Timer" = 1554411065;
     "NCalc Scientific Calculator +" = 1449106995;
     "OneDrive" = 823766827;
-    "TeraBox: 1TB Cloud & AI Space" = 1509453185;
-    "The Unarchiver" = 425424353;
+    # "TeraBox: 1TB Cloud & AI Space" = 1509453185;  # Removed - requires App Store login
+    # "The Unarchiver" = 425424353;  # Removed - requires App Store login
     # "Windows App" = 1295203466;  # Removed - causes installation issues
   };
 
