@@ -36,6 +36,7 @@ in
     "btop"
     "ast-grep"
     "tree-sitter"
+    "gh"
     
     # Kubernetes
     "kubernetes-cli"

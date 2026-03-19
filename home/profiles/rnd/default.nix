@@ -62,6 +62,7 @@
     ripgrep
     fd
     jq
+    gh
     
     # Container tools
     colima
