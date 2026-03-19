@@ -4,10 +4,9 @@
 # This file is automatically imported if hostname matches
 
 {
-  # Docker runtime - OrbStack for this machine
+  # Docker runtime - Colima
   programs.zsh.initContent = lib.mkAfter ''
-    # export DOCKER_HOST='unix:///var/folders/hf/z_4jqsxs05b28y3_qt8j7tmh0000gn/T/podman/podman-machine-default-api.sock'
-    export DOCKER_HOST='unix:///Users/mike/.orbstack/run/docker.sock'
+    export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
 
     # Antigravity PATH & Alias (Declarative Setup)
     export PATH="/Applications/Antigravity.app/Contents/Resources/app/bin:$PATH"

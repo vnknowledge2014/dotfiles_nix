@@ -22,11 +22,11 @@
     neofetch
     export PATH="''${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
     
-    # Container runtime detection
-    if [[ -S /var/run/docker.sock ]]; then
+    # Container runtime detection (Colima)
+    if [[ -S $HOME/.colima/default/docker.sock ]]; then
+      export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+    elif [[ -S /var/run/docker.sock ]]; then
       export DOCKER_HOST='unix:///var/run/docker.sock'
-    elif [[ -S /run/user/$(id -u)/podman/podman.sock ]]; then
-      export DOCKER_HOST='unix:///run/user/$(id -u)/podman/podman.sock'
     fi
 
     # Rustup
@@ -64,9 +64,6 @@
     jq
     
     # Container tools
-    podman
-    podman-compose
-    podman-tui
     lazydocker
     
     # Kubernetes

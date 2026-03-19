@@ -8,7 +8,7 @@
   # Docker runtime configuration
   # Uncomment and modify as needed:
   # programs.zsh.initContent = lib.mkAfter ''
-  #   export DOCKER_HOST='unix:///path/to/docker.sock'
+  #   export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
   # '';
 
   # Machine-specific packages

@@ -32,10 +32,11 @@
     "kubernetes-cli"
     "k9s"
     
-    # Container
-    "podman"
-    "podman-compose"
-    "podman-tui"
+    # Container (Colima)
+    "colima"
+    "docker"
+    "docker-compose"
+    "docker-buildx"
     
     # Media
     "mpv"
@@ -75,9 +76,8 @@
     "ghostty"
     "font-fira-code-nerd-font"
     
-    # Container & Cloud
-    "orbstack"
-    "podman-desktop"
+    # Container
+    # (Colima is CLI-only, no GUI cask needed)
     
     # Utilities
     "gotiengviet"

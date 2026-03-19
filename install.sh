@@ -403,19 +403,6 @@ case $OS in
       fi
     done
     
-    # Podman Desktop (Flatpak — Nix không quản lý Flatpak)
-    echo ""
-    echo "Cài đặt Podman Desktop..."
-    if flatpak list | grep -q "io.podman_desktop.PodmanDesktop" 2>/dev/null; then
-      echo "✓ Podman Desktop đã được cài đặt"
-    else
-      if flatpak install -y flathub io.podman_desktop.PodmanDesktop 2>&1; then
-        echo "✓ Đã cài đặt Podman Desktop"
-      else
-        echo "⚠️  Không thể cài đặt Podman Desktop qua Flatpak"
-        echo "Bạn có thể cài thủ công sau: flatpak install flathub io.podman_desktop.PodmanDesktop"
-      fi
-    fi
     
     # Antigravity trên Ubuntu → quản lý qua Nix module
     echo ""
