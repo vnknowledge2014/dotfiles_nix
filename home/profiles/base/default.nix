@@ -7,6 +7,7 @@
     ../../modules/shell
     ../../modules/dev/git.nix
     ../../modules/editors
+    ../../modules/terminal
     ../../modules/secrets.nix
   ];
 
@@ -73,6 +74,15 @@
     };
     
     secrets.enable = true;
+    
+    terminal = {
+      enable = true;
+      tmux = {
+        enable = true;
+        mouse = true;
+      };
+      ghostty.enable = true;
+    };
   };
 
   # Packages cơ bản
