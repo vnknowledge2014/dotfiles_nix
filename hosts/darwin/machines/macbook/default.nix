@@ -20,7 +20,7 @@
   # Cấu hình Homebrew
   # Machine-specific Homebrew config
   extraTaps = [
-    "slp/krunkit" # Cho Colima AI (GPU Accelerated model runner)
+    # "slp/krunkit" # Bỏ comment nếu dùng Colima AI (GPU Accelerated model runner)
   ];
   
   extraBrews = [
@@ -43,7 +43,7 @@
     "docker-compose"
     "docker-buildx"
     "incus"
-    "krunkit"
+    # "krunkit" # Bỏ comment nếu dùng Colima AI
     
     # Media
     "mpv"
