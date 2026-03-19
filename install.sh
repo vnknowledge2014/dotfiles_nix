@@ -248,10 +248,10 @@ case $OS in
     MAC_CONFIG="hosts/darwin/machines/$HOSTNAME/default.nix"
     if [[ -f "$MAC_CONFIG" ]]; then
         if [[ "$enable_ai" =~ ^[Yy]$ ]]; then
-            sed -i '' 's/enableColimaAI = false;/enableColimaAI = true;/' "$MAC_CONFIG"
+            sed -E 's/^[[:blank:]]*enableColimaAI[[:blank:]]*=.*;/  enableColimaAI = true;/' "$MAC_CONFIG" > "${MAC_CONFIG}.tmp" && mv "${MAC_CONFIG}.tmp" "$MAC_CONFIG"
             echo "✓ Đã BẬT Colima AI"
         else
-            sed -i '' 's/enableColimaAI = true;/enableColimaAI = false;/' "$MAC_CONFIG"
+            sed -E 's/^[[:blank:]]*enableColimaAI[[:blank:]]*=.*;/  enableColimaAI = false;/' "$MAC_CONFIG" > "${MAC_CONFIG}.tmp" && mv "${MAC_CONFIG}.tmp" "$MAC_CONFIG"
             echo "✓ Đã TẮT Colima AI"
         fi
     fi

@@ -101,10 +101,10 @@ if [[ "$OS" == "darwin" ]]; then
     MAC_CONFIG="hosts/darwin/machines/$HOSTNAME/default.nix"
     if [[ -f "$MAC_CONFIG" ]]; then
         if [[ "$enable_ai" =~ ^[Yy]$ ]]; then
-            sed -i '' 's/enableColimaAI = false;/enableColimaAI = true;/' "$MAC_CONFIG"
+            sed -E 's/^[[:blank:]]*enableColimaAI[[:blank:]]*=.*;/  enableColimaAI = true;/' "$MAC_CONFIG" > "${MAC_CONFIG}.tmp" && mv "${MAC_CONFIG}.tmp" "$MAC_CONFIG"
             print_success "Đã BẬT cấu hình Colima AI"
         else
-            sed -i '' 's/enableColimaAI = true;/enableColimaAI = false;/' "$MAC_CONFIG"
+            sed -E 's/^[[:blank:]]*enableColimaAI[[:blank:]]*=.*;/  enableColimaAI = false;/' "$MAC_CONFIG" > "${MAC_CONFIG}.tmp" && mv "${MAC_CONFIG}.tmp" "$MAC_CONFIG"
             print_info "Đã TẮT cấu hình Colima AI"
         fi
     fi
