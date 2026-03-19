@@ -92,8 +92,24 @@ else
 fi
 
 # ============================================================================
-# 3. REBUILD: Áp dụng config mới
+# 3. NIX REBUILD: Áp dụng config mới
 # ============================================================================
+if [[ "$OS" == "darwin" ]]; then
+    print_section "Colima AI (Apple Silicon)"
+    read -p "Bạn có muốn bật Colima AI (hỗ trợ GPU, cần cài thêm Krunkit)? [y/N] " enable_ai
+    
+    MAC_CONFIG="hosts/darwin/machines/$HOSTNAME/default.nix"
+    if [[ -f "$MAC_CONFIG" ]]; then
+        if [[ "$enable_ai" =~ ^[Yy]$ ]]; then
+            sed -i '' 's/enableColimaAI = false;/enableColimaAI = true;/' "$MAC_CONFIG"
+            print_success "Đã BẬT cấu hình Colima AI"
+        else
+            sed -i '' 's/enableColimaAI = true;/enableColimaAI = false;/' "$MAC_CONFIG"
+            print_info "Đã TẮT cấu hình Colima AI"
+        fi
+    fi
+fi
+
 print_section "Nix Rebuild"
 
 case $OS in

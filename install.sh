@@ -240,6 +240,22 @@ case $OS in
       cp "hosts/darwin/machines/template/default.nix" "hosts/darwin/machines/$HOSTNAME/default.nix"
     fi
 
+    # --- Colima AI Prompt ---
+    echo ""
+    echo "Cấu hình Colima AI (chỉ dành cho Apple Silicon):"
+    read -p "Bạn có muốn bật Colima AI (hỗ trợ GPU, cài thêm Krunkit)? [y/N] " enable_ai
+    
+    MAC_CONFIG="hosts/darwin/machines/$HOSTNAME/default.nix"
+    if [[ -f "$MAC_CONFIG" ]]; then
+        if [[ "$enable_ai" =~ ^[Yy]$ ]]; then
+            sed -i '' 's/enableColimaAI = false;/enableColimaAI = true;/' "$MAC_CONFIG"
+            echo "✓ Đã BẬT Colima AI"
+        else
+            sed -i '' 's/enableColimaAI = true;/enableColimaAI = false;/' "$MAC_CONFIG"
+            echo "✓ Đã TẮT Colima AI"
+        fi
+    fi
+
     # --- Rebuild ---
     echo ""
     echo "Xây dựng cấu hình Darwin..."
