@@ -1,5 +1,9 @@
 { config, lib, pkgs, ... }:
 
+let
+  # Đổi thành true để cài đặt Krunkit (cho phép Colima chạy AI Models bằng GPU)
+  enableColimaAI = false;
+in
 {
   # Import cấu hình darwin chung
   imports = [];
@@ -19,9 +23,9 @@
 
   # Cấu hình Homebrew
   # Machine-specific Homebrew config
-  extraTaps = [
-    # "slp/krunkit" # Bỏ comment nếu dùng Colima AI (GPU Accelerated model runner)
-  ];
+  extraTaps = if enableColimaAI then [
+    "slp/krunkit"
+  ] else [];
   
   extraBrews = [
     # CLI tools
@@ -43,7 +47,6 @@
     "docker-compose"
     "docker-buildx"
     "incus"
-    # "krunkit" # Bỏ comment nếu dùng Colima AI
     
     # Media
     "mpv"
@@ -63,6 +66,8 @@
     "librdkafka"
     "zlib"
     "p7zip"
+  ] ++ lib.optionals enableColimaAI [
+    "krunkit"
   ];
 
   extraCasks = [
