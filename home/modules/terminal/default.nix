@@ -1,7 +1,9 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-let cfg = config.modules.terminal;
+let
+  cfg = config.modules.terminal;
+  clipboardCmd = if pkgs.stdenv.isDarwin then "pbcopy" else "xclip -in -selection clipboard";
 in {
   options.modules.terminal = {
     enable = mkEnableOption "Enable terminal configuration";
@@ -92,8 +94,8 @@ in {
         # --- Copy mode (Vim-style) ---
         set-window-option -g mode-keys vi
         bind-key -T copy-mode-vi 'v' send -X begin-selection
-        bind-key -T copy-mode-vi 'y' send -X copy-selection
-        unbind -T copy-mode-vi MouseDragEnd1Pane
+        bind-key -T copy-mode-vi 'y' send -X copy-pipe-and-cancel "${clipboardCmd}"
+        bind-key -T copy-mode-vi MouseDragEnd1Pane send -X copy-pipe-and-cancel "${clipboardCmd}"
 
         # --- Reload cấu hình ---
         unbind r
