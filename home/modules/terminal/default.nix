@@ -173,6 +173,7 @@ in {
         notify-on-command-finish-after = 10s
 
         # Misc
+        copy-on-select = clipboard
         confirm-close-surface = true
         macos-option-as-alt = true
         clipboard-paste-protection = false
