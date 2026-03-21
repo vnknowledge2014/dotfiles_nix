@@ -47,6 +47,7 @@ in
     "docker"
     "docker-compose"
     "docker-buildx"
+    "docker-credential-helper"
     "incus"
     
     # Media
