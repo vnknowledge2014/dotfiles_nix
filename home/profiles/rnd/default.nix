@@ -70,6 +70,7 @@
     docker-compose
     nerdctl
     incus
+    docker-credential-helpers
     lazydocker
     
     # Kubernetes
