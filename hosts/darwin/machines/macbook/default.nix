@@ -75,7 +75,7 @@ in
   extraCasks = [
     # Editors & Dev
     "antigravity"
-    "trae"
+    # "trae" # Temporarily disabled due to download failure
     "zed"
     "gitbutler"
     "postman"
