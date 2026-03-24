@@ -33,7 +33,6 @@
     
     # Danh sách đầy đủ các gói
     brews = [
-      "mas"      # Mac App Store CLI
       "python"
       "go"
       "gh"       # GitHub CLI
@@ -46,11 +45,6 @@
       "rectangle"  # Quản lý cửa sổ
       # Thêm các cask applications khác
     ];
-    
-    masApps = {
-      # Các ứng dụng Mac App Store
-      "Xcode" = 497799835;
-    };
   };
 
   # Cấu hình các dịch vụ đặc thù

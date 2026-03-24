@@ -11,10 +11,6 @@ let
   commonCasks = [
     "openzfs"
   ];
-  
-  commonMasApps = {
-    
-  };
 in
 {
   options = {
@@ -35,12 +31,6 @@ in
       default = [];
       description = "Additional Homebrew casks to install";
     };
-
-    extraMasApps = mkOption {
-      type = types.attrsOf types.int;
-      default = {};
-      description = "Additional Mac App Store apps to install";
-    };
   };
 
   config = {
@@ -58,7 +48,6 @@ in
       # Combine common and extra packages
       brews = commonBrews ++ config.extraBrews;
       casks = commonCasks ++ config.extraCasks;
-      masApps = commonMasApps // config.extraMasApps;
       taps = config.extraTaps;
     };
 
