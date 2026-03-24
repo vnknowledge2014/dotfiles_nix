@@ -228,7 +228,7 @@ case $OS in
       [[ -f /etc/bashrc ]] && sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
 
       echo "Cài đặt nix-darwin..."
-      sudo nix run nix-darwin -- switch --flake .#$HOSTNAME
+      sudo nix --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake .#$HOSTNAME
 
       [[ -f /etc/static/bashrc ]] && source /etc/static/bashrc
     fi
@@ -259,7 +259,7 @@ case $OS in
     # --- Rebuild ---
     echo ""
     echo "Xây dựng cấu hình Darwin..."
-    if sudo darwin-rebuild switch --flake .#$HOSTNAME; then
+    if sudo darwin-rebuild switch --flake .#$HOSTNAME --extra-experimental-features "nix-command flakes"; then
       echo "✓ Xây dựng cấu hình Darwin thành công"
     else
       echo "Lỗi: Không thể xây dựng cấu hình Darwin."
@@ -292,7 +292,7 @@ case $OS in
     # --- Rebuild ---
     echo ""
     echo "Xây dựng cấu hình NixOS..."
-    sudo nixos-rebuild switch --flake .#$HOSTNAME
+    sudo nixos-rebuild switch --flake .#$HOSTNAME --extra-experimental-features "nix-command flakes"
     echo "✓ Xây dựng cấu hình NixOS thành công"
     ;;
     
@@ -312,7 +312,7 @@ case $OS in
     # --- Rebuild ---
     echo ""
     echo "Xây dựng cấu hình NixOS WSL..."
-    sudo nixos-rebuild switch --flake .#wsl
+    sudo nixos-rebuild switch --flake .#wsl --extra-experimental-features "nix-command flakes"
     echo "✓ Xây dựng cấu hình NixOS WSL thành công"
     ;;
     
@@ -351,11 +351,11 @@ case $OS in
     # --- Rebuild: Home Manager ---
     echo ""
     echo "Cài đặt home-manager..."
-    if nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME; then
+    if nix --extra-experimental-features "nix-command flakes" run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME; then
       echo "✓ Home Manager switch thành công"
     else
       echo "Thử lại với nix-shell..."
-      nix-shell -p nixVersions.stable --run "nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME"
+      nix-shell -p nixVersions.stable --run "nix --extra-experimental-features \"nix-command flakes\" run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME"
     fi
     
     # --- Platform-specific extras (Nix không quản lý được) ---
