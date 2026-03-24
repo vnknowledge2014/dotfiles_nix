@@ -259,7 +259,7 @@ case $OS in
     # --- Rebuild ---
     echo ""
     echo "Xây dựng cấu hình Darwin..."
-    if sudo darwin-rebuild switch --flake .#$HOSTNAME --extra-experimental-features "nix-command flakes"; then
+    if sudo darwin-rebuild switch --flake .#$HOSTNAME; then
       echo "✓ Xây dựng cấu hình Darwin thành công"
 
       echo ""
@@ -304,7 +304,7 @@ case $OS in
     # --- Rebuild ---
     echo ""
     echo "Xây dựng cấu hình NixOS..."
-    sudo nixos-rebuild switch --flake .#$HOSTNAME --extra-experimental-features "nix-command flakes"
+    sudo nixos-rebuild switch --flake .#$HOSTNAME
     echo "✓ Xây dựng cấu hình NixOS thành công"
     ;;
     
@@ -324,7 +324,7 @@ case $OS in
     # --- Rebuild ---
     echo ""
     echo "Xây dựng cấu hình NixOS WSL..."
-    sudo nixos-rebuild switch --flake .#wsl --extra-experimental-features "nix-command flakes"
+    sudo nixos-rebuild switch --flake .#wsl
     echo "✓ Xây dựng cấu hình NixOS WSL thành công"
     ;;
     
