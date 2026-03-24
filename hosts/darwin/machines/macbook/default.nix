@@ -105,13 +105,17 @@ in
   ];
 
   extraMasApps = {
+    # macOS "Tahoe" / newer versions currently break `mas` (Mac App Store CLI).
+    # Error: 2 unexpected arguments: 'get', '<id>'
+    # Install these apps manually via the App Store until `mas` is updated.
+
     # "Xcode" = 497799835;
-    "Telegram" = 747648890;
-    "Focus - Pomodoro & Focus Timer" = 1554411065;
-    "NCalc Scientific Calculator +" = 1449106995;
-    "OneDrive" = 823766827;
+    # "Telegram" = 747648890;
+    # "Focus - Pomodoro & Focus Timer" = 1554411065;
+    # "NCalc Scientific Calculator +" = 1449106995;
+    # "OneDrive" = 823766827;
     # "TeraBox: 1TB Cloud & AI Space" = 1509453185;  # Removed - requires App Store login
-    "The Unarchiver" = 425424353;
+    # "The Unarchiver" = 425424353;
     # "Windows App" = 1295203466;  # Removed - causes installation issues
   };
 
