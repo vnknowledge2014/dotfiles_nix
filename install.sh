@@ -261,6 +261,18 @@ case $OS in
     echo "Xây dựng cấu hình Darwin..."
     if sudo darwin-rebuild switch --flake .#$HOSTNAME --extra-experimental-features "nix-command flakes"; then
       echo "✓ Xây dựng cấu hình Darwin thành công"
+
+      echo ""
+      echo "⚠️  LƯU Ý: CÁC ỨNG DỤNG MAC APP STORE (MAS) CẦN CÀI ĐẶT THỦ CÔNG"
+      echo "------------------------------------------------------------------"
+      echo "Công cụ mas-cli hiện tại không tương thích với các phiên bản macOS mới."
+      echo "Vui lòng mở App Store và cài đặt thủ công các ứng dụng sau:"
+      echo "  - Telegram"
+      echo "  - Focus - Pomodoro & Focus Timer"
+      echo "  - NCalc Scientific Calculator +"
+      echo "  - OneDrive"
+      echo "  - The Unarchiver"
+      echo "------------------------------------------------------------------"
     else
       echo "Lỗi: Không thể xây dựng cấu hình Darwin."
       exit 1
