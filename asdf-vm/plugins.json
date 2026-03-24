@@ -42,7 +42,7 @@
     },
     "lua": {
       "repo": "https://github.com/Stratus3D/asdf-lua.git",
-      "version": "latest"
+      "version": "5.4.7"
     },
     "purescript": {
       "repo": "https://github.com/jrrom/asdf-purescript.git",

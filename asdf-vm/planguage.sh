@@ -306,11 +306,42 @@ add_plugin() {
     fi
 }
 
+# Đảm bảo build dependencies cho các plugin biên dịch từ source (lua, erlang, ...)
+ensure_build_deps() {
+    local plugin_name=$1
+
+    case "$plugin_name" in
+        lua)
+            # LuaRocks 3.13.0 có lỗi rockspec syntax → pin version 3.11.1
+            export ASDF_LUA_LUAROCKS_VERSION="${ASDF_LUA_LUAROCKS_VERSION:-3.11.1}"
+            print_info "Sử dụng LuaRocks v${ASDF_LUA_LUAROCKS_VERSION} (tránh lỗi rockspec v3.13.0)"
+
+            if [[ "$(uname)" == "Darwin" ]]; then
+                if command -v brew &> /dev/null; then
+                    if ! brew list readline &> /dev/null; then
+                        print_info "Cài đặt readline (dependency cho Lua)..."
+                        brew install readline
+                    fi
+                    local readline_prefix
+                    readline_prefix="$(brew --prefix readline)"
+                    export CFLAGS="-I${readline_prefix}/include ${CFLAGS:-}"
+                    export LDFLAGS="-L${readline_prefix}/lib ${LDFLAGS:-}"
+                    export PKG_CONFIG_PATH="${readline_prefix}/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+                    print_info "Đã thiết lập CFLAGS/LDFLAGS cho readline ($readline_prefix)"
+                fi
+            fi
+            ;;
+    esac
+}
+
 # Hàm cài đặt phiên bản
 install_version() {
     local plugin_name=$1
     local version=$2
     
+    # Đảm bảo build deps trước khi compile
+    ensure_build_deps "$plugin_name"
+
     print_info "Đang cài đặt $plugin_name phiên bản $version..."
     
     if asdf install "$plugin_name" "$version"; then
