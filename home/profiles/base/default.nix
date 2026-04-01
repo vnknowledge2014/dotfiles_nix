@@ -11,9 +11,20 @@
     ../../modules/secrets.nix
   ];
 
-  # Bật các module mặc định
+  # ═══════════════════════════════════════════════════════════
+  # MODULE ENABLES — Nguồn duy nhất, mike/rnd chỉ override
+  # ═══════════════════════════════════════════════════════════
   modules = {
-    core.enable = true;
+    core = {
+      enable = true;
+      packages = with pkgs; [
+        curl
+        wget
+        jq
+        ripgrep
+        fd
+      ];
+    };
     
     shell = {
       enable = true;
@@ -24,7 +35,7 @@
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "docker" "ubuntu" ]; # Default plugins
+          plugins = [ "git" "docker" ]; # Default — profile override thêm "macos"/"ubuntu"
         };
         aliases = {
           ll = "eza -l --icons";
@@ -43,8 +54,8 @@
             source ${pkgs.fzf}/share/fzf/key-bindings.zsh
           fi
 
+          # Auto-start tmux (an toàn — chạy trên cả macOS và Linux)
           if command -v tmux &> /dev/null && [ -z "$TMUX" ] && [ -n "$PS1" ]; then
-            source ~/.config/tmux/.tmux.conf
             if tmux has-session 2>/dev/null; then
               tmux attach-session
             else
@@ -55,7 +66,18 @@
           neofetch
           export PATH="''${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
           
-          source "$HOME/.cargo/env"
+          # Cargo/Rustup (guard nếu chưa cài)
+          [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+
+          # Bun (guard nếu chưa cài)
+          [ -d "$HOME/.bun/bin" ] && export PATH="$HOME/.bun/bin:$PATH"
+
+          # Container runtime auto-detection (Colima trên macOS, Docker Engine trên Linux)
+          if [[ -S "$HOME/.colima/default/docker.sock" ]]; then
+            export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+          elif [[ -S /var/run/docker.sock ]]; then
+            export DOCKER_HOST='unix:///var/run/docker.sock'
+          fi
         '';
       };
     };
@@ -85,12 +107,50 @@
     };
   };
 
-  # Packages cơ bản
+  # ═══════════════════════════════════════════════════════════
+  # PACKAGES CHUNG — Cài trên tất cả nền tảng
+  # ═══════════════════════════════════════════════════════════
   home.packages = with pkgs; [
-    # Common tools
+    # Fonts
+    nerd-fonts.fira-code
+    
+    # CLI utilities
+    atuin
+    yazi
+    lazygit
+    btop
+    eza
+    bat
+    fzf
+    ripgrep
+    fd
+    jq
+    gh
+    neofetch
+    
+    # Container tools (cross-platform)
+    docker-client
+    docker-compose
+    docker-credential-helpers
+    lazydocker
+    
+    # Kubernetes
+    kubectl
+    kubernetes-helm
+    k9s
+  ]
+  # macOS: Colima là container runtime thay OrbStack/Docker Desktop
+  ++ lib.optionals pkgs.stdenv.isDarwin [
+    colima
+  ]
+  # Linux: nerdctl cho containerd native
+  ++ lib.optionals pkgs.stdenv.isLinux [
+    nerdctl
   ];
 
-  # Starship configuration
+  # ═══════════════════════════════════════════════════════════
+  # STARSHIP — Prompt chung
+  # ═══════════════════════════════════════════════════════════
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
@@ -187,7 +247,9 @@
     };
   };
 
-  # Environment variables
+  # ═══════════════════════════════════════════════════════════
+  # ENVIRONMENT — Session variables chung
+  # ═══════════════════════════════════════════════════════════
   home.sessionVariables = {
     EDITOR = "nvim";
     VISUAL = "nvim";

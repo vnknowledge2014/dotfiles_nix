@@ -20,25 +20,11 @@ in
   home.username = username;
   home.homeDirectory = "/home/${username}";
   
-  # Kích hoạt các module cơ bản
+  # Module enables — base profile đã bật hết, ở đây chỉ cần khai báo tối thiểu
   modules = {
-    core = {
-      enable = true;
-      packages = with pkgs; [
-        curl
-        wget
-        jq
-        ripgrep
-        fd
-      ];
-    };
-    
+    core.enable = true;
     dev.git.enable = true;
-    editors = {
-      enable = true;
-      neovim.enable = true;
-      antigravity.enable = true;
-    };
+    editors.enable = true;
     terminal.enable = true;
   };
   

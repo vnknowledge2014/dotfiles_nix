@@ -4,17 +4,16 @@ with lib;
 let
   cfg = config.modules.editors.antigravity;
   
+  hasValidHash = cfg.sha256 != "";
+
   # Define Antigravity package (Linux only)
   antigravity = pkgs.stdenv.mkDerivation rec {
     pname = "antigravity";
-    version = "1.13.3"; # Should match versions.json
+    version = cfg.version;
 
     src = pkgs.fetchurl {
-      url = "https://antigravity.google/download/linux";
-      # Lần build đầu tiên sẽ fail với hash mismatch.
-      # Nix sẽ in ra hash đúng — copy hash đó vào đây để thay thế fakeHash.
-      # Ví dụ: sha256 = "sha256-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
-      sha256 = lib.fakeHash;
+      url = cfg.url;
+      sha256 = cfg.sha256;
     };
 
     nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.makeWrapper ];
@@ -68,10 +67,36 @@ let
 in {
   options.modules.editors.antigravity = {
     enable = mkEnableOption "Enable Antigravity editor";
+
+    version = mkOption {
+      type = types.str;
+      default = "1.13.3";
+      description = "Version of Antigravity to install (should match versions.json)";
+    };
+
+    url = mkOption {
+      type = types.str;
+      default = "https://antigravity.google/download/linux";
+      description = "Download URL for Antigravity Linux package";
+    };
+
+    sha256 = mkOption {
+      type = types.str;
+      default = "sha256-jIO5wWE/U1PvTEXrMrzpafbhs12rEj0hvbB1Oq7Rg7s=";
+      description = ''
+        SHA256 hash of the Antigravity Linux package.
+        Để trống để bỏ qua cài đặt qua Nix.
+
+        Cập nhật hash khi có version mới:
+          nix-prefetch-url --type sha256 https://antigravity.google/download/linux
+          nix hash convert --hash-algo sha256 --to sri <hash>
+      '';
+    };
   };
 
-  # Chỉ cài trên Linux — macOS dùng DMG qua install.sh
-  config = mkIf (cfg.enable && pkgs.stdenv.isLinux) {
+  # Chỉ cài trên Linux VÀ khi có hash hợp lệ — macOS dùng DMG qua install.sh
+  # Khi sha256 rỗng → bỏ qua, build không fail
+  config = mkIf (cfg.enable && pkgs.stdenv.isLinux && hasValidHash) {
     home.packages = [ antigravity ];
   };
 }

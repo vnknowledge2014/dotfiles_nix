@@ -5,10 +5,10 @@
     ../base
   ];
 
-  # Override specific settings for Mike
+  # Override: macOS-specific oh-my-zsh plugin
   modules.shell.zsh.ohmyzsh.plugins = [ "git" "macos" "docker" ]; 
 
-  # Greeting message override
+  # Greeting
   modules.shell.zsh.extraConfig = lib.mkAfter ''
     echo "Welcome to your development environment, Mike!"
     echo "Remember to stay hydrated and take breaks while coding!"
@@ -20,8 +20,8 @@
     userEmail = "vnknowledge2014@gmail.com";
   };
   
-  # Mike specific packages
+  # macOS-specific packages (thêm ngoài base)
   home.packages = with pkgs; [
-    # Any extra packages for Mike
+    # Thêm packages riêng cho Mike tại đây
   ];
 }
