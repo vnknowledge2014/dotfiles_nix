@@ -115,7 +115,7 @@ print_section "Nix Rebuild"
 case $OS in
     darwin)
         print_info "darwin-rebuild switch..."
-        if sudo darwin-rebuild switch --flake .#$HOSTNAME; then
+        if sudo -H darwin-rebuild switch --flake .#$HOSTNAME; then
             print_success "Darwin rebuild thành công"
         else
             print_error "Darwin rebuild thất bại"

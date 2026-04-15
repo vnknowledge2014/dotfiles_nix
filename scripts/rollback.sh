@@ -42,7 +42,7 @@ rollback_darwin() {
     ls -l $PROFILE | grep " -> " || echo "Unknown"
     
     echo "Rolling back..."
-    if sudo darwin-rebuild --rollback; then
+    if sudo -H darwin-rebuild --rollback; then
         echo -e "${GREEN}✓ Rollback successful${NC}"
     else
         echo -e "${RED}✗ Rollback failed${NC}"
