@@ -228,7 +228,7 @@ case $OS in
       [[ -f /etc/bashrc ]] && sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
 
       echo "Cài đặt nix-darwin..."
-      sudo nix --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake .#$HOSTNAME
+      sudo -H nix --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake .#$HOSTNAME
 
       [[ -f /etc/static/bashrc ]] && source /etc/static/bashrc
     fi
@@ -262,7 +262,7 @@ case $OS in
     # --- Rebuild ---
     echo ""
     echo "Xây dựng cấu hình Darwin..."
-    if sudo darwin-rebuild switch --flake .#$HOSTNAME; then
+    if sudo -H darwin-rebuild switch --flake .#$HOSTNAME; then
       echo "✓ Xây dựng cấu hình Darwin thành công"
 
       echo ""
