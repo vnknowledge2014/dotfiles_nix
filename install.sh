@@ -256,6 +256,9 @@ case $OS in
         fi
     fi
 
+    # --- Ensure synthetic.conf exists (nix-darwin activation needs it) ---
+    [[ ! -f /etc/synthetic.conf ]] && sudo touch /etc/synthetic.conf
+
     # --- Rebuild ---
     echo ""
     echo "Xây dựng cấu hình Darwin..."

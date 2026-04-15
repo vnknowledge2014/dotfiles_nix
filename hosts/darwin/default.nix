@@ -39,6 +39,11 @@
     mkdir -p /Users/${username}/Library/LaunchAgents
     chown ${username}:staff /Users/${username}/Library/LaunchAgents
     chmod 755 /Users/${username}/Library/LaunchAgents
+
+    # Ensure synthetic.conf exists for nix-darwin activation
+    if [[ ! -f /etc/synthetic.conf ]]; then
+      touch /etc/synthetic.conf
+    fi
   '';
   
   # Phiên bản hệ thống
