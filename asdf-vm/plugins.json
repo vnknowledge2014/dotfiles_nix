@@ -50,7 +50,8 @@
     },
     "v": {
       "repo": "https://github.com/jthegedus/asdf-v",
-      "version": "latest"
+      "version": "0.5.1",
+      "_bootstrap": "github:vlang/v"
     },
     "gleam": {
       "repo": "https://github.com/asdf-community/asdf-gleam.git",

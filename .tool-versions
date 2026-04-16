@@ -2,7 +2,7 @@ purescript 0.15.15 --home
 java oracle-24.0.1 --home
 gleam 1.10.0 --home
 bun 1.2.15 --home
-v weekly.2025.22 --home
+v 0.5.1 --home
 uv 0.7.8 --home
 python 3.13.3t --home
 ocaml 5.3.0 --home

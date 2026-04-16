@@ -334,6 +334,129 @@ ensure_build_deps() {
     esac
 }
 
+# Cài đặt plugin qua bootstrap (khi asdf build bị lỗi)
+# Tải pre-built binary từ GitHub Releases, dùng nó compile source, rồi xóa.
+# Hoạt động trên mọi platform (macOS x86/arm64, Linux x86_64) không cần brew/nix.
+install_with_bootstrap() {
+    local plugin_name=$1
+    local version=$2
+    local bootstrap=$3  # format: "github:owner/repo"
+
+    local bootstrap_type="${bootstrap%%:*}"
+    local bootstrap_repo="${bootstrap#*:}"
+
+    local install_path="$HOME/.asdf/installs/$plugin_name/$version"
+
+    # Kiểm tra đã cài chưa
+    if [ -x "$install_path/bin/$plugin_name" ] || [ -x "$install_path/$plugin_name" ]; then
+        print_warning "$plugin_name@$version đã được cài đặt"
+        asdf set "$plugin_name" "$version" --home 2>/dev/null || true
+        return 0
+    fi
+
+    if [ "$bootstrap_type" != "github" ]; then
+        print_error "Bootstrap type '$bootstrap_type' không được hỗ trợ (dùng 'github:owner/repo')"
+        return 1
+    fi
+
+    # Xác định source repo
+    local source_repo=$(jq -r ".asdf.\"$plugin_name\"._source_repo // empty" "$PLUGINS_FILE")
+    if [ -z "$source_repo" ]; then
+        source_repo="https://github.com/${bootstrap_repo}.git"
+    fi
+
+    # Xác định URL tải binary theo OS/arch
+    local os_name=$(uname -s | tr '[:upper:]' '[:lower:]')
+    local arch=$(uname -m)
+    local archive_name=""
+
+    case "$os_name" in
+        darwin)
+            case "$arch" in
+                arm64)  archive_name="${plugin_name}_macos_arm64.zip" ;;
+                x86_64) archive_name="${plugin_name}_macos_x86_64.zip" ;;
+                *)      print_error "Kiến trúc $arch không được hỗ trợ trên macOS"; return 1 ;;
+            esac
+            ;;
+        linux)
+            archive_name="${plugin_name}_linux.zip"
+            ;;
+        *)
+            print_error "Hệ điều hành $os_name không được hỗ trợ"
+            return 1
+            ;;
+    esac
+
+    local download_url="https://github.com/${bootstrap_repo}/releases/latest/download/${archive_name}"
+
+    print_info "Bootstrap $plugin_name@$version ($os_name/$arch)..."
+
+    # Bước 1: Tải pre-built binary tạm
+    local tmp_dir=$(mktemp -d)
+    print_info "Tải bootstrap binary từ GitHub Releases..."
+
+    if ! curl -fsSL "$download_url" -o "$tmp_dir/$archive_name"; then
+        print_error "Không thể tải $archive_name từ $download_url"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    # Giải nén
+    if ! unzip -q "$tmp_dir/$archive_name" -d "$tmp_dir/extracted" 2>/dev/null; then
+        print_error "Không thể giải nén $archive_name"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    # Tìm binary trong thư mục giải nén
+    local bootstrap_bin=""
+    bootstrap_bin=$(find "$tmp_dir/extracted" -name "$plugin_name" -type f 2>/dev/null | head -1)
+    if [ -n "$bootstrap_bin" ]; then
+        chmod +x "$bootstrap_bin"
+    fi
+
+    if [ -z "$bootstrap_bin" ] || [ ! -f "$bootstrap_bin" ]; then
+        print_error "Không tìm thấy binary $plugin_name trong archive"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    print_success "Đã tải bootstrap binary: $("$bootstrap_bin" version 2>/dev/null || echo 'unknown')"
+
+    # Bước 2: Clone source vào asdf install path
+    rm -rf "$install_path"
+    mkdir -p "$install_path"
+
+    print_info "Clone $plugin_name@$version source..."
+    if ! git clone --quiet --depth 1 --branch "$version" "$source_repo" "$install_path" 2>/dev/null; then
+        print_error "Không thể clone $plugin_name@$version"
+        rm -rf "$install_path" "$tmp_dir"
+        return 1
+    fi
+
+    # Bước 3: Compile bằng bootstrap binary
+    print_info "Compile $plugin_name@$version bằng bootstrap binary..."
+    if ! "$bootstrap_bin" -o "$install_path/$plugin_name" "$install_path/cmd/$plugin_name" 2>/dev/null; then
+        print_error "Không thể compile $plugin_name@$version"
+        rm -rf "$install_path" "$tmp_dir"
+        return 1
+    fi
+
+    # Bước 4: Dọn dẹp bootstrap binary
+    rm -rf "$tmp_dir"
+
+    # Bước 5: Tạo symlink bin
+    mkdir -p "$install_path/bin"
+    ln -sf "$install_path/$plugin_name" "$install_path/bin/$plugin_name"
+
+    # Bước 6: Set version và reshim
+    asdf reshim "$plugin_name" "$version" 2>/dev/null || true
+    asdf set "$plugin_name" "$version" --home 2>/dev/null || asdf global "$plugin_name" "$version" 2>/dev/null
+
+    print_success "Đã cài đặt $plugin_name@$version qua bootstrap"
+    return 0
+}
+
 # Hàm cài đặt phiên bản
 install_version() {
     local plugin_name=$1
@@ -416,9 +539,18 @@ process_plugins_with_preset() {
                 continue
             fi
         fi
-        
-        if ! install_version "$plugin_name" "$version"; then
-            failed_installs+=("$plugin_name")
+
+        # Check if plugin needs bootstrap from external tool (e.g. broken asdf build)
+        local bootstrap=$(jq -r ".asdf.\"$plugin_name\"._bootstrap // empty" "$PLUGINS_FILE")
+        if [ -n "$bootstrap" ]; then
+            print_warning "$plugin_name cần bootstrap đặc biệt ($bootstrap)"
+            if ! install_with_bootstrap "$plugin_name" "$version" "$bootstrap"; then
+                failed_installs+=("$plugin_name")
+            fi
+        else
+            if ! install_version "$plugin_name" "$version"; then
+                failed_installs+=("$plugin_name")
+            fi
         fi
         echo
     done
