@@ -1,61 +1,21 @@
 { nixpkgs, ... }:
 
-let
-  inherit (nixpkgs) lib;
+# Thư viện tiện ích — CHỈ CHỨA HÀM PURE
+# Không dùng builtins.getEnv, builtins.readFile, hay bất kỳ I/O nào
+# Tất cả hostname/username phải được hardcode trong flake.nix
 
-  # Phát hiện WSL
-  isWSL = 
-    if builtins.pathExists "/proc/sys/kernel/osrelease" then
-      lib.hasInfix "microsoft" (builtins.readFile "/proc/sys/kernel/osrelease")
-    else
-      false;
-
-  # Phát hiện Ubuntu
-  isUbuntu =
-    if builtins.pathExists "/etc/os-release" then
-      lib.hasInfix "Ubuntu" (builtins.readFile "/etc/os-release")
-    else
-      false;
-in
 {
-  # Phát hiện hostname
-  getHostName = let
-    envHostname = builtins.getEnv "HOSTNAME";
-    fallback = "default-host";
-  in
-    if envHostname != "" then envHostname
-    else if builtins.pathExists "/etc/hostname" then
-      builtins.readFile "/etc/hostname"
-    else if builtins.getEnv "HOST" != "" then
-      builtins.getEnv "HOST"
-    else
-      fallback;
-
-  # Phát hiện username
-  getUserName = let
-    envUser = builtins.getEnv "USER";
-    envUsername = builtins.getEnv "USERNAME";
-    fallback = "default-user";
-  in
-    if envUser != "" then envUser
-    else if envUsername != "" then envUsername
-    else
-      fallback;
-
-  # Phát hiện hệ thống
-  detectSystem = 
+  # Phát hiện nhóm hệ điều hành từ builtins.currentSystem (pure)
+  detectPlatform = system:
     let
-      isMac = builtins.match ".*darwin.*" (builtins.currentSystem or "");
-      isLinux = builtins.match ".*linux.*" (builtins.currentSystem or "");
-    in
-      if isMac != null then "darwin"
-      else if isLinux != null then
-        if builtins.pathExists "/etc/NIXOS" then
-          if isWSL then "nixos-wsl" else "nixos"
-        else if isUbuntu then "ubuntu"
-        else "unknown-linux"
-      else "unknown";
-
-  # Xuất biến
-  inherit isWSL isUbuntu;
+      inherit (nixpkgs) lib;
+      isDarwin = lib.hasSuffix "-darwin" system;
+      isLinux = lib.hasSuffix "-linux" system;
+      isAarch64 = lib.hasPrefix "aarch64-" system;
+    in {
+      inherit isDarwin isLinux isAarch64 system;
+      # Trả về tên ngắn gọn cho conditional logic
+      os = if isDarwin then "darwin" else if isLinux then "linux" else "unknown";
+      arch = if isAarch64 then "aarch64" else "x86_64";
+    };
 }

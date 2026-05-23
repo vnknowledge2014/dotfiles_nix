@@ -25,7 +25,10 @@ in
   # Machine-specific Homebrew config
   extraTaps = if enableColimaAI then [
     "slp/krunkit"
-  ] else [];
+    "quarkdown-labs/quarkdown"
+  ] else [
+    "quarkdown-labs/quarkdown"
+  ];
   
   extraBrews = [
     # CLI tools
@@ -41,6 +44,8 @@ in
     # Kubernetes
     "kubernetes-cli"
     "k9s"
+    "kind"
+    "helm"
     
     # Container (Colima)
     "colima"
@@ -57,10 +62,14 @@ in
     
     # Dev tools
     "asdf"
+    "fnm"
     "posting"
     "gnupg"
     "smartmontools"
     "tesseract"
+    "imagemagick"
+    "cmake"
+    "llama.cpp"
     
     # Build dependencies
     "pkg-config"
@@ -68,6 +77,11 @@ in
     "librdkafka"
     "zlib"
     "p7zip"
+    "pkgconf"
+    "unar"
+    
+    # Utilities
+    "quarkdown-labs/quarkdown/quarkdown"
   ] ++ lib.optionals enableColimaAI [
     "krunkit"
   ];
@@ -75,6 +89,8 @@ in
   extraCasks = [
     # Editors & Dev
     "antigravity"
+    "antigravity-ide"
+    "antigravity-cli"
     "trae"
     "zed"
     "gitbutler"
@@ -90,18 +106,16 @@ in
     "ghostty"
     "font-fira-code-nerd-font"
     
-    # Container
-    # (Colima is CLI-only, no GUI cask needed)
+    # Android
+    "android-commandlinetools"
     
     # Utilities
     "gotiengviet"
     "cloudflare-warp"
-    "mountain-duck"
     "localsend"
     "rustdesk"
     "ollama-app"
     "iina"
-    "zalo"
   ];
 
   # Thiết lập macOS cơ bản

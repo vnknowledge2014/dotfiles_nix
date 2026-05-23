@@ -14,6 +14,8 @@ in
     ./modules/editors
     ./modules/terminal
     ./profiles/${username}
+    # Snap package management trên Ubuntu
+    ../hosts/ubuntu/snapd.nix
   ] ++ lib.optional hasMachineConfig machineConfigPath;
   
   # Thông tin cơ bản

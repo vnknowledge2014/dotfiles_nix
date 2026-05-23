@@ -14,7 +14,6 @@
   # Gói phần mềm cốt lõi cho mọi hệ thống
   environment.systemPackages = with pkgs; [
     neovim
-    wezterm
     htop
     eza
     wget

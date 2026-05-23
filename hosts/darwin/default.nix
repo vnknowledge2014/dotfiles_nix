@@ -3,9 +3,6 @@
 {
   # Import các thành phần cấu hình theo thứ tự
   imports = [
-    # Cấu hình macOS cơ bản
-    ./base.nix
-    
     # Cấu hình Homebrew
     ./homebrew.nix
 
@@ -25,9 +22,10 @@
   # Fix nixbld group GID
   ids.gids.nixbld = 350;
   
-  # Cài đặt môi trường macOS cơ bản
+  # Gói macOS cơ bản (gộp từ base.nix)
   environment.systemPackages = with pkgs; [
-
+    m-cli  # Tiện ích CLI cho macOS
+    mas    # Mac App Store CLI
   ];
   
   # Cấu hình shell

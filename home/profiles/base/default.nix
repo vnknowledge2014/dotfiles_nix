@@ -92,7 +92,18 @@
     editors = {
       enable = true;
       neovim.enable = true;
+      # Antigravity 2.0 Desktop App
       antigravity.enable = true;
+      # Antigravity IDE (VS Code-based) — kích hoạt khi có sha256
+      antigravityIde = {
+        enable = true;
+        sha256 = ""; # Cập nhật sau khi chạy: nix-prefetch-url https://antigravity.google/download/linux/ide
+      };
+      # Antigravity CLI — dùng install script chính thức mặc định
+      antigravityCli = {
+        enable = true;
+        useInstallScript = true; # Dùng curl install.sh từ antigravity.google
+      };
     };
     
     secrets.enable = true;
@@ -143,9 +154,24 @@
   ++ lib.optionals pkgs.stdenv.isDarwin [
     colima
   ]
-  # Linux: nerdctl cho containerd native
+  # Linux: nerdctl cho containerd native + packages tương đương macOS brew
   ++ lib.optionals pkgs.stdenv.isLinux [
     nerdctl
+    # Build tools
+    cmake
+    pkg-config
+    # Media tools
+    imagemagick
+    # Kubernetes (cross-platform)
+    kind
+    # Terminal utilities
+    unar
+    # LLM inference (tương đương llama.cpp trên brew)
+    llama-cpp
+    # Node version manager
+    fnm
+    # Android tools (tương đương android-commandlinetools cask)
+    android-tools
   ];
 
   # ═══════════════════════════════════════════════════════════
@@ -256,7 +282,4 @@
     LANG = "en_US.UTF-8";
     PATH = "$HOME/.cargo/bin:$HOME/.local/bin:$PATH";
   };
-
-  home.stateVersion = "25.05";
-  programs.home-manager.enable = true;
 }

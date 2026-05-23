@@ -1,70 +1,46 @@
 { config, lib, pkgs, system, inputs, ... }:
 
+# ═══════════════════════════════════════════════════════════
+# TEMPLATE PROFILE — Copy để tạo profile mới cho team member
+# ═══════════════════════════════════════════════════════════
+# Cách dùng:
+#   1. cp -r template/ <tên-bạn>/
+#   2. Sửa Git identity (userName, userEmail)
+#   3. Override plugins, aliases, packages theo ý thích
+#   4. Thêm machine config: cp machines/example.nix machines/<hostname>.nix
+#   5. Thêm entry vào flake.nix
+#
+# Hoặc chạy: ./scripts/add-user.sh <tên-bạn>
+# ═══════════════════════════════════════════════════════════
+
 {
-  # Import các module
+  # Kế thừa base profile — tất cả modules đã được import và bật sẵn ở đây
   imports = [
-    ../../modules/core
-    ../../modules/shell
-    ../../modules/dev/git.nix
-    ../../modules/editors
+    ../base
   ];
 
-  # Bật các module
-  modules = {
-    core.enable = true;
-    shell = {
-      enable = true;
-      zsh = {
-        enable = true;
-        autosuggestions.enable = true;
-        syntaxHighlighting.enable = true;
-        ohmyzsh = {
-          enable = true;
-          theme = "robbyrussell";
-          plugins = [ "git" "docker" ];
-        };
-        aliases = {
-          ll = "ls -l";
-          la = "ls -la";
-        };
-      };
-    };
-    dev.git = {
-      enable = true;
-      # Thông tin cá nhân
-      extraConfig = {
-        core.editor = "vim";
-      };
-    };
-    editors.enable = true;
-  };
+  # Override: oh-my-zsh plugins (base mặc định: ["git" "docker"])
+  # Thêm plugin theo OS: "macos", "ubuntu", "wsl"
+  modules.shell.zsh.ohmyzsh.plugins = [ "git" "docker" ];
 
-  # Các package cá nhân
-  home.packages = with pkgs; [
-    # Thêm các package riêng tại đây
-  ];
+  # Greeting (tùy chỉnh)
+  modules.shell.zsh.extraConfig = lib.mkAfter ''
+    echo "Welcome to your development environment!"
+  '';
 
-  # Cấu hình Git cá nhân
+  # Git Identity — BẮT BUỘC SỬA cho đúng tên của bạn
   programs.git = {
     userName = "Your Name";
     userEmail = "your.email@example.com";
   };
 
-  # Các cấu hình riêng khác
+  # Packages cá nhân (thêm ngoài base)
+  home.packages = with pkgs; [
+    # Thêm packages riêng của bạn tại đây
+  ];
+
+  # Session variables cá nhân
   home.sessionVariables = {
-    EDITOR = "vim";
+    EDITOR = "nvim";
   };
-
-  # Các cấu hình đặc thù cho từng hệ thống
-  home.activation = lib.mkIf (builtins.currentSystem == "x86_64-darwin") {
-    # Chỉ chạy trên macOS
-    fixLaunchAgentsPermissions = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "$HOME/Library/LaunchAgents"
-      $DRY_RUN_CMD chmod $VERBOSE_ARG 755 "$HOME/Library/LaunchAgents"
-    '';
-  };
-
-  # Phiên bản Home Manager
-  home.stateVersion = "25.05";
-  programs.home-manager.enable = true;
 }

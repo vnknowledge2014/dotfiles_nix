@@ -42,15 +42,6 @@ in {
       };
     };
 
-    wezterm = {
-      enable = mkEnableOption "Enable WezTerm configuration";
-      
-      settings = mkOption {
-        type = types.attrs;
-        default = {};
-        description = "WezTerm settings";
-      };
-    };
   };
 
   config = mkIf cfg.enable {
@@ -250,40 +241,5 @@ in {
       '';
     };
 
-    # WezTerm configuration
-    programs.wezterm = mkIf cfg.wezterm.enable {
-      enable = true;
-      extraConfig = ''
-        local wezterm = require 'wezterm'
-        local config = {}
-
-        config.window_padding = {
-          left = 10,
-          right = 10,
-          top = 10,
-          bottom = 10
-        }
-
-        config.window_decorations = "TITLE | RESIZE | MACOS_FORCE_ENABLE_SHADOW"
-        config.window_state = "Normal"
-
-        config.font = wezterm.font({
-          family = "JetBrains Mono",
-          weight = "Regular"
-        })
-        config.font_size = 12.0
-
-        config.colors = {
-          background = "#2e3440",
-          foreground = "#d8dee9"
-        }
-
-        ${concatStringsSep "\n" (mapAttrsToList (name: value: 
-          "config.${name} = ${if isString value then ''"${value}"'' else toString value}"
-        ) cfg.wezterm.settings)}
-
-        return config
-      '';
-    };
   };
 }

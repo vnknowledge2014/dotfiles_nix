@@ -1,5 +1,13 @@
 { config, lib, pkgs, system, inputs, ... }:
 
+# ═══════════════════════════════════════════════════════════
+# PROFILE: mike (macOS)
+# ═══════════════════════════════════════════════════════════
+# Tạo profile mới cho team member:
+#   cp -r home/profiles/mike/ home/profiles/<tên-bạn>/
+#   Sửa Git identity + plugins, rồi thêm entry vào flake.nix
+# Hoặc chạy: ./scripts/add-user.sh <tên-bạn>
+# ═══════════════════════════════════════════════════════════
 {
   imports = [
     ../base

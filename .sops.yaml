@@ -1,8 +1,26 @@
-# SOPS configuration file
-# For more information, see: https://github.com/mozilla/sops
+# SOPS configuration — Secrets management cho team
+# Docs: https://github.com/getsops/sops
+#
+# Workflow:
+#   1. Mỗi member tạo Age key: age-keygen -o ~/.config/sops/age/keys.txt
+#   2. Gửi PUBLIC KEY cho team lead
+#   3. Team lead thêm key vào file này rồi re-encrypt: sops updatekeys secrets/shared/*.yaml
+#   4. Tạo secret mới: sops secrets/shared/api-keys.yaml
+#   5. Giải mã: sops -d secrets/shared/api-keys.yaml
 
 creation_rules:
-  - path_regex: secrets/.*\.yaml$
+  # Secrets chung cho toàn team — tất cả members đều giải mã được
+  - path_regex: secrets/shared/.*\.yaml$
     key_groups:
       - age:
-          - "age1..." # Replace with your age public key (generated via: age-keygen -o key.txt)
+          # Team Lead
+          - age1... # mike — Thay bằng public key thật
+          # Members (thêm public key khi onboard)
+          # - age1... # alice
+          # - age1... # bob
+
+  # Secrets riêng từng người — chỉ người đó giải mã được
+  - path_regex: secrets/users/(.+)/.*\.yaml$
+    key_groups:
+      - age:
+          - age1... # Thay bằng public key của người sở hữu thư mục

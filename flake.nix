@@ -1,5 +1,5 @@
 {
-  description = "Dotfiles đa nền tảng cho NixOS, macOS, Ubuntu và WSL";
+  description = "Dotfiles đa nền tảng cho NixOS, macOS, Ubuntu và WSL — Team-ready";
 
   inputs = {
     # Nixpkgs
@@ -34,26 +34,26 @@
   outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, 
               home-manager, darwin, nixos-wsl, zen-browser, ... }@inputs:
     let
-      # Import thư viện tiện ích
+      # ═══════════════════════════════════════════════════════════
+      # PURE EVALUATION — Không dùng builtins.getEnv hay readFile
+      # Mọi hostname/username đều được hardcode bên dưới
+      # ═══════════════════════════════════════════════════════════
       lib = import ./lib { inherit nixpkgs; };
       
-      # Phát hiện hệ thống
-      getHostName = lib.getHostName;
-      getUserName = lib.getUserName;
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
-      
-      # Helper tạo attrset cho các hệ thống được hỗ trợ
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       
-      # Khởi tạo nixpkgs với allowUnfree
       nixpkgsFor = forAllSystems (system: import nixpkgs {
         inherit system;
         config.allowUnfree = true;
       });
       
-      # Hàm tạo cấu hình NixOS
-      mkNixOS = { hostname ? getHostName, username ? getUserName, 
-                  system ? "x86_64-linux", isWSL ? false }: 
+      # ═══════════════════════════════════════════════════════════
+      # BUILDER FUNCTIONS — Tạo cấu hình cho từng nền tảng
+      # ═══════════════════════════════════════════════════════════
+      
+      # NixOS (bao gồm cả WSL)
+      mkNixOS = { hostname, username, system ? "x86_64-linux", isWSL ? false }: 
         nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = { 
@@ -63,6 +63,8 @@
           };
           modules = [
             ./hosts/common
+            # NixOS-specific: lix, nix.gc, ZFS, locale (bỏ qua cho WSL)
+            (if isWSL then (_: {}) else ./hosts/nixos/common.nix)
             (if isWSL 
               then ./hosts/wsl
               else ./hosts/nixos/machines/${hostname})
@@ -71,16 +73,19 @@
               networking.hostName = hostname;
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.${username} = import ./home/nixos.nix;
+              # WSL dùng home/wsl.nix (Windows PATH, clipboard, wslview),
+              # NixOS thuần dùng home/nixos.nix
+              home-manager.users.${username} = import (
+                if isWSL then ./home/wsl.nix else ./home/nixos.nix
+              );
               home-manager.extraSpecialArgs = { inherit inputs system hostname username; };
               nixpkgs.config.allowUnfree = true;
             }
           ];
         };
       
-      # Hàm tạo cấu hình macOS (Darwin)
-      mkDarwin = { hostname ? getHostName, username ? getUserName, 
-                    system ? "x86_64-darwin" }: 
+      # macOS (Darwin)
+      mkDarwin = { hostname, username, system ? "aarch64-darwin" }: 
         darwin.lib.darwinSystem {
           inherit system;
           specialArgs = { 
@@ -104,9 +109,8 @@
           ];
         };
       
-      # Hàm tạo cấu hình Home Manager cho Ubuntu
-      mkUbuntu = { hostname ? getHostName, username ? getUserName, 
-                   system ? "x86_64-linux" }: 
+      # Ubuntu (Home Manager standalone)
+      mkUbuntu = { hostname, username, system ? "x86_64-linux" }: 
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgsFor.${system};
           extraSpecialArgs = { 
@@ -120,9 +124,17 @@
         };
     in
     {
-      # Cấu hình NixOS
+      # ═══════════════════════════════════════════════════════════
+      # CONFIGURATIONS — Hardcoded, mỗi máy 1 entry
+      # ═══════════════════════════════════════════════════════════
+      # Thêm máy mới: copy 1 entry, đổi hostname/username/system
+      # Rồi tạo profile + machine config bằng:
+      #   ./scripts/add-user.sh <username>
+      #   ./scripts/add-machine.sh <hostname> <os>
+      # ═══════════════════════════════════════════════════════════
+      
       nixosConfigurations = {
-        # Cấu hình WSL
+        # WSL instance
         wsl = mkNixOS {
           hostname = "wsl";
           username = "rnd";
@@ -130,52 +142,56 @@
           isWSL = true;
         };
         
-        # Cấu hình động theo hostname
-        ${getHostName} = mkNixOS {
-          hostname = getHostName;
-          username = getUserName;
-        };
+        # Thêm máy NixOS: 
+        # my-server = mkNixOS { hostname = "my-server"; username = "admin"; };
       };
       
-      # Cấu hình macOS (Darwin)
       darwinConfigurations = {
-        # Cấu hình macbook
+        # MacBook chính
         macbook = mkDarwin {
           hostname = "macbook";
           username = "mike";
           system = "x86_64-darwin";
         };
         
-        # Cấu hình động theo hostname
-        ${getHostName} = mkDarwin {
-          hostname = getHostName;
-          username = getUserName;
-        };
+        # Thêm máy macOS:
+        # macbook-pro = mkDarwin { hostname = "macbook-pro"; username = "alice"; system = "aarch64-darwin"; };
       };
       
-      # Cấu hình Home Manager cho Ubuntu
       homeConfigurations = {
-        # Cấu hình Ubuntu
-        "${getUserName}@${getHostName}" = mkUbuntu {
-          hostname = getHostName;
-          username = getUserName;
-        };
-        
-        # Cấu hình cố định
+        # Ubuntu PC
         "rnd@ubuntu" = mkUbuntu {
           hostname = "ubuntu";
           username = "rnd";
         };
+        
+        # Thêm Ubuntu:
+        # "bob@dev-machine" = mkUbuntu { hostname = "dev-machine"; username = "bob"; };
       };
       
-      # Tùy chọn khác (shell phát triển, v.v.)
+      # ═══════════════════════════════════════════════════════════
+      # FORMATTER — `nix fmt` sẽ dùng nixfmt-rfc-style (RFC 166)
+      # ═══════════════════════════════════════════════════════════
+      formatter = forAllSystems (system: nixpkgsFor.${system}.nixfmt-rfc-style);
+      
+      # ═══════════════════════════════════════════════════════════
+      # DEV SHELL — `nix develop` cho contributors
+      # ═══════════════════════════════════════════════════════════
       devShells = forAllSystems (system:
         let pkgs = nixpkgsFor.${system}; in {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              nixpkgs-fmt
-              nil
+              nixfmt-rfc-style  # Formatter (RFC 166)
+              nil               # Nix LSP
+              statix            # Nix linter
+              deadnix           # Phát hiện dead code
             ];
+            shellHook = ''
+              echo "🔧 Dotfiles Dev Shell"
+              echo "  nix fmt        — Format tất cả file .nix"
+              echo "  statix check . — Lint Nix code"
+              echo "  deadnix .      — Tìm dead code"
+            '';
           };
         }
       );

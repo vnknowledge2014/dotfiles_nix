@@ -13,6 +13,8 @@ in {
 
   imports = [
     ./antigravity.nix
+    ./antigravity-ide.nix
+    ./antigravity-cli.nix
   ];
 
   config = mkIf cfg.enable {

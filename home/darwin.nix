@@ -52,9 +52,6 @@ in
     '';
   };
   
-  # Terminal configuration
-  programs.wezterm.enable = true;
-  
   # Integracja z Homebrew
   programs.zsh.initContent = lib.mkIf config.programs.zsh.enable ''
     # Homebrew integration

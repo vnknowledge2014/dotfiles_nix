@@ -1,0 +1,42 @@
+name: Nix Flake Check
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  check:
+    name: "Flake Check (${{ matrix.system }})"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            system: x86_64-linux
+          - os: macos-latest
+            system: aarch64-darwin
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+            experimental-features = nix-command flakes
+
+      - name: Check flake
+        run: nix flake check --no-build
+
+      - name: Check format
+        run: nix fmt -- --check .
+
+      - name: Lint (statix)
+        run: nix run nixpkgs#statix -- check .
+
+      - name: Dead code (deadnix)
+        run: nix run nixpkgs#deadnix -- --fail .
