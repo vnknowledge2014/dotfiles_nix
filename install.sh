@@ -211,9 +211,9 @@ case $OS in
       /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       
       if [[ -f /opt/homebrew/bin/brew ]]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
+        export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
       elif [[ -f /usr/local/bin/brew ]]; then
-        eval "$(/usr/local/bin/brew shellenv)"
+        export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
       fi
     fi
     
@@ -461,7 +461,7 @@ if [[ -f "./asdf-vm/planguage.sh" ]]; then
   PLANG_ARGS=""
   [[ -n "$LANG_PRESET" ]] && PLANG_ARGS="$PLANG_ARGS --preset $LANG_PRESET"
   [[ -n "$EXTRA_LANGS" ]] && PLANG_ARGS="$PLANG_ARGS --add $EXTRA_LANGS"
-  bash ./asdf-vm/planguage.sh $PLANG_ARGS
+  bash "$(dirname "$0")/asdf-vm/planguage.sh" $PLANG_ARGS
 else
   echo "Cảnh báo: Không tìm thấy file asdf-vm/planguage.sh"
 fi

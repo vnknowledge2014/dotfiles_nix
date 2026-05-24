@@ -17,8 +17,11 @@ in
   ] ++ lib.optional hasMachineConfig machineConfigPath;
   
   # Thông tin cơ bản
-  home.username = username;
-  home.homeDirectory = lib.mkForce "/Users/${username}";
+  home = {
+    username = username;
+    homeDirectory = lib.mkForce "/Users/${username}";
+    stateVersion = "25.05";
+  };
   
   # Kích hoạt các module cơ bản
   modules = {
@@ -63,6 +66,5 @@ in
   '';
   
   # Phiên bản Home Manager
-  home.stateVersion = "25.05";
   programs.home-manager.enable = true;
 }

@@ -9,11 +9,10 @@ let
   # Define Antigravity package (Linux only)
   antigravity = pkgs.stdenv.mkDerivation rec {
     pname = "antigravity";
-    version = cfg.version;
+    inherit (cfg) version;
 
     src = pkgs.fetchurl {
-      url = cfg.url;
-      sha256 = cfg.sha256;
+      inherit (cfg) url sha256;
     };
 
     nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.makeWrapper ];
@@ -95,8 +94,7 @@ in {
   };
 
   # Chỉ cài trên Linux VÀ khi có hash hợp lệ — macOS dùng DMG qua install.sh
-  # Khi sha256 rỗng → bỏ qua, build không fail
-  config = mkIf (cfg.enable && pkgs.stdenv.isLinux && hasValidHash) {
+  config = mkIf (cfg.enable && pkgs.stdenv.isLinux && cfg.sha256 != "") {
     home.packages = [ antigravity ];
   };
 }

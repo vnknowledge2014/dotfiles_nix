@@ -9,12 +9,11 @@ let
   # Linux: fetch binary từ install script chính thức và đóng gói vào Nix store
   antigravityCli = pkgs.stdenv.mkDerivation rec {
     pname = "antigravity-cli";
-    version = cfg.version;
+    inherit (cfg) version;
 
     # Sử dụng fetchurl để lấy binary pre-built từ URL chính thức
     src = pkgs.fetchurl {
-      url = cfg.url;
-      sha256 = cfg.sha256;
+      inherit (cfg) url sha256;
     };
 
     nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.makeWrapper ];
@@ -95,15 +94,15 @@ in {
     };
   };
 
-  config = mkIf (cfg.enable && pkgs.stdenv.isLinux) (
-    if cfg.sha256 != "" then {
-      # Mode 1: Reproducible Nix derivation (khi có sha256)
-      home.packages = [ antigravityCli ];
-    } else if cfg.useInstallScript then {
-      # Mode 2: Install script chính thức (mặc định — luôn có bản mới nhất)
-      home.activation.installAntigravityCli = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  config = mkIf (cfg.enable && pkgs.stdenv.isLinux) {
+    # Mode 1: Reproducible Nix derivation (khi có sha256)
+    home.packages = mkIf (cfg.sha256 != "") [ antigravityCli ];
+    
+    # Mode 2: Install script chính thức (mặc định — luôn có bản mới nhất)
+    home.activation.installAntigravityCli = mkIf (cfg.sha256 == "" && cfg.useInstallScript) (
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         ${cliInstallScript}
-      '';
-    } else {}
-  );
+      ''
+    );
+  };
 }

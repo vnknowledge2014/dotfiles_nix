@@ -54,7 +54,7 @@ if command -v nix &>/dev/null; then
     NIX_VERSION=$(nix --version 2>/dev/null | head -1)
     check_pass "Nix installed ($NIX_VERSION)"
 else
-    check_fail "Nix not installed" "Install Nix: curl -L https://nixos.org/nix/install | sh"
+    check_fail "Nix not installed" "Install Nix: curl -L https://nixos.org/nix/install -o install-nix.sh && sh install-nix.sh"
 fi
 
 # 2. Kiểm tra Home Manager

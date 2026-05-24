@@ -64,22 +64,22 @@
           modules = [
             ./hosts/common
             # NixOS-specific: lix, nix.gc, ZFS, locale (bỏ qua cho WSL)
-            (if isWSL then (_: {}) else ./hosts/nixos/common.nix)
+            (if isWSL then nixos-wsl.nixosModules.default else ./hosts/nixos/common.nix)
             (if isWSL 
               then ./hosts/wsl
               else ./hosts/nixos/machines/${hostname})
             home-manager.nixosModules.home-manager
             {
               networking.hostName = hostname;
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              # WSL dùng home/wsl.nix (Windows PATH, clipboard, wslview),
-              # NixOS thuần dùng home/nixos.nix
-              home-manager.users.${username} = import (
-                if isWSL then ./home/wsl.nix else ./home/nixos.nix
-              );
-              home-manager.extraSpecialArgs = { inherit inputs system hostname username; };
               nixpkgs.config.allowUnfree = true;
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = { inherit inputs system hostname username; };
+                users.${username} = import (
+                  if isWSL then ./home/wsl.nix else ./home/nixos.nix
+                );
+              };
             }
           ];
         };
@@ -99,12 +99,14 @@
             ./hosts/darwin/machines/${hostname}
             home-manager.darwinModules.home-manager
             {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "backup";
-              home-manager.users.${username} = import ./home/darwin.nix;
-              home-manager.extraSpecialArgs = { inherit inputs system hostname username; };
               nixpkgs.config.allowUnfree = true;
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                backupFileExtension = "backup";
+                extraSpecialArgs = { inherit inputs system hostname username; };
+                users.${username} = import ./home/darwin.nix;
+              };
             }
           ];
         };

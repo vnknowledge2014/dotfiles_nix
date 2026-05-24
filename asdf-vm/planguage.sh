@@ -221,12 +221,16 @@ install_rustup() {
     local default_toolchain=$(jq -r '.rustup.default_toolchain // "stable"' "$PLUGINS_FILE")
     
     print_info "Đang cài đặt Rustup từ $install_url..."
-    if curl --proto '=https' --tlsv1.2 -sSf "$install_url" | sh -s -- --no-modify-path -y --default-toolchain "$default_toolchain"; then
+    local tmp_script
+    tmp_script=$(mktemp)
+    if curl --proto '=https' --tlsv1.2 -sSf "$install_url" -o "$tmp_script" && sh "$tmp_script" -s -- --no-modify-path -y --default-toolchain "$default_toolchain"; then
+        rm -f "$tmp_script"
         print_success "Đã cài đặt Rustup thành công"
         source "$HOME/.cargo/env"
         setup_rustup_shell
         install_rustup_components
     else
+        rm -f "$tmp_script"
         print_error "Không thể cài đặt Rustup"
         return 1
     fi

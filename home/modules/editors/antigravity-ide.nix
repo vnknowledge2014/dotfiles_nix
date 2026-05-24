@@ -10,11 +10,10 @@ let
   # macOS: được cài qua Homebrew Cask "antigravity-ide"
   antigravityIde = pkgs.stdenv.mkDerivation rec {
     pname = "antigravity-ide";
-    version = cfg.version;
+    inherit (cfg) version;
 
     src = pkgs.fetchurl {
-      url = cfg.url;
-      sha256 = cfg.sha256;
+      inherit (cfg) url sha256;
     };
 
     nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.makeWrapper ];
@@ -101,7 +100,7 @@ in {
   };
 
   # Chỉ cài trên Linux VÀ khi có SHA256 hợp lệ — macOS dùng Homebrew Cask
-  config = mkIf (cfg.enable && pkgs.stdenv.isLinux && hasValidHash) {
+  config = mkIf (cfg.enable && pkgs.stdenv.isLinux && cfg.sha256 != "") {
     home.packages = [ antigravityIde ];
   };
 }
