@@ -8,7 +8,7 @@ Hỗ trợ: **NixOS, macOS, Ubuntu, và WSL**.
 
 - **Pure Nix Flakes**: Không phụ thuộc vào biến môi trường (`$USER`, `$HOSTNAME`), chạy hoàn hảo trên GitHub Actions.
 - **Multi-tenant / Multi-machine**: Mỗi thành viên tự quản lý profile cá nhân (`home/profiles/<user>/`) mà không xung đột với base chung.
-- **CI/CD Tích Hợp**: Tự động kiểm tra flake (`nix flake check`), format (`nixfmt-rfc-style`), và lint (`statix`, `deadnix`) trên mỗi PR.
+- **Zero-Warnings CI/CD**: Hệ thống đã được khử toàn bộ lỗi đệ quy vô hạn (Infinite Recursion) và cảnh báo Linter (`statix`, `deadnix`). Luôn chạy `nix flake check` trên mỗi PR để đảm bảo an toàn.
 - **Secrets Management (SOPS + Age)**: Mã hóa API keys, passwords an toàn trong Git. Hỗ trợ 2 phân cấp: Shared Secrets (cho cả team) và Per-User Secrets.
 - **Dev Shell (`nix develop`)**: Môi trường phát triển chuẩn hóa với linter và formatter tích hợp.
 

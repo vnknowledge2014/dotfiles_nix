@@ -23,6 +23,17 @@ Script sẽ copy template profile và mở file để bạn sửa:
 - **ZSH plugins**: Thêm `"macos"`, `"ubuntu"`, hoặc `"wsl"` tùy OS
 - **Packages riêng**: Thêm vào `home.packages`
 
+## Bước 3: Thiết lập khóa bảo mật (Age Key cho SOPS)
+
+Dự án này sử dụng SOPS mã hóa bí mật. Bạn BẮT BUỘC phải tạo một Age key để giải mã:
+
+```bash
+mkdir -p ~/.config/sops/age
+age-keygen -o ~/.config/sops/age/keys.txt
+```
+
+Sau khi tạo, lấy **Public Key** (dòng bắt đầu bằng `# public key: ...`) và gửi cho Team Lead để họ thêm vào file `.sops.yaml` ở gốc dự án. Nếu không làm bước này, bạn sẽ bị lỗi khi cài đặt.
+
 ## Bước 3: Tạo machine config
 
 ```bash
