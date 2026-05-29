@@ -228,7 +228,8 @@ case $OS in
       [[ -f /etc/bashrc ]] && sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
 
       echo "Cài đặt nix-darwin..."
-      sudo -H nix --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake .#$HOSTNAME
+      NIX_BIN="$(command -v nix)"
+      sudo -H "$NIX_BIN" --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake .#$HOSTNAME
 
       [[ -f /etc/static/bashrc ]] && source /etc/static/bashrc
     fi
@@ -262,7 +263,15 @@ case $OS in
     # --- Rebuild ---
     echo ""
     echo "Xây dựng cấu hình Darwin..."
-    if sudo -H darwin-rebuild switch --flake .#$HOSTNAME; then
+
+    # Resolve full path — sudo resets PATH and can't find Nix binaries
+    DARWIN_REBUILD="$(command -v darwin-rebuild 2>/dev/null || echo "")"
+    if [[ -z "$DARWIN_REBUILD" ]]; then
+      echo "Lỗi: darwin-rebuild không tìm thấy sau khi bootstrap."
+      exit 1
+    fi
+
+    if sudo -H "$DARWIN_REBUILD" switch --flake .#$HOSTNAME; then
       echo "✓ Xây dựng cấu hình Darwin thành công"
 
       echo ""

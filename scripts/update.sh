@@ -114,8 +114,13 @@ print_section "Nix Rebuild"
 
 case $OS in
     darwin)
+        DARWIN_REBUILD="$(command -v darwin-rebuild 2>/dev/null || echo "")"
+        if [[ -z "$DARWIN_REBUILD" ]]; then
+            print_error "darwin-rebuild không tìm thấy. Hãy chạy install.sh trước để bootstrap nix-darwin."
+            exit 1
+        fi
         print_info "darwin-rebuild switch..."
-        if sudo -H darwin-rebuild switch --flake .#$HOSTNAME; then
+        if sudo -H "$DARWIN_REBUILD" switch --flake .#$HOSTNAME; then
             print_success "Darwin rebuild thành công"
         else
             print_error "Darwin rebuild thất bại"

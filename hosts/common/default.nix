@@ -19,7 +19,7 @@
     wget
     curl
     git
-    neofetch
+    fastfetch
     jq
     zsh
     oh-my-zsh

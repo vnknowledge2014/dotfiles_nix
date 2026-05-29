@@ -27,18 +27,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Apps
-    zen-browser.url = "github:0xc000022070/zen-browser-flake";
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, nixos-hardware, 
-              home-manager, darwin, nixos-wsl, zen-browser, ... }@inputs:
+              home-manager, darwin, nixos-wsl, ... }@inputs:
     let
       # ═══════════════════════════════════════════════════════════
       # PURE EVALUATION — Không dùng builtins.getEnv hay readFile
       # Mọi hostname/username đều được hardcode bên dưới
       # ═══════════════════════════════════════════════════════════
-      lib = import ./lib { inherit nixpkgs; };
       
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;

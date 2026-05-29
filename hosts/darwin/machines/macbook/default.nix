@@ -8,8 +8,6 @@ in
   # Import cấu hình darwin chung
   imports = [];
 
-  # Hostname của máy
-  networking.hostName = "macbook";
 
   # Các cấu hình đặc thù cho máy macbook
   nixpkgs.config = {
@@ -161,10 +159,6 @@ in
     # Các dịch vụ đặc thù cho máy macbook
   };
 
-  # Cấu hình macOS đặc thù
-  system.defaults = {
-    # Cấu hình đặc thù cho macOS trên máy này
-  };
 
   # Các thiết lập khác
   users.users.mike = {
@@ -172,6 +166,4 @@ in
     home = "/Users/mike";
   };
 
-  # Phiên bản hệ thống
-  system.stateVersion = 4;
 }
