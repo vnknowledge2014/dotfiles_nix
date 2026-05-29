@@ -223,7 +223,7 @@ install_rustup() {
     print_info "Đang cài đặt Rustup từ $install_url..."
     local tmp_script
     tmp_script=$(mktemp)
-    if curl --proto '=https' --tlsv1.2 -sSf "$install_url" -o "$tmp_script" && sh "$tmp_script" -s -- --no-modify-path -y --default-toolchain "$default_toolchain"; then
+    if curl --proto '=https' --tlsv1.2 -sSf "$install_url" -o "$tmp_script" && sh "$tmp_script" -y --no-modify-path --default-toolchain "$default_toolchain"; then
         rm -f "$tmp_script"
         print_success "Đã cài đặt Rustup thành công"
         source "$HOME/.cargo/env"

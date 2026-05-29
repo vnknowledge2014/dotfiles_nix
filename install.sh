@@ -200,6 +200,22 @@ case $OS in
     
     # --- Bootstrap: Nix ---
     if ! command -v nix &> /dev/null; then
+      # Dọn dẹp file backup từ lần cài Nix trước (nếu có)
+      # Nix installer sẽ backup /etc/bashrc → /etc/bashrc.backup-before-nix, v.v.
+      # Nếu backup đã tồn tại từ lần cài trước, installer sẽ bị lỗi.
+      for f in /etc/bashrc /etc/bash.bashrc /etc/zshrc /etc/zprofile; do
+        backup="${f}.backup-before-nix"
+        if [[ -f "$backup" ]]; then
+          if [[ ! -f "$f" ]]; then
+            echo "Khôi phục $backup → $f (dọn dẹp từ lần cài Nix trước)..."
+            sudo mv "$backup" "$f"
+          else
+            echo "Xóa backup cũ $backup (file gốc $f đã tồn tại)..."
+            sudo rm -f "$backup"
+          fi
+        fi
+      done
+
       echo "Cài đặt Nix..."
       sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install)
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
