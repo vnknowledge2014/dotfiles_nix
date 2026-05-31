@@ -33,4 +33,22 @@ in
   # Phiên bản Home Manager
   home.stateVersion = "25.05";
   programs.home-manager.enable = true;
+
+  # Tự động thiết lập giới hạn ZFS ARC (16GB) nếu phát hiện máy có ZFS nhưng chưa cấu hình
+  home.activation.zfs-arc-limit = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ -d /sys/module/zfs ]; then
+      if [ ! -f /etc/modprobe.d/zfs.conf ] || ! grep -q "zfs_arc_max" /etc/modprobe.d/zfs.conf 2>/dev/null; then
+        echo -e "\n\e[1;33m[ZFS ARC Tuning] Phát hiện hệ thống có module ZFS nhưng chưa cấu hình giới hạn ARC.\e[0m"
+        echo -e "\e[1;34mĐang tự động thiết lập vĩnh viễn giới hạn 16GB ZFS ARC vào /etc/modprobe.d/zfs.conf...\e[0m"
+        
+        # Thử ghi cấu hình và update initramfs bằng sudo
+        if sudo sh -c 'echo "options zfs zfs_arc_max=17179869184" >> /etc/modprobe.d/zfs.conf && update-initramfs -u -k all'; then
+          echo -e "\e[1;32m[ZFS ARC Tuning] Đã cấu hình giới hạn ZFS ARC 16GB thành công!\e[0m\n"
+        else
+          echo -e "\e[1;31m[ZFS ARC Tuning] Không thể thiết lập tự động do thiếu quyền sudo. Bạn hãy tự chạy lệnh sau:\e[0m"
+          echo -e "  echo 'options zfs zfs_arc_max=17179869184' | sudo tee -a /etc/modprobe.d/zfs.conf && sudo update-initramfs -u -k all\n"
+        fi
+      fi
+    fi
+  '';
 }

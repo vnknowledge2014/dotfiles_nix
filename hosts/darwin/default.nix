@@ -60,6 +60,12 @@
     fi
   '';
   
+  # OpenZFS Tuning — Limit ZFS ARC memory to 16GB (16 * 1024 * 1024 * 1024)
+  # Prevents kernel_task / Wired Memory exhaustion under heavy I/O
+  environment.etc."zfs/zfs.conf".text = ''
+    vfs.zfs.arc.max=17179869184
+  '';
+
   # Phiên bản hệ thống
   system.stateVersion = 4;
 }

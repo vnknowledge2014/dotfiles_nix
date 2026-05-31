@@ -63,6 +63,12 @@ in
     elif [ -f /usr/local/bin/brew ]; then
       eval "$(/usr/local/bin/brew shellenv)"
     fi
+
+    # OpenZFS tools — prioritize 2.3.1 userland matching the loaded kext
+    # Prevents version mismatch with /usr/local/sbin/zpool (1.9.4)
+    if [ -d /usr/local/zfs/bin ]; then
+      export PATH="/usr/local/zfs/bin:/usr/local/zfs/sbin:$PATH"
+    fi
   '';
   
   # Phiên bản Home Manager

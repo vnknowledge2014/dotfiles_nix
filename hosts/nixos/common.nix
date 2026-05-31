@@ -34,5 +34,8 @@
 
   # ZFS Support
   boot.supportedFilesystems = [ "zfs" ];
+  # Limit ZFS ARC memory to 16GB (16 * 1024 * 1024 * 1024)
+  # Prevents RAM exhaustion under heavy I/O workloads
+  boot.extraModprobeConfig = "options zfs zfs_arc_max=17179869184";
   # Note: networking.hostId must be set in machine-specific config (e.g., generated via `head -c 4 /dev/urandom | od -A n -t x4`)
 }
