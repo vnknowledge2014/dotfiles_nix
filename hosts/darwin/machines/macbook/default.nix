@@ -84,7 +84,7 @@ in
     "quarkdown-labs/quarkdown/quarkdown"
     
     # Sync Additions
-    "anomalyco/tap/opencode/opencode"
+    "anomalyco/tap/opencode"
     "cocoapods"
     "llvm"
     "llvm@14"
