@@ -20,7 +20,7 @@ in
   home = {
     username = username;
     homeDirectory = lib.mkForce "/Users/${username}";
-    stateVersion = "25.05";
+    stateVersion = "26.05";
   };
   
   # Kích hoạt các module cơ bản

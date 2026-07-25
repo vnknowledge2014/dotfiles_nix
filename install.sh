@@ -391,11 +391,11 @@ case $OS in
     # --- Rebuild: Home Manager ---
     echo ""
     echo "Cài đặt home-manager..."
-    if nix --extra-experimental-features "nix-command flakes" run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME; then
+    if nix --extra-experimental-features "nix-command flakes" run github:nix-community/home-manager/release-26.05 -- switch --flake .#$USERNAME@$HOSTNAME; then
       echo "✓ Home Manager switch thành công"
     else
       echo "Thử lại với nix-shell..."
-      nix-shell -p nixVersions.stable --run "nix --extra-experimental-features \"nix-command flakes\" run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME"
+      nix-shell -p nixVersions.stable --run "nix --extra-experimental-features \"nix-command flakes\" run github:nix-community/home-manager/release-26.05 -- switch --flake .#$USERNAME@$HOSTNAME"
     fi
     
     # --- Platform-specific extras (Nix không quản lý được) ---

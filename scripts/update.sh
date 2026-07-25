@@ -139,7 +139,7 @@ case $OS in
         ;;
     ubuntu)
         print_info "home-manager switch..."
-        if nix run github:nix-community/home-manager/release-25.05 -- switch --flake .#$USERNAME@$HOSTNAME; then
+        if nix run github:nix-community/home-manager/release-26.05 -- switch --flake .#$USERNAME@$HOSTNAME; then
             print_success "Home Manager switch thành công"
         else
             print_error "Home Manager switch thất bại"

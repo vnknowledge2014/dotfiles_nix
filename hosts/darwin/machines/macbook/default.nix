@@ -24,8 +24,10 @@ in
   extraTaps = if enableColimaAI then [
     "slp/krunkit"
     "quarkdown-labs/quarkdown"
+    "anomalyco/tap"
   ] else [
     "quarkdown-labs/quarkdown"
+    "anomalyco/tap"
   ];
   
   extraBrews = [
@@ -55,7 +57,7 @@ in
     
     # Media
     "mpv"
-    "ffmpeg"
+    "ffmpeg-full"
     "yt-dlp"
     
     # Dev tools
@@ -80,6 +82,13 @@ in
     
     # Utilities
     "quarkdown-labs/quarkdown/quarkdown"
+    
+    # Sync Additions
+    "anomalyco/tap/opencode/opencode"
+    "cocoapods"
+    "llvm"
+    "llvm@14"
+    "llvm@15"
   ] ++ lib.optionals enableColimaAI [
     "krunkit"
   ];

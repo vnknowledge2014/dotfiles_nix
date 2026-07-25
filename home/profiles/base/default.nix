@@ -138,6 +138,7 @@
     jq
     gh
     neofetch
+    protobuf
     
     # Container tools (cross-platform)
     docker-client
@@ -160,8 +161,12 @@
     # Build tools
     cmake
     pkg-config
+    llvm
+    llvmPackages_14.llvm
+    llvmPackages_15.llvm
     # Media tools
     imagemagick
+    ffmpeg-full
     # Kubernetes (cross-platform)
     kind
     # Terminal utilities
