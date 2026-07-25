@@ -31,8 +31,9 @@ in {
   config = mkIf cfg.enable {
     programs.git = {
       enable = true;
-      aliases = cfg.aliases;
-      extraConfig = cfg.extraConfig;
+      settings = cfg.extraConfig // {
+        alias = cfg.aliases;
+      };
     };
   };
 }

@@ -23,9 +23,9 @@
   '';
 
   # Git Identity
-  programs.git = {
-    userName = "architectureman";
-    userEmail = "vnknowledge2014@gmail.com";
+  programs.git.settings.user = {
+    name = "architectureman";
+    email = "vnknowledge2014@gmail.com";
   };
   
   # macOS-specific packages (thêm ngoài base)

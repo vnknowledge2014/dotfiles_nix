@@ -29,9 +29,9 @@
   '';
 
   # Git Identity — BẮT BUỘC SỬA cho đúng tên của bạn
-  programs.git = {
-    userName = "Your Name";
-    userEmail = "your.email@example.com";
+  programs.git.settings.user = {
+    name = "Your Name";
+    email = "your.email@example.com";
   };
 
   # Packages cá nhân (thêm ngoài base)

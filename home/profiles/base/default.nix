@@ -63,7 +63,7 @@
             fi
           fi
           
-          neofetch
+          fastfetch
           export PATH="''${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
           
           # Cargo/Rustup (guard nếu chưa cài)
@@ -137,7 +137,7 @@
     fd
     jq
     gh
-    neofetch
+    fastfetch
     protobuf
     
     # Container tools (cross-platform)
