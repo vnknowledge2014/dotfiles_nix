@@ -9,6 +9,7 @@
     ../../modules/editors
     ../../modules/terminal
     ../../modules/secrets.nix
+    ../../modules/services/9router.nix
   ];
 
   # ═══════════════════════════════════════════════════════════
@@ -115,6 +116,10 @@
         mouse = true;
       };
       ghostty.enable = true;
+    };
+    
+    services = {
+      "9router".enable = true;
     };
   };
 
