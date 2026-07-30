@@ -70,7 +70,7 @@ Save & quit — SOPS tự mã hóa values, giữ nguyên keys.
 sops -d secrets/shared/api-keys.yaml
 
 # Export ra biến môi trường
-eval $(sops -d --output-type dotenv secrets/shared/api-keys.yaml)
+set -a; source <(sops -d --output-type dotenv secrets/shared/api-keys.yaml); set +a
 ```
 
 ### Sửa secret có sẵn

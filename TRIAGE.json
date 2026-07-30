@@ -1,0 +1,47 @@
+{
+  "triaged_at": "2026-07-30T09:34:00+07:00",
+  "triage_context": {
+    "environment": "Local/Internal",
+    "threat_model": "THREAT_MODEL.md",
+    "noise_tolerance": "precision"
+  },
+  "summary": {
+    "input": 2,
+    "duplicates": 0,
+    "false_positives": 0,
+    "confirmed": 2,
+    "high": 1,
+    "medium": 0,
+    "low": 1
+  },
+  "findings": [
+    {
+      "id": "f001",
+      "verdict": "true_positive",
+      "verify_verdict": "exploitable",
+      "severity": "HIGH",
+      "confidence": 0.95,
+      "vote_breakdown": {"true_positive": 3, "false_positive": 0, "cannot_verify": 0},
+      "preconditions": ["Attacker compromises the upstream `9router` npm package"],
+      "access_level": "unauthenticated_remote",
+      "owner_hint": "component: home/modules/services/; top committer mike",
+      "rationale": "The `npx -y 9router@latest` command forces a dynamic fetch of the newest version on every service start. This is a classic supply chain vulnerability; compromising the npm package results in immediate, automatic code execution as the current user.",
+      "refute_reasons": [],
+      "exclusion_rule": null
+    },
+    {
+      "id": "f002",
+      "verdict": "true_positive",
+      "verify_verdict": "mitigated",
+      "severity": "LOW",
+      "confidence": 0.8,
+      "vote_breakdown": {"true_positive": 2, "false_positive": 1, "cannot_verify": 0},
+      "preconditions": ["Attacker has commit access to modify secrets/shared/api-keys.yaml"],
+      "access_level": "local",
+      "owner_hint": "component: docs/; top committer mike",
+      "rationale": "While `eval` on `sops` output is a potential command injection vector, it requires the attacker to already have commit access to the repository to modify the SOPS encrypted payload. Still, it's a bad practice and should be replaced.",
+      "refute_reasons": [],
+      "exclusion_rule": null
+    }
+  ]
+}
