@@ -91,6 +91,12 @@ homeConfigurations = {
 
 Xem [SECRETS.md](./SECRETS.md) để cấu hình SOPS/Age.
 
+## Bước 7: Cấu hình AI IDE với 9Router
+
+Hệ thống đã tự động cài đặt và chạy ngầm service `9router`. Nếu bạn sử dụng các AI IDE như **Cursor**, **Cline**, hay plugin gọi API LLM:
+- Chuyển `Base URL` thành: `http://localhost:20128/v1`
+- `9router` sẽ tự động route các request OpenAI-compatible đến model cục bộ hoặc API từ xa an toàn.
+
 ## Kiểm tra sức khỏe
 
 ```bash

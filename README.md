@@ -11,6 +11,9 @@ Hỗ trợ: **NixOS, macOS, Ubuntu, và WSL**.
 - **Zero-Warnings CI/CD**: Hệ thống đã được khử toàn bộ lỗi đệ quy vô hạn (Infinite Recursion) và cảnh báo Linter (`statix`, `deadnix`). Luôn chạy `nix flake check` trên mỗi PR để đảm bảo an toàn.
 - **Secrets Management (SOPS + Age)**: Mã hóa API keys, passwords an toàn trong Git. Hỗ trợ 2 phân cấp: Shared Secrets (cho cả team) và Per-User Secrets.
 - **Dev Shell (`nix develop`)**: Môi trường phát triển chuẩn hóa với linter và formatter tích hợp.
+- **9Router AI Proxy**: Tích hợp sẵn daemon proxy LLM đa nền tảng (`systemd`/`launchd`), cung cấp endpoint `http://localhost:20128/v1` chuẩn OpenAI cho các IDE (Cursor, Cline).
+- **Cross-Platform Virtualization**: Tích hợp sẵn kiến trúc ảo hóa toàn cầu với QEMU và Colima cho mọi nền tảng.
+- **Tối Ưu Hiệu Năng**: Tự động giới hạn ZFS ARC (RAM) trên Linux giúp tránh lỗi OOM khi dùng chung với LLM.
 
 ## 🚀 Dành cho Thành Viên Mới (Onboarding)
 
