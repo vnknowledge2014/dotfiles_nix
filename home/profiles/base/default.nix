@@ -150,6 +150,7 @@
     docker-compose
     docker-credential-helpers
     lazydocker
+    qemu
     
     # Kubernetes
     kubectl
