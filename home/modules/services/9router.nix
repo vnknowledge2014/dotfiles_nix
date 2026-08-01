@@ -11,7 +11,7 @@ let
     
     # Run 9router (npx will auto-download if not present)
     echo "Starting 9router..."
-    exec npx -y 9router@0.5.45
+    exec npx -y 9router@0.5.45 --no-browser --tray
   '';
 in {
   options.modules.services."9router" = {
