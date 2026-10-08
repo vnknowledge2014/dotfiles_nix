@@ -1,27 +1,16 @@
-{
-  config,
-  lib,
-  pkgs,
-  system,
-  inputs,
-  ...
-}:
+{ lib, ... }:
 
 {
   imports = [
     ../base
   ];
 
-  # Override: Ubuntu-specific oh-my-zsh plugin
-  modules.shell.zsh.ohmyzsh.plugins = [
-    "git"
-    "ubuntu"
-    "docker"
-  ];
+  # Profile này dùng chung cho Ubuntu (home/ubuntu.nix) và NixOS-WSL (home/wsl.nix).
+  # Những gì riêng của từng OS (plugin "ubuntu", /snap/bin, incus...) nằm ở file OS đó.
 
   # Greeting
   modules.shell.zsh.extraConfig = lib.mkAfter ''
-    echo "Welcome to your Ubuntu development environment, RND!"
+    echo "Welcome to your development environment, RND!"
     echo "Remember to stay hydrated and take breaks while coding!"
   '';
 
@@ -29,15 +18,5 @@
   programs.git.settings.user = {
     name = "architectureman";
     email = "vnknowledge2014@gmail.com";
-  };
-
-  # Ubuntu-specific packages (thêm ngoài base)
-  home.packages = with pkgs; [
-    incus # Ubuntu-specific container tool
-  ];
-
-  # Ubuntu-specific env vars
-  home.sessionVariables = {
-    PATH = lib.mkForce "$HOME/.cargo/bin:$HOME/.local/bin:/snap/bin:$PATH";
   };
 }

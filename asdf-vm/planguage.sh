@@ -354,7 +354,7 @@ install_with_bootstrap() {
     # Kiểm tra đã cài chưa
     if [ -x "$install_path/bin/$plugin_name" ] || [ -x "$install_path/$plugin_name" ]; then
         print_warning "$plugin_name@$version đã được cài đặt"
-        asdf set "$plugin_name" "$version" --home 2>/dev/null || true
+        asdf set -u "$plugin_name" "$version" 2>/dev/null || true
         return 0
     fi
 
@@ -455,7 +455,7 @@ install_with_bootstrap() {
 
     # Bước 6: Set version và reshim
     asdf reshim "$plugin_name" "$version" 2>/dev/null || true
-    asdf set "$plugin_name" "$version" --home 2>/dev/null || asdf global "$plugin_name" "$version" 2>/dev/null
+    asdf set -u "$plugin_name" "$version" 2>/dev/null || asdf global "$plugin_name" "$version" 2>/dev/null
 
     print_success "Đã cài đặt $plugin_name@$version qua bootstrap"
     return 0
@@ -473,7 +473,7 @@ install_version() {
     
     if asdf install "$plugin_name" "$version"; then
         print_success "Đã cài đặt $plugin_name phiên bản $version"
-        asdf set "$plugin_name" "$version" --home 2>/dev/null || asdf global "$plugin_name" "$version" 2>/dev/null
+        asdf set -u "$plugin_name" "$version" 2>/dev/null || asdf global "$plugin_name" "$version" 2>/dev/null
     else
         print_error "Không thể cài đặt $plugin_name"
         return 1

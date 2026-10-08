@@ -8,7 +8,18 @@
 with lib;
 let
   cfg = config.modules.terminal;
-  clipboardCmd = if pkgs.stdenv.isDarwin then "pbcopy" else "xclip -in -selection clipboard";
+  # Chọn công cụ clipboard lúc chạy: macOS, WSL (clip.exe), Wayland, X11
+  clipboardCmd =
+    if pkgs.stdenv.isDarwin then
+      "pbcopy"
+    else
+      "${pkgs.writeShellScript "tmux-copy" ''
+        if command -v clip.exe >/dev/null 2>&1; then exec clip.exe
+        elif [ -n "$WAYLAND_DISPLAY" ]; then exec ${pkgs.wl-clipboard}/bin/wl-copy
+        elif [ -n "$DISPLAY" ]; then exec ${pkgs.xclip}/bin/xclip -in -selection clipboard
+        else cat >/dev/null
+        fi
+      ''}";
 in
 {
   options.modules.terminal = {
@@ -141,7 +152,7 @@ in
       text = ''
         # Theme
         theme = Catppuccin Macchiato
-        font-family = Cascadia Mono NF
+        font-family = FiraCode Nerd Font Mono
         font-synthetic-style = false
         font-size = 12
 

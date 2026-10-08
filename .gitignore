@@ -1,1 +1,5 @@
 result
+result-*
+.antigravitycli/
+# asdf: phiên bản ngôn ngữ đặt ở ~/.tool-versions (planguage.sh dùng --home), không theo repo
+.tool-versions

@@ -56,10 +56,33 @@ let
 
   # Fallback: Cài bằng activation script (dùng install.sh từ trang chủ)
   # Áp dụng khi không có sha256 hoặc muốn dùng phiên bản mới nhất
+  # PATH lúc activation của Home Manager không có ~/.local/bin, ~/.antigravity/bin...
+  # nên kiểm tra trực tiếp các vị trí install script hay đặt binary.
   cliInstallScript = ''
-    if ! command -v antigravity-cli &>/dev/null && ! command -v agy &>/dev/null; then
+    found=""
+    for bin in antigravity-cli agy; do
+      for dir in "$HOME/.local/bin" "$HOME/.antigravity/bin" "$HOME/bin" /usr/local/bin; do
+        [ -x "$dir/$bin" ] && found="$dir/$bin"
+      done
+    done
+    if [ -z "$found" ]; then
       echo "[antigravity-cli] Đang cài đặt bằng install script chính thức..."
-      curl -fsSL https://antigravity.google/cli/install.sh | bash
+      script="$(${pkgs.coreutils}/bin/mktemp)"
+      if ${pkgs.curl}/bin/curl -fsSL https://antigravity.google/cli/install.sh -o "$script"; then
+        PATH="${
+          lib.makeBinPath [
+            pkgs.curl
+            pkgs.coreutils
+            pkgs.gnutar
+            pkgs.gzip
+            pkgs.unzip
+          ]
+        }:$PATH" \
+          $DRY_RUN_CMD ${pkgs.bash}/bin/bash "$script" || echo "[antigravity-cli] Cài đặt thất bại — bỏ qua"
+      else
+        echo "[antigravity-cli] Không tải được install script (offline?) — bỏ qua"
+      fi
+      rm -f "$script"
     fi
   '';
 in

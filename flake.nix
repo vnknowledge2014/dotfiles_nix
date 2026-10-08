@@ -31,10 +31,7 @@
 
   outputs =
     {
-      self,
       nixpkgs,
-      nixpkgs-unstable,
-      nixos-hardware,
       home-manager,
       darwin,
       nixos-wsl,
@@ -227,9 +224,9 @@
       };
 
       # ═══════════════════════════════════════════════════════════
-      # FORMATTER — `nix fmt` sẽ dùng nixfmt-rfc-style (RFC 166)
+      # FORMATTER — `nix fmt` sẽ dùng nixfmt (RFC 166)
       # ═══════════════════════════════════════════════════════════
-      formatter = forAllSystems (system: nixpkgsFor.${system}.nixfmt-rfc-style);
+      formatter = forAllSystems (system: nixpkgsFor.${system}.nixfmt-tree);
 
       # ═══════════════════════════════════════════════════════════
       # DEV SHELL — `nix develop` cho contributors
@@ -242,7 +239,7 @@
         {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              nixfmt-rfc-style # Formatter (RFC 166)
+              nixfmt # Formatter (RFC 166)
               nil # Nix LSP
               statix # Nix linter
               deadnix # Phát hiện dead code

@@ -9,8 +9,6 @@ with lib;
 let
   cfg = config.modules.editors.antigravity;
 
-  hasValidHash = cfg.sha256 != "";
-
   # Define Antigravity package (Linux only)
   antigravity = pkgs.stdenv.mkDerivation rec {
     pname = "antigravity";
@@ -38,14 +36,14 @@ let
       mesa
       at-spi2-atk
       at-spi2-core
-      xorg.libX11
-      xorg.libXcomposite
-      xorg.libXdamage
-      xorg.libXext
-      xorg.libXfixes
-      xorg.libXrandr
-      xorg.libxcb
-      xorg.libxshmfence
+      libx11
+      libxcomposite
+      libxdamage
+      libxext
+      libxfixes
+      libxrandr
+      libxcb
+      libxshmfence
       pango
       cairo
     ];
@@ -90,10 +88,13 @@ in
 
     sha256 = mkOption {
       type = types.str;
-      default = "sha256-jIO5wWE/U1PvTEXrMrzpafbhs12rEj0hvbB1Oq7Rg7s=";
+      default = "";
       description = ''
         SHA256 hash of the Antigravity Linux package.
         Để trống để bỏ qua cài đặt qua Nix.
+
+        LƯU Ý: URL mặc định là trang tải về (HTML), không phải tarball — cần đặt
+        `url` trỏ tới file .tar.gz có version cụ thể cùng với hash tương ứng.
 
         Cập nhật hash khi có version mới:
           nix-prefetch-url --type sha256 https://antigravity.google/download/linux
@@ -103,7 +104,11 @@ in
   };
 
   # Chỉ cài trên Linux VÀ khi có hash hợp lệ — macOS dùng DMG qua install.sh
-  config = mkIf (cfg.enable && pkgs.stdenv.isLinux && cfg.sha256 != "") {
-    home.packages = [ antigravity ];
+  config = mkIf (cfg.enable && pkgs.stdenv.isLinux) {
+    home.packages = mkIf (cfg.sha256 != "") [ antigravity ];
+    warnings = optional (cfg.sha256 == "") ''
+      modules.editors.antigravity: chưa đặt url (tarball có version) + sha256 nên
+      Antigravity không được cài qua Nix trên Linux.
+    '';
   };
 }

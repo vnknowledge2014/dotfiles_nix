@@ -1,10 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  hostname,
-  ...
-}:
+{ pkgs, ... }:
 
 # Machine-specific template
 # Copy this file and rename to match your hostname

@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ config, lib, ... }:
 
 with lib;
 let
@@ -37,7 +32,10 @@ in
             "git"
             "docker"
           ];
-          description = "oh-my-zsh plugins";
+          description = ''
+            oh-my-zsh plugins. Các định nghĩa từ nhiều module được cộng dồn
+            (base + profile + file theo OS) và loại trùng khi áp dụng.
+          '';
         };
       };
 
@@ -63,7 +61,7 @@ in
       oh-my-zsh = mkIf cfg.zsh.ohmyzsh.enable {
         enable = true;
         theme = cfg.zsh.ohmyzsh.theme;
-        plugins = cfg.zsh.ohmyzsh.plugins;
+        plugins = unique cfg.zsh.ohmyzsh.plugins;
       };
 
       shellAliases = cfg.zsh.aliases;

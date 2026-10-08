@@ -35,14 +35,47 @@ case $OS_TYPE in
     echo "Tạo cấu hình cho $HOSTNAME..."
     mkdir -p "hosts/nixos/machines/$HOSTNAME"
     
-    # Tạo cấu hình phần cứng
+    MACHINE_DIR="hosts/nixos/machines/$HOSTNAME"
+
+    # Cấu hình phần cứng (chỉ sinh được khi đang chạy trên chính máy NixOS đó)
     if [[ -f "/etc/NIXOS" ]]; then
       echo "Tạo cấu hình phần cứng..."
-      sudo nixos-generate-config --dir "hosts/nixos/machines/$HOSTNAME"
+      nixos-generate-config --show-hardware-config > "$MACHINE_DIR/hardware-configuration.nix"
     else
-      echo "Không thể tạo cấu hình phần cứng. Hãy tạo thủ công sau."
-      cp -r hosts/nixos/machines/template/* "hosts/nixos/machines/$HOSTNAME/"
+      echo "Không ở trên NixOS — hãy chạy 'nixos-generate-config --show-hardware-config'"
+      echo "trên máy đích và lưu vào $MACHINE_DIR/hardware-configuration.nix."
+      echo "{ ... }: { }" > "$MACHINE_DIR/hardware-configuration.nix"
     fi
+
+    # flake.nix import thư mục này → cần default.nix
+    cat > "$MACHINE_DIR/default.nix" <<EOF
+{ pkgs, username, ... }:
+
+{
+  imports = [ ./hardware-configuration.nix ];
+
+  # Bootloader — chỉnh theo máy (systemd-boot cho UEFI)
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  # Bắt buộc khi bật ZFS (hosts/nixos/common.nix)
+  networking.hostId = "$(head -c 4 /dev/urandom | od -A n -t x4 | tr -d ' \n')";
+  boot.zfs.forceImportRoot = false;
+
+  time.timeZone = "Asia/Ho_Chi_Minh";
+
+  users.users.\${username} = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "networkmanager" ];
+    shell = pkgs.zsh;
+  };
+
+  networking.networkmanager.enable = true;
+
+  # Phiên bản NixOS lúc cài lần đầu — KHÔNG đổi khi nâng cấp
+  system.stateVersion = "26.05";
+}
+EOF
     
     echo "Đã tạo cấu hình cho $HOSTNAME."
     echo "Bạn có thể chỉnh sửa tại: hosts/nixos/machines/$HOSTNAME/"
@@ -67,6 +100,13 @@ case $OS_TYPE in
     ;;
 esac
 
-# Cập nhật flake.nix
-echo "Cập nhật flake.nix..."
-echo "Hãy thêm cấu hình cho $HOSTNAME vào flake.nix theo hướng dẫn trong README.md"
+# Flake chỉ thấy file đã được git track
+git add -- "hosts/$OS_TYPE/machines/$HOSTNAME" 2>/dev/null || true
+
+echo ""
+echo "Bước tiếp theo: thêm entry vào flake.nix, ví dụ:"
+if [[ "$OS_TYPE" == "nixos" ]]; then
+  echo "  nixosConfigurations.$HOSTNAME = mkNixOS { hostname = \"$HOSTNAME\"; username = \"<user>\"; };"
+else
+  echo "  darwinConfigurations.$HOSTNAME = mkDarwin { hostname = \"$HOSTNAME\"; username = \"<user>\"; system = \"aarch64-darwin\"; };"
+fi

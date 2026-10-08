@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ pkgs, ... }:
 
 {
   # Cấu hình chung cho tất cả hệ thống (NixOS, Darwin, WSL)

@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ config, lib, ... }:
 
 let
   # Cấu hình Snapd chung
@@ -16,23 +11,22 @@ let
 in
 {
   # Tích hợp Snapd
+  # Không cài snapd tự động trong activation (cần sudo + systemd); WSL mặc định
+  # không có systemd và cũng không cần app GUI → bỏ qua.
   home.activation.snapPackages = config.lib.dag.entryAfter [ "writeBoundary" ] ''
-    if command -v snap > /dev/null 2>&1; then
-      echo "Cài đặt các gói snap..."
-      
-      # Kết hợp danh sách
-      PACKAGES=(${lib.concatStringsSep " " (map (x: "\"${x}\"") (commonSnaps ++ extraSnaps))})
-      
+    SNAP=/usr/bin/snap
+    if grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; then
+      : # WSL — bỏ qua snap
+    elif [ ! -x "$SNAP" ] || [ ! -d /run/systemd/system ]; then
+      echo "snapd chưa sẵn sàng — bỏ qua snap. Cài bằng: sudo apt install -y snapd"
+    else
+      PACKAGES=(${lib.concatStringsSep " " (map lib.escapeShellArg (commonSnaps ++ extraSnaps))})
       for pkg in "''${PACKAGES[@]}"; do
-        if ! snap list | grep -q "^$pkg"; then
-          echo "Đang cài đặt $pkg..."
-          sudo snap install $pkg
+        if ! "$SNAP" list "$pkg" >/dev/null 2>&1; then
+          echo "Đang cài đặt snap $pkg..."
+          $DRY_RUN_CMD /usr/bin/sudo "$SNAP" install "$pkg" || echo "Không cài được snap $pkg"
         fi
       done
-    else
-      echo "Snapd không được cài đặt. Cài đặt snapd trước..."
-      sudo apt update
-      sudo apt install -y snapd
     fi
   '';
 }

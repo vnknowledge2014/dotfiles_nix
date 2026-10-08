@@ -42,6 +42,26 @@ detect_os() {
 OS=$(detect_os)
 HOSTNAME=$(hostname -s)
 USERNAME=$(whoami)
+IS_WSL=false
+grep -qi "microsoft" /proc/sys/kernel/osrelease 2>/dev/null && IS_WSL=true
+
+# Chọn entry trong flake.nix: <output> <tên mong muốn>
+# Khớp đúng tên → dùng; flake chỉ có 1 entry → dùng entry đó; ngược lại báo lỗi.
+resolve_flake_target() {
+    local output=$1 wanted=$2 names count
+    names=$(nix eval --raw ".#$output" --apply 'x: builtins.concatStringsSep " " (builtins.attrNames x)' 2>/dev/null)
+    for n in $names; do
+        [[ "$n" == "$wanted" ]] && { echo "$n"; return 0; }
+    done
+    count=$(wc -w <<< "$names" | tr -d ' ')
+    if [[ "$count" == 1 ]]; then
+        print_warning "Không có '$wanted' trong $output — dùng entry duy nhất: $names" >&2
+        echo "$names"
+        return 0
+    fi
+    print_error "Không có '$wanted' trong $output (hiện có: ${names:-trống}). Hãy thêm entry vào flake.nix." >&2
+    exit 1
+}
 
 echo "Hệ thống: $OS | Host: $HOSTNAME | User: $USERNAME"
 
@@ -98,7 +118,7 @@ if [[ "$OS" == "darwin" ]]; then
     print_section "Colima AI (Apple Silicon)"
     read -p "Bạn có muốn bật Colima AI (hỗ trợ GPU, cần cài thêm Krunkit)? [y/N] " enable_ai
     
-    MAC_CONFIG="hosts/darwin/machines/$HOSTNAME/default.nix"
+    MAC_CONFIG="hosts/darwin/machines/$(resolve_flake_target darwinConfigurations "$HOSTNAME")/default.nix"
     if [[ -f "$MAC_CONFIG" ]]; then
         if [[ "$enable_ai" =~ ^[Yy]$ ]]; then
             sed -E 's/^[[:blank:]]*enableColimaAI[[:blank:]]*=.*;/  enableColimaAI = true;/' "$MAC_CONFIG" > "${MAC_CONFIG}.tmp" && mv "${MAC_CONFIG}.tmp" "$MAC_CONFIG"
@@ -119,8 +139,9 @@ case $OS in
             print_error "darwin-rebuild không tìm thấy. Hãy chạy install.sh trước để bootstrap nix-darwin."
             exit 1
         fi
-        print_info "darwin-rebuild switch..."
-        if sudo -H "$DARWIN_REBUILD" switch --flake .#$HOSTNAME; then
+        FLAKE_TARGET=$(resolve_flake_target darwinConfigurations "$HOSTNAME")
+        print_info "darwin-rebuild switch --flake .#$FLAKE_TARGET..."
+        if sudo -H "$DARWIN_REBUILD" switch --flake ".#$FLAKE_TARGET"; then
             print_success "Darwin rebuild thành công"
         else
             print_error "Darwin rebuild thất bại"
@@ -128,9 +149,9 @@ case $OS in
         fi
         ;;
     nixos|nixos-wsl)
-        FLAKE_TARGET=$([[ "$OS" == "nixos-wsl" ]] && echo "wsl" || echo "$HOSTNAME")
+        FLAKE_TARGET=$(resolve_flake_target nixosConfigurations "$([[ "$OS" == "nixos-wsl" ]] && echo "wsl" || echo "$HOSTNAME")")
         print_info "nixos-rebuild switch --flake .#$FLAKE_TARGET..."
-        if sudo nixos-rebuild switch --flake .#$FLAKE_TARGET; then
+        if sudo nixos-rebuild switch --flake ".#$FLAKE_TARGET"; then
             print_success "NixOS rebuild thành công"
         else
             print_error "NixOS rebuild thất bại"
@@ -138,8 +159,9 @@ case $OS in
         fi
         ;;
     ubuntu)
-        print_info "home-manager switch..."
-        if nix run github:nix-community/home-manager/release-26.05 -- switch --flake .#$USERNAME@$HOSTNAME; then
+        FLAKE_TARGET=$(resolve_flake_target homeConfigurations "$USERNAME@$HOSTNAME")
+        print_info "home-manager switch --flake .#$FLAKE_TARGET..."
+        if nix run github:nix-community/home-manager/release-26.05 -- switch --flake ".#$FLAKE_TARGET"; then
             print_success "Home Manager switch thành công"
         else
             print_error "Home Manager switch thất bại"
@@ -162,10 +184,14 @@ fi
 # ============================================================================
 # 5. SNAP (Ubuntu only)
 # ============================================================================
-if [[ "$OS" == "ubuntu" ]] && command -v snap &>/dev/null; then
+# snapd cần systemd — WSL không bật systemd thì bỏ qua thay vì làm dừng script (set -e)
+if [[ "$OS" == "ubuntu" ]] && command -v snap &>/dev/null && [[ -d /run/systemd/system ]]; then
     print_section "Snap"
-    sudo snap refresh
-    print_success "Snap đã cập nhật"
+    if sudo snap refresh; then
+        print_success "Snap đã cập nhật"
+    else
+        print_warning "snap refresh thất bại — bỏ qua"
+    fi
 fi
 
 # ============================================================================
@@ -173,8 +199,7 @@ fi
 # ============================================================================
 if [[ "$OS" == "ubuntu" ]] && command -v flatpak &>/dev/null; then
     print_section "Flatpak"
-    flatpak update -y
-    print_success "Flatpak đã cập nhật"
+    flatpak update -y && print_success "Flatpak đã cập nhật" || print_warning "flatpak update thất bại — bỏ qua"
 fi
 
 # ============================================================================
@@ -190,7 +215,7 @@ fi
 # ============================================================================
 if command -v rustup &>/dev/null; then
     print_section "Rustup"
-    rustup update && print_success "Rust toolchain đã cập nhật"
+    rustup update && print_success "Rust toolchain đã cập nhật" || print_warning "rustup update thất bại"
     rustup self update 2>/dev/null && print_success "Rustup đã cập nhật" || true
 fi
 
@@ -211,7 +236,8 @@ fi
 # ============================================================================
 print_section "Health Check"
 if [[ -f "$SCRIPT_DIR/verify.sh" ]]; then
-    bash "$SCRIPT_DIR/verify.sh"
+    # verify.sh trả về số lỗi — không để set -e dừng trước khi in kết quả
+    bash "$SCRIPT_DIR/verify.sh" || print_warning "Health check phát hiện vấn đề (xem ở trên)"
 fi
 
 echo ""

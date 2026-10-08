@@ -72,6 +72,10 @@
     "elixir": {
       "repo": "https://github.com/asdf-vm/asdf-elixir.git",
       "version": "1.18.4"
+    },
+    "julia": {
+      "repo": "https://github.com/rkyleg/asdf-julia.git",
+      "version": "latest"
     }
   },
   "rustup": {

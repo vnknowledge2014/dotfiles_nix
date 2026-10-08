@@ -27,9 +27,15 @@ echo "Tạo profile cho $USERNAME..."
 mkdir -p "home/profiles/$USERNAME"
 cp -r home/profiles/template/* "home/profiles/$USERNAME/"
 
-# Cập nhật thông tin
-sed -i "s/Your Name/$FULLNAME/g" "home/profiles/$USERNAME/default.nix"
-sed -i "s/your\.email@example\.com/$EMAIL/g" "home/profiles/$USERNAME/default.nix"
+# Cập nhật thông tin (sed qua file tạm — tương thích GNU lẫn BSD/macOS sed)
+sed_escape() { printf '%s' "$1" | sed -e 's/[\\|&]/\\&/g'; }
+PROFILE_FILE="home/profiles/$USERNAME/default.nix"
+sed -e "s|Your Name|$(sed_escape "$FULLNAME")|g" \
+    -e "s|your\.email@example\.com|$(sed_escape "$EMAIL")|g" \
+    "$PROFILE_FILE" > "$PROFILE_FILE.tmp" && mv "$PROFILE_FILE.tmp" "$PROFILE_FILE"
+
+# Flake chỉ thấy file đã được git track
+git add -- "home/profiles/$USERNAME" 2>/dev/null || true
 
 echo "Đã tạo profile cho $USERNAME."
 echo "Bạn có thể chỉnh sửa thêm tại: home/profiles/$USERNAME/default.nix"

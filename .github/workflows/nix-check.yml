@@ -33,7 +33,7 @@ jobs:
         run: nix flake check --no-build
 
       - name: Check format
-        run: nix fmt -- --check .
+        run: nix fmt -- --ci
 
       - name: Lint (statix)
         run: nix run nixpkgs#statix -- check .

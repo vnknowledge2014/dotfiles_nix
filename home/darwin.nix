@@ -2,8 +2,6 @@
   config,
   lib,
   pkgs,
-  system,
-  inputs,
   hostname,
   username,
   ...
@@ -28,7 +26,7 @@ in
 
   # Thông tin cơ bản
   home = {
-    username = username;
+    inherit username;
     homeDirectory = lib.mkForce "/Users/${username}";
     stateVersion = "26.05";
   };
@@ -45,6 +43,8 @@ in
     dev.git.enable = true;
     editors.enable = true;
     terminal.enable = true;
+
+    shell.zsh.ohmyzsh.plugins = [ "macos" ];
   };
 
   # Các gói cơ bản cho macOS
@@ -66,20 +66,39 @@ in
   };
 
   # Integracja z Homebrew
-  programs.zsh.initContent = lib.mkIf config.programs.zsh.enable ''
-    # Homebrew integration
-    if [ -f /opt/homebrew/bin/brew ]; then
-      eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [ -f /usr/local/bin/brew ]; then
-      eval "$(/usr/local/bin/brew shellenv)"
-    fi
+  programs.zsh.initContent = lib.mkMerge [
+    (lib.mkIf config.programs.zsh.enable ''
+      # Homebrew integration
+      if [ -f /opt/homebrew/bin/brew ]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      elif [ -f /usr/local/bin/brew ]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+      fi
 
-    # OpenZFS tools — prioritize 2.3.1 userland matching the loaded kext
-    # Prevents version mismatch with /usr/local/sbin/zpool (1.9.4)
-    if [ -d /usr/local/zfs/bin ]; then
-      export PATH="/usr/local/zfs/bin:/usr/local/zfs/sbin:$PATH"
-    fi
-  '';
+      # OpenZFS tools — prioritize 2.3.1 userland matching the loaded kext
+      # Prevents version mismatch with /usr/local/sbin/zpool (1.9.4)
+      if [ -d /usr/local/zfs/bin ]; then
+        export PATH="/usr/local/zfs/bin:/usr/local/zfs/sbin:$PATH"
+      fi
+    '')
+
+    # Language runtimes are asdf's job on this machine, not Homebrew's.
+    #
+    # base/default.nix already puts the asdf shims on PATH, but `brew shellenv`
+    # above runs afterwards and prepends /usr/local/bin — so every tool Homebrew
+    # also ships (node, python, ruby, go…) shadowed the version named in
+    # .tool-versions. That is how a Homebrew `node`, pulled in only as another
+    # formula's dependency, came to outrank the asdf runtime: when Homebrew's
+    # copy broke, every project broke with it while asdf's own node was fine.
+    #
+    # mkAfter runs last, so re-prepending here keeps asdf ahead of Homebrew no
+    # matter how the block above is ordered.
+    (lib.mkAfter ''
+      if [ -d "''${ASDF_DATA_DIR:-$HOME/.asdf}/shims" ]; then
+        export PATH="''${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+      fi
+    '')
+  ];
 
   # Phiên bản Home Manager
   programs.home-manager.enable = true;

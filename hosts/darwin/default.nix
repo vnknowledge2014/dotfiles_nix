@@ -1,6 +1,4 @@
 {
-  config,
-  lib,
   pkgs,
   hostname,
   username,
@@ -54,14 +52,22 @@
     fi
 
     # Fix /usr/local ownership for Homebrew (prevents permission errors
-    # when darwin-rebuild runs brew as root)
+    # when darwin-rebuild runs brew as root).
+    # - Thư mục riêng của Homebrew: chown -R, nhưng chỉ khi owner đã bị lệch
+    #   (tránh duyệt lại toàn bộ cây ở mỗi lần rebuild).
+    # - bin/lib/share/...: dùng chung với installer khác (OpenZFS, Docker...) —
+    #   chỉ sửa owner của chính thư mục để brew tạo được symlink, không đệ quy.
     if [[ -d /usr/local ]]; then
-      echo "Fixing /usr/local ownership for Homebrew..."
-      for dir in /usr/local/Cellar /usr/local/var/homebrew /usr/local/share \
-                 /usr/local/lib /usr/local/bin /usr/local/opt /usr/local/Homebrew \
-                 /usr/local/Caskroom /usr/local/Frameworks; do
-        if [[ -d "$dir" ]]; then
+      for dir in /usr/local/Cellar /usr/local/Caskroom /usr/local/Homebrew \
+                 /usr/local/var/homebrew /usr/local/opt /usr/local/Frameworks; do
+        if [[ -d "$dir" ]] && [[ "$(stat -f %Su "$dir")" != "${username}" || -n "$(find "$dir" -maxdepth 2 ! -user ${username} -print -quit)" ]]; then
+          echo "Fixing ownership of $dir for Homebrew..."
           chown -R ${username}:staff "$dir"
+        fi
+      done
+      for dir in /usr/local/bin /usr/local/lib /usr/local/share /usr/local/include /usr/local/etc; do
+        if [[ -d "$dir" && "$(stat -f %Su "$dir")" != "${username}" ]]; then
+          chown ${username}:staff "$dir"
         fi
       done
       # Ensure fish completions dir exists and is writable
@@ -72,8 +78,11 @@
 
   # OpenZFS Tuning — Limit ZFS ARC memory to 16GB (16 * 1024 * 1024 * 1024)
   # Prevents kernel_task / Wired Memory exhaustion under heavy I/O
-  environment.etc."zfs/zfs.conf".text = ''
-    vfs.zfs.arc.max=17179869184
+  # OpenZFS on macOS đọc /etc/zfs/zsysctl.conf (zpool-import-all.sh → zsysctl -f)
+  # lúc boot; cú pháp vfs.zfs.* trong zfs.conf là của FreeBSD và không có tác dụng.
+  # Áp dụng ngay không cần reboot: sudo zsysctl -f /etc/zfs/zsysctl.conf
+  environment.etc."zfs/zsysctl.conf".text = ''
+    kstat.zfs.darwin.tunable.zfs_arc.max=17179869184
   '';
 
   # Phiên bản hệ thống

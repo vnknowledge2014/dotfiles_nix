@@ -1,10 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  system,
-  ...
-}:
+{ lib, pkgs, ... }:
 
 {
   # Import các module chung
@@ -41,11 +35,14 @@
         syntaxHighlighting.enable = true;
         ohmyzsh = {
           enable = true;
-          theme = "robbyrussell";
+          # Prompt do Starship đảm nhiệm (programs.starship bên dưới) — tắt theme oh-my-zsh
+          theme = "";
+          # Danh sách plugin được CỘNG DỒN (không ghi đè): profile và file theo OS
+          # (darwin.nix → "macos", ubuntu.nix → "ubuntu") chỉ khai báo plugin thêm.
           plugins = [
             "git"
             "docker"
-          ]; # Default — profile override thêm "macos"/"ubuntu"
+          ];
         };
         aliases = {
           ll = "eza -l --icons";
@@ -55,7 +52,6 @@
           g = "git";
         };
         extraConfig = ''
-          eval "$(starship init zsh)"
           HISTSIZE=10000
           SAVEHIST=10000
 
@@ -157,9 +153,6 @@
       protobuf
 
       # Container tools (cross-platform)
-      docker-client
-      docker-compose
-      docker-credential-helpers
       lazydocker
       qemu
 
@@ -167,25 +160,26 @@
       kubectl
       kubernetes-helm
       k9s
+      kind
     ]
-    # macOS: Colima là container runtime thay OrbStack/Docker Desktop
-    ++ lib.optionals pkgs.stdenv.isDarwin [
-      colima
-    ]
+    # macOS: Docker CLI + Colima do Homebrew quản lý (hosts/darwin/machines/*),
+    # vì docker-compose/buildx cần đăng ký vào thư mục cli-plugins của Homebrew.
     # Linux: nerdctl cho containerd native + packages tương đương macOS brew
     ++ lib.optionals pkgs.stdenv.isLinux [
+      docker-client
+      docker-compose
+      docker-buildx
+      docker-credential-helpers
       nerdctl
-      # Build tools
+      # Version manager cho ngôn ngữ (macOS cài qua Homebrew)
+      asdf-vm
+      # Build tools (llvmPackages_14/15 đã bị gỡ khỏi nixpkgs 26.05)
       cmake
       pkg-config
       llvm
-      llvmPackages_14.llvm
-      llvmPackages_15.llvm
       # Media tools
       imagemagick
       ffmpeg-full
-      # Kubernetes (cross-platform)
-      kind
       # Terminal utilities
       unar
       # LLM inference (tương đương llama.cpp trên brew)

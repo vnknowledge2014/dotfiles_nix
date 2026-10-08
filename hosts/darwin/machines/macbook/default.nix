@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ lib, pkgs, ... }:
 
 let
   # Đổi thành true để cài đặt Krunkit (cho phép Colima chạy AI Models bằng GPU)
@@ -38,24 +33,14 @@ in
         "anomalyco/tap"
       ];
 
+  # atuin, yazi, lazygit, lazydocker, btop, gh, kubectl, k9s, kind, helm
+  # được cài qua Nix (home/profiles/base) cho mọi nền tảng — không cài trùng ở đây.
   extraBrews = [
     # CLI tools
-    "atuin"
-    "yazi"
-    "lazygit"
-    "lazydocker"
-    "btop"
     "ast-grep"
     "tree-sitter"
-    "gh"
 
-    # Kubernetes
-    "kubernetes-cli"
-    "k9s"
-    "kind"
-    "helm"
-
-    # Container (Colima)
+    # Container (Colima) — Docker CLI + plugins do Homebrew quản lý trên macOS
     "colima"
     "docker"
     "docker-compose"
@@ -92,7 +77,9 @@ in
     "quarkdown-labs/quarkdown/quarkdown"
 
     # Sync Additions
+    # AI coding agents (claude-code là cask, xem extraCasks)
     "anomalyco/tap/opencode"
+    "pi-coding-agent"
     "cocoapods"
     "llvm"
     "llvm@14"
@@ -110,6 +97,7 @@ in
     "trae"
     "zed"
     "gitbutler"
+    "claude-code"
     "postman"
     "apidog"
 
@@ -118,9 +106,8 @@ in
     "arc"
     "zen"
 
-    # Terminal & Fonts
+    # Terminal (font FiraCode Nerd Font cài qua Nix: home/profiles/base)
     "ghostty"
-    "font-fira-code-nerd-font"
 
     # Android
     "android-commandlinetools"

@@ -1,10 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  hostname,
-  ...
-}:
+{ lib, pkgs, ... }:
 
 # Machine-specific overrides for macbook (mike's MacBook)
 # This file is automatically imported if hostname matches

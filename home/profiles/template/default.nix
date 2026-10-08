@@ -1,11 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  system,
-  inputs,
-  ...
-}:
+{ lib, pkgs, ... }:
 
 # ═══════════════════════════════════════════════════════════
 # TEMPLATE PROFILE — Copy để tạo profile mới cho team member
@@ -26,12 +19,10 @@
     ../base
   ];
 
-  # Override: oh-my-zsh plugins (base mặc định: ["git" "docker"])
-  # Thêm plugin theo OS: "macos", "ubuntu", "wsl"
-  modules.shell.zsh.ohmyzsh.plugins = [
-    "git"
-    "docker"
-  ];
+  # oh-my-zsh plugins: được CỘNG DỒN với base ["git" "docker"] và plugin theo OS
+  # ("macos" / "ubuntu" do home/darwin.nix / home/ubuntu.nix tự thêm).
+  # Chỉ liệt kê plugin bạn muốn thêm:
+  # modules.shell.zsh.ohmyzsh.plugins = [ "kubectl" ];
 
   # Greeting (tùy chỉnh)
   modules.shell.zsh.extraConfig = lib.mkAfter ''
@@ -51,6 +42,6 @@
 
   # Session variables cá nhân
   home.sessionVariables = {
-    EDITOR = "nvim";
+    # EDITOR = "nvim";  # base đã đặt sẵn
   };
 }

@@ -141,12 +141,18 @@ detect_os() {
   fi
 }
 
+is_wsl() {
+  grep -qi "microsoft" /proc/sys/kernel/osrelease 2>/dev/null
+}
+
 HOSTNAME=${HOSTNAME:-$(hostname -s)}
 USERNAME=${USERNAME:-$(whoami)}
 OS=$(detect_os)
+IS_WSL=false
+is_wsl && IS_WSL=true
 
 echo "Hệ thống phát hiện:"
-echo "  Hệ điều hành: $OS"
+echo "  Hệ điều hành: $OS$([[ "$IS_WSL" == true && "$OS" == "ubuntu" ]] && echo " (WSL)")"
 echo "  Hostname: $HOSTNAME"
 echo "  Username: $USERNAME"
 echo ""
@@ -163,6 +169,48 @@ fi
 export HOSTNAME=$HOSTNAME
 export USERNAME=$USERNAME
 
+# sed -i tương thích cả GNU (Linux) lẫn BSD (macOS)
+sed_inplace() {
+  local expr=$1 file=$2
+  sed "$expr" "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+}
+
+# Escape chuỗi để dùng làm phần thay thế trong sed s|...|...|
+sed_escape() {
+  printf '%s' "$1" | sed -e 's/[\\|&]/\\&/g'
+}
+
+nix_flakes() {
+  nix --extra-experimental-features "nix-command flakes" "$@"
+}
+
+# Flake chỉ thấy file đã được git track — add các file vừa tạo
+track_new_files() {
+  if git rev-parse --is-inside-work-tree &>/dev/null; then
+    git add -- "$@"
+  fi
+}
+
+# Chọn entry trong flake.nix: <output> <tên mong muốn>
+# In ra tên entry hợp lệ; hỏi người dùng nếu không khớp.
+resolve_flake_target() {
+  local output=$1 wanted=$2 names
+  names=$(nix_flakes eval --raw ".#$output" --apply 'x: builtins.concatStringsSep " " (builtins.attrNames x)' 2>/dev/null)
+  for n in $names; do
+    [[ "$n" == "$wanted" ]] && { echo "$n"; return 0; }
+  done
+  echo "" >&2
+  echo "⚠️  Không có '$wanted' trong $output của flake.nix." >&2
+  echo "    Các entry hiện có: ${names:-(trống)}" >&2
+  echo "    Để thêm máy mới, khai báo entry trong flake.nix (xem README) rồi chạy lại." >&2
+  read -p "Dùng entry nào? (Enter để thoát): " chosen
+  for n in $names; do
+    [[ "$n" == "$chosen" ]] && { echo "$n"; return 0; }
+  done
+  echo "Lỗi: entry không hợp lệ." >&2
+  exit 1
+}
+
 # ============================================================================
 # TẠO USER PROFILE (nếu chưa có)
 # ============================================================================
@@ -176,13 +224,9 @@ if [[ ! -d "home/profiles/$USERNAME" ]]; then
   read -p "Nhập tên đầy đủ: " FULLNAME
   read -p "Nhập email: " EMAIL
   
-  if [[ "$OS" == "darwin" ]]; then
-    sed -i '' "s/Your Name/$FULLNAME/g" "home/profiles/$USERNAME/default.nix"
-    sed -i '' "s/your\.email@example\.com/$EMAIL/g" "home/profiles/$USERNAME/default.nix"
-  else
-    sed -i "s/Your Name/$FULLNAME/g" "home/profiles/$USERNAME/default.nix"
-    sed -i "s/your\.email@example\.com/$EMAIL/g" "home/profiles/$USERNAME/default.nix"
-  fi
+  sed_inplace "s|Your Name|$(sed_escape "$FULLNAME")|g" "home/profiles/$USERNAME/default.nix"
+  sed_inplace "s|your\.email@example\.com|$(sed_escape "$EMAIL")|g" "home/profiles/$USERNAME/default.nix"
+  track_new_files "home/profiles/$USERNAME"
   
   echo "Đã tạo profile cho $USERNAME."
 fi
@@ -233,6 +277,16 @@ case $OS in
       fi
     fi
     
+    # --- Tạo machine config nếu chưa có (trước khi bootstrap nix-darwin) ---
+    if [[ ! -d "hosts/darwin/machines/$HOSTNAME" ]]; then
+      echo "Tạo cấu hình cho máy $HOSTNAME từ template..."
+      mkdir -p "hosts/darwin/machines/$HOSTNAME"
+      cp "hosts/darwin/machines/template/default.nix" "hosts/darwin/machines/$HOSTNAME/default.nix"
+      track_new_files "hosts/darwin/machines/$HOSTNAME"
+    fi
+
+    FLAKE_TARGET=$(resolve_flake_target darwinConfigurations "$HOSTNAME")
+
     # --- Bootstrap: nix-darwin ---
     if ! command -v darwin-rebuild &> /dev/null; then
       echo "Setup Xcode license accept"
@@ -245,24 +299,17 @@ case $OS in
 
       echo "Cài đặt nix-darwin..."
       NIX_BIN="$(command -v nix)"
-      sudo -H "$NIX_BIN" --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake .#$HOSTNAME
+      sudo -H "$NIX_BIN" --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake ".#$FLAKE_TARGET"
 
       [[ -f /etc/static/bashrc ]] && source /etc/static/bashrc
     fi
     
-    # --- Tạo machine config nếu chưa có ---
-    if [[ ! -d "hosts/darwin/machines/$HOSTNAME" ]]; then
-      echo "Tạo cấu hình cho máy $HOSTNAME từ template..."
-      mkdir -p "hosts/darwin/machines/$HOSTNAME"
-      cp "hosts/darwin/machines/template/default.nix" "hosts/darwin/machines/$HOSTNAME/default.nix"
-    fi
-
     # --- Colima AI Prompt ---
     echo ""
     echo "Cấu hình Colima AI (chỉ dành cho Apple Silicon):"
     read -p "Bạn có muốn bật Colima AI (hỗ trợ GPU, cài thêm Krunkit)? [y/N] " enable_ai
     
-    MAC_CONFIG="hosts/darwin/machines/$HOSTNAME/default.nix"
+    MAC_CONFIG="hosts/darwin/machines/$FLAKE_TARGET/default.nix"
     if [[ -f "$MAC_CONFIG" ]]; then
         if [[ "$enable_ai" =~ ^[Yy]$ ]]; then
             sed -E 's/^[[:blank:]]*enableColimaAI[[:blank:]]*=.*;/  enableColimaAI = true;/' "$MAC_CONFIG" > "${MAC_CONFIG}.tmp" && mv "${MAC_CONFIG}.tmp" "$MAC_CONFIG"
@@ -287,7 +334,7 @@ case $OS in
       exit 1
     fi
 
-    if sudo -H "$DARWIN_REBUILD" switch --flake .#$HOSTNAME; then
+    if sudo -H "$DARWIN_REBUILD" switch --flake ".#$FLAKE_TARGET"; then
       echo "✓ Xây dựng cấu hình Darwin thành công"
 
       echo ""
@@ -322,17 +369,15 @@ case $OS in
     
     # --- Tạo machine config nếu chưa có ---
     if [[ ! -d "hosts/nixos/machines/$HOSTNAME" ]]; then
-      echo "Tạo cấu hình cho $HOSTNAME..."
-      mkdir -p "hosts/nixos/machines/$HOSTNAME"
-      echo "Tạo cấu hình phần cứng..."
-      sudo nixos-generate-config --dir "hosts/nixos/machines/$HOSTNAME"
-      echo "Đã tạo cấu hình cho $HOSTNAME."
+      bash ./scripts/add-machine.sh "$HOSTNAME" nixos
     fi
     
+    FLAKE_TARGET=$(resolve_flake_target nixosConfigurations "$HOSTNAME")
+
     # --- Rebuild ---
     echo ""
     echo "Xây dựng cấu hình NixOS..."
-    sudo nixos-rebuild switch --flake .#$HOSTNAME
+    sudo nixos-rebuild switch --flake ".#$FLAKE_TARGET"
     echo "✓ Xây dựng cấu hình NixOS thành công"
     ;;
     
@@ -365,14 +410,18 @@ case $OS in
     # --- APT dependencies (Nix không quản lý APT) ---
     echo "Cài đặt build dependencies..."
     sudo apt update
-    sudo apt install -y build-essential curl git zsh flatpak gnome-software-plugin-flatpak gnupg2 \
+    # zsh: shell mặc định — HM chỉ cấu hình, không đổi login shell
+    sudo apt install -y build-essential curl git zsh gnupg2 \
       autoconf libssl-dev libncurses-dev libreadline-dev zlib1g-dev \
-      libbz2-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev \
-      zfsutils-linux
+      libbz2-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev unzip jq
     
-    # --- Flatpak ---
-    echo "Thiết lập Flatpak..."
-    sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    # WSL dùng kernel của Microsoft (không có ZFS) và không có desktop → bỏ qua
+    # ZFS, Flatpak, Snap GUI và Ghostty.
+    if [[ "$IS_WSL" != true ]]; then
+      sudo apt install -y zfsutils-linux flatpak gnome-software-plugin-flatpak
+      echo "Thiết lập Flatpak..."
+      sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    fi
     
     # --- Bootstrap: Nix ---
     if [[ -d "/nix" && -f "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]]; then
@@ -391,11 +440,17 @@ case $OS in
     # --- Rebuild: Home Manager ---
     echo ""
     echo "Cài đặt home-manager..."
-    if nix --extra-experimental-features "nix-command flakes" run github:nix-community/home-manager/release-26.05 -- switch --flake .#$USERNAME@$HOSTNAME; then
+    FLAKE_TARGET=$(resolve_flake_target homeConfigurations "$USERNAME@$HOSTNAME")
+    if nix_flakes run github:nix-community/home-manager/release-26.05 -- switch --flake ".#$FLAKE_TARGET"; then
       echo "✓ Home Manager switch thành công"
     else
       echo "Thử lại với nix-shell..."
-      nix-shell -p nixVersions.stable --run "nix --extra-experimental-features \"nix-command flakes\" run github:nix-community/home-manager/release-26.05 -- switch --flake .#$USERNAME@$HOSTNAME"
+      nix-shell -p nixVersions.stable --run "nix --extra-experimental-features \"nix-command flakes\" run github:nix-community/home-manager/release-26.05 -- switch --flake '.#$FLAKE_TARGET'"
+    fi
+
+    # Đặt zsh làm login shell (Home Manager không tự đổi)
+    if [[ "$(getent passwd "$USER" | cut -d: -f7)" != *zsh ]]; then
+      sudo chsh -s "$(command -v zsh)" "$USER" || echo "⚠️  Không đổi được shell, hãy chạy: chsh -s \$(which zsh)"
     fi
     
     # --- Platform-specific extras (Nix không quản lý được) ---
@@ -403,7 +458,12 @@ case $OS in
     # Docker Engine (APT)
     echo ""
     echo "Cài đặt Docker..."
-    if ! command -v docker &>/dev/null; then
+    if [[ "$IS_WSL" == true && ! -d /run/systemd/system ]]; then
+      echo "⚠️  WSL chưa bật systemd → bỏ qua Docker Engine."
+      echo "    Dùng Docker Desktop (WSL integration) hoặc bật systemd trong /etc/wsl.conf:"
+      echo "      [boot]"
+      echo "      systemd=true"
+    elif ! command -v docker &>/dev/null || ! dpkg -s docker-ce &>/dev/null; then
       echo "Thiết lập Docker repository..."
       sudo install -m 0755 -d /etc/apt/keyrings
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -424,41 +484,38 @@ case $OS in
     # Ghostty (.deb — chưa có trong nixpkgs cho Ubuntu non-NixOS)
     echo ""
     echo "Cài đặt Ghostty..."
-    if ! command -v ghostty &>/dev/null; then
+    if [[ "$IS_WSL" == true ]]; then
+      echo "Bỏ qua Ghostty trên WSL (dùng Windows Terminal)."
+    elif ! command -v ghostty &>/dev/null; then
       sudo dpkg --remove --force-remove-reinstreq ghostty 2>/dev/null || true
       sudo apt --fix-broken install -y
       sudo apt update
       sudo apt install -y libgtk4-layer-shell0
       
+      # Bản .deb được build riêng theo Ubuntu release + kiến trúc (versions.json)
       VERSIONS_FILE="./versions.json"
-      if [[ -f "$VERSIONS_FILE" ]] && command -v jq &>/dev/null; then
-        GHOSTTY_URL=$(jq -r '.tools.ghostty["ubuntu-deb"]' "$VERSIONS_FILE")
-      else
-        GHOSTTY_URL="https://github.com/mkasberg/ghostty-ubuntu/releases/download/1.2.2-0-ppa1/ghostty_1.2.2-0.ppa1_amd64_25.10.deb"
-      fi
+      GHOSTTY_TAG=$(jq -r '.tools.ghostty.tag' "$VERSIONS_FILE")
+      GHOSTTY_DEB_VERSION=$(jq -r '.tools.ghostty["deb-version"]' "$VERSIONS_FILE")
+      UBUNTU_RELEASE=$(. /etc/os-release && echo "$VERSION_ID")
+      DEB_ARCH=$(dpkg --print-architecture)
+      GHOSTTY_URL="https://github.com/mkasberg/ghostty-ubuntu/releases/download/${GHOSTTY_TAG}/ghostty_${GHOSTTY_DEB_VERSION}_${DEB_ARCH}_${UBUNTU_RELEASE}.deb"
       
-      wget -O /tmp/ghostty.deb "$GHOSTTY_URL" || curl -L -o /tmp/ghostty.deb "$GHOSTTY_URL"
-      sudo dpkg -i /tmp/ghostty.deb
-      sudo apt-get install -f -y
-      rm /tmp/ghostty.deb
-      echo "✓ Đã cài đặt Ghostty"
+      echo "Tải $GHOSTTY_URL"
+      curl -fL -o /tmp/ghostty.deb "$GHOSTTY_URL" || {
+        echo "⚠️  Không có bản Ghostty cho Ubuntu $UBUNTU_RELEASE/$DEB_ARCH — xem https://github.com/mkasberg/ghostty-ubuntu/releases"
+        rm -f /tmp/ghostty.deb
+      }
+      if [[ -f /tmp/ghostty.deb ]]; then
+        sudo dpkg -i /tmp/ghostty.deb
+        sudo apt-get install -f -y
+        rm /tmp/ghostty.deb
+        echo "✓ Đã cài đặt Ghostty"
+      fi
     else
       echo "✓ Ghostty đã được cài đặt"
     fi
     
-    # Snap packages (Nix không quản lý Snap)
-    echo ""
-    echo "Cài đặt Snap packages..."
-    for pkg in spotify; do
-      if ! snap list | grep -q "^$pkg "; then
-        echo "Đang cài đặt $pkg..."
-        sudo snap install $pkg
-        echo "✓ Đã cài đặt $pkg"
-      else
-        echo "✓ $pkg đã được cài đặt"
-      fi
-    done
-    
+    # Snap packages: do Home Manager quản lý (hosts/ubuntu/snapd.nix)
     
     # Antigravity trên Ubuntu → quản lý qua Nix module
     echo ""

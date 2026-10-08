@@ -9,8 +9,6 @@ with lib;
 let
   cfg = config.modules.editors.antigravityIde;
 
-  hasValidHash = cfg.sha256 != "";
-
   # Antigravity IDE — VS Code-based editor (Linux only)
   # macOS: được cài qua Homebrew Cask "antigravity-ide"
   antigravityIde = pkgs.stdenv.mkDerivation rec {
@@ -39,19 +37,19 @@ let
       mesa
       at-spi2-atk
       at-spi2-core
-      xorg.libX11
-      xorg.libXcomposite
-      xorg.libXdamage
-      xorg.libXext
-      xorg.libXfixes
-      xorg.libXrandr
-      xorg.libxcb
-      xorg.libxshmfence
+      libx11
+      libxcomposite
+      libxdamage
+      libxext
+      libxfixes
+      libxrandr
+      libxcb
+      libxshmfence
       pango
       cairo
       # VS Code-based dependencies bổ sung
       libsecret
-      xorg.libXtst
+      libxtst
     ];
 
     sourceRoot = ".";

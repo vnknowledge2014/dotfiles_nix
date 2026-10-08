@@ -1,11 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  system,
-  inputs,
-  ...
-}:
+{ lib, pkgs, ... }:
 
 # ═══════════════════════════════════════════════════════════
 # PROFILE: mike (macOS)
@@ -20,12 +13,9 @@
     ../base
   ];
 
-  # Override: macOS-specific oh-my-zsh plugin
-  modules.shell.zsh.ohmyzsh.plugins = [
-    "git"
-    "macos"
-    "docker"
-  ];
+  # oh-my-zsh: base đã có "git" "docker", darwin.nix thêm "macos".
+  # Thêm plugin riêng tại đây (danh sách được cộng dồn, không ghi đè):
+  # modules.shell.zsh.ohmyzsh.plugins = [ "kubectl" ];
 
   # Greeting
   modules.shell.zsh.extraConfig = lib.mkAfter ''

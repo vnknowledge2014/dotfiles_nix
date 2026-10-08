@@ -14,13 +14,19 @@ creation_rules:
     key_groups:
       - age:
           # Team Lead
-          - age1... # mike — Thay bằng public key thật
+          - age1dzyrhs443y6ssvucd5t54n0rw68pd6fyg4e0s5fsuj9rhu5ut50shgputs # mike
           # Members (thêm public key khi onboard)
           # - age1... # alice
           # - age1... # bob
 
-  # Secrets riêng từng người — chỉ người đó giải mã được
-  - path_regex: secrets/users/(.+)/.*\.yaml$
+  # Secrets riêng từng người — chỉ người đó giải mã được (mỗi người 1 rule)
+  - path_regex: secrets/users/mike/.*\.yaml$
     key_groups:
       - age:
-          - age1... # Thay bằng public key của người sở hữu thư mục
+          - age1dzyrhs443y6ssvucd5t54n0rw68pd6fyg4e0s5fsuj9rhu5ut50shgputs # mike
+
+  # Thêm người mới:
+  # - path_regex: secrets/users/<username>/.*\.yaml$
+  #   key_groups:
+  #     - age:
+  #         - age1... # <username>

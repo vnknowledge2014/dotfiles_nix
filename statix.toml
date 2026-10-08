@@ -1,0 +1,3 @@
+# statix — https://github.com/oppiliappan/statix
+# repeated_keys (W20): repo cố ý tách `home.x = …; home.y = …;` theo nhóm chức năng
+disabled = [ "repeated_keys" ]

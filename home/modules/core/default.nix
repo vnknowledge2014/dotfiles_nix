@@ -21,12 +21,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages =
-      with pkgs;
-      [
-        # Các công cụ cơ bản
-        # Secrets (sops + age) được quản lý bởi modules/secrets.nix
-      ]
-      ++ cfg.packages;
+    home.packages = with pkgs; cfg.packages;
   };
 }

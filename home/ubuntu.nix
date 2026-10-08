@@ -1,9 +1,6 @@
 {
-  config,
   lib,
   pkgs,
-  system,
-  inputs,
   hostname,
   username,
   ...
@@ -38,7 +35,15 @@ in
     dev.git.enable = true;
     editors.enable = true;
     terminal.enable = true;
+
+    shell.zsh.ohmyzsh.plugins = [ "ubuntu" ];
   };
+
+  # Ubuntu-specific packages & PATH (snap)
+  home.packages = with pkgs; [
+    incus
+  ];
+  home.sessionPath = [ "/snap/bin" ];
 
   # Phiên bản Home Manager
   home.stateVersion = "26.05";
