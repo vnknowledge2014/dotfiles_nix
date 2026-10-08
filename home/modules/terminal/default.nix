@@ -1,13 +1,19 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
   cfg = config.modules.terminal;
   clipboardCmd = if pkgs.stdenv.isDarwin then "pbcopy" else "xclip -in -selection clipboard";
-in {
+in
+{
   options.modules.terminal = {
     enable = mkEnableOption "Enable terminal configuration";
-    
+
     tmux = {
       enable = mkOption {
         type = types.bool;
@@ -24,17 +30,17 @@ in {
 
     alacritty = {
       enable = mkEnableOption "Enable Alacritty configuration";
-      
+
       settings = mkOption {
         type = types.attrs;
-        default = {};
+        default = { };
         description = "Alacritty settings";
       };
     };
-    
+
     ghostty = {
       enable = mkEnableOption "Enable Ghostty configuration";
-      
+
       extraConfig = mkOption {
         type = types.lines;
         default = "";
@@ -112,7 +118,7 @@ in {
           decorations = "full";
           startup_mode = "Windowed";
         };
-        
+
         font = {
           normal = {
             family = "JetBrains Mono";
@@ -120,7 +126,7 @@ in {
           };
           size = 12.0;
         };
-        
+
         colors = {
           primary = {
             background = "#2e3440";
@@ -129,8 +135,8 @@ in {
         };
       };
     };
-    
-    # Ghostty configuration 
+
+    # Ghostty configuration
     xdg.configFile."ghostty/config" = mkIf cfg.ghostty.enable {
       text = ''
         # Theme

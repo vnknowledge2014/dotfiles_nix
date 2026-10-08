@@ -1,9 +1,14 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
   cfg = config.modules.editors.antigravity;
-  
+
   hasValidHash = cfg.sha256 != "";
 
   # Define Antigravity package (Linux only)
@@ -15,8 +20,11 @@ let
       inherit (cfg) url sha256;
     };
 
-    nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.makeWrapper ];
-    
+    nativeBuildInputs = [
+      pkgs.autoPatchelfHook
+      pkgs.makeWrapper
+    ];
+
     buildInputs = with pkgs; [
       gtk3
       nss
@@ -47,7 +55,7 @@ let
     installPhase = ''
       mkdir -p $out/opt/antigravity
       cp -r * $out/opt/antigravity
-      
+
       mkdir -p $out/bin
       makeWrapper $out/opt/antigravity/antigravity $out/bin/antigravity \
         --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath buildInputs}
@@ -63,7 +71,8 @@ let
       EOF
     '';
   };
-in {
+in
+{
   options.modules.editors.antigravity = {
     enable = mkEnableOption "Enable Antigravity editor";
 

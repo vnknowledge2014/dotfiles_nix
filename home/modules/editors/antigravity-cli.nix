@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
@@ -16,7 +21,10 @@ let
       inherit (cfg) url sha256;
     };
 
-    nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.makeWrapper ];
+    nativeBuildInputs = [
+      pkgs.autoPatchelfHook
+      pkgs.makeWrapper
+    ];
 
     buildInputs = with pkgs; [
       # Các runtime dependency tối thiểu cho CLI binary (Node.js-based)
@@ -54,7 +62,8 @@ let
       curl -fsSL https://antigravity.google/cli/install.sh | bash
     fi
   '';
-in {
+in
+{
   options.modules.editors.antigravityCli = {
     enable = mkEnableOption "Enable Antigravity CLI";
 
@@ -97,7 +106,7 @@ in {
   config = mkIf (cfg.enable && pkgs.stdenv.isLinux) {
     # Mode 1: Reproducible Nix derivation (khi có sha256)
     home.packages = mkIf (cfg.sha256 != "") [ antigravityCli ];
-    
+
     # Mode 2: Install script chính thức (mặc định — luôn có bản mới nhất)
     home.activation.installAntigravityCli = mkIf (cfg.sha256 == "" && cfg.useInstallScript) (
       lib.hm.dag.entryAfter [ "writeBoundary" ] ''

@@ -1,22 +1,31 @@
-{ config, lib, pkgs, system, inputs, hostname, username, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  system,
+  inputs,
+  hostname,
+  username,
+  ...
+}:
 
 {
   # Import các module cơ bản
-  imports = [ 
+  imports = [
     ./modules/core
     ./modules/shell
     ./modules/dev/git.nix
     ./modules/editors
     ./profiles/${username}
   ];
-  
+
   # Thông tin cơ bản
   home = {
     username = username;
     homeDirectory = "/home/${username}";
     stateVersion = "26.05";
   };
-  
+
   # Kích hoạt các module cơ bản
   modules = {
     core = {
@@ -29,7 +38,7 @@
         fd
       ];
     };
-    
+
     shell = {
       enable = true;
       zsh = {
@@ -39,7 +48,10 @@
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "wsl" ];
+          plugins = [
+            "git"
+            "wsl"
+          ];
         };
         aliases = {
           ll = lib.mkForce "ls -l";
@@ -51,15 +63,15 @@
         };
       };
     };
-    
+
     dev.git.enable = true;
     editors.enable = true;
   };
-  
+
   # Các gói cơ bản cho WSL
   home.packages = with pkgs; [
     # CLI tools
-    wslu  # Tiện ích WSL
+    wslu # Tiện ích WSL
     # wsl-open  # Mở file Windows từ WSL (thay bằng wslview từ wslu)
     # wsl-clipboard
   ];
@@ -69,7 +81,7 @@
     zsh.initContent = lib.mkIf config.programs.zsh.enable ''
       # Cấu hình PATH cho WSL2
       export PATH="$HOME/.local/bin:$PATH"
-      
+
       # Fix permissions cảnh báo của zsh compinit
       if [[ -d /usr/share/zsh/site-functions ]]; then
         chmod -f g-w,o-w /usr/share/zsh/site-functions || true
@@ -77,10 +89,10 @@
 
       # Đường dẫn Windows
       export PATH=$PATH:/mnt/c/Windows/System32:/mnt/c/Windows
-      
+
       # Tích hợp WSL
       export BROWSER="wslview"
-      
+
       # Tự động chuyển đến thư mục Windows home khi mở terminal
       if [ -d "/mnt/c/Users/$USER" ]; then
         WINDOWS_HOME="/mnt/c/Users/$USER"

@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -7,7 +12,7 @@ let
   commonBrews = [
 
   ];
-  
+
   commonCasks = [
     "openzfs"
   ];
@@ -16,19 +21,19 @@ in
   options = {
     extraBrews = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "Additional Homebrew packages to install";
     };
 
     extraTaps = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "Additional Homebrew taps to add";
     };
 
     extraCasks = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "Additional Homebrew casks to install";
     };
   };
@@ -41,10 +46,9 @@ in
         cleanup = "zap";
         upgrade = true;
       };
-      
+
       global.brewfile = true;
-      
-      
+
       # Combine common and extra packages
       brews = commonBrews ++ config.extraBrews;
       casks = commonCasks ++ config.extraCasks;

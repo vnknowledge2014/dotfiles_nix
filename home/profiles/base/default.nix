@@ -1,4 +1,10 @@
-{ config, lib, pkgs, system, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  system,
+  ...
+}:
 
 {
   # Import các module chung
@@ -26,7 +32,7 @@
         fd
       ];
     };
-    
+
     shell = {
       enable = true;
       zsh = {
@@ -36,7 +42,10 @@
         ohmyzsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [ "git" "docker" ]; # Default — profile override thêm "macos"/"ubuntu"
+          plugins = [
+            "git"
+            "docker"
+          ]; # Default — profile override thêm "macos"/"ubuntu"
         };
         aliases = {
           ll = "eza -l --icons";
@@ -49,7 +58,7 @@
           eval "$(starship init zsh)"
           HISTSIZE=10000
           SAVEHIST=10000
-          
+
           if [ -n "$(command -v fzf)" ]; then
             source ${pkgs.fzf}/share/fzf/completion.zsh
             source ${pkgs.fzf}/share/fzf/key-bindings.zsh
@@ -63,10 +72,10 @@
               tmux new-session
             fi
           fi
-          
+
           fastfetch
           export PATH="''${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
-          
+
           # Cargo/Rustup (guard nếu chưa cài)
           [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 
@@ -82,14 +91,14 @@
         '';
       };
     };
-    
+
     dev.git = {
       enable = true;
       extraConfig = {
         core.editor = "nvim";
       };
     };
-    
+
     editors = {
       enable = true;
       neovim.enable = true;
@@ -106,9 +115,9 @@
         useInstallScript = true; # Dùng curl install.sh từ antigravity.google
       };
     };
-    
+
     secrets.enable = true;
-    
+
     terminal = {
       enable = true;
       tmux = {
@@ -117,7 +126,7 @@
       };
       ghostty.enable = true;
     };
-    
+
     services = {
       "9router".enable = true;
     };
@@ -126,64 +135,66 @@
   # ═══════════════════════════════════════════════════════════
   # PACKAGES CHUNG — Cài trên tất cả nền tảng
   # ═══════════════════════════════════════════════════════════
-  home.packages = with pkgs; [
-    # Fonts
-    nerd-fonts.fira-code
-    
-    # CLI utilities
-    atuin
-    yazi
-    lazygit
-    btop
-    eza
-    bat
-    fzf
-    ripgrep
-    fd
-    jq
-    gh
-    fastfetch
-    protobuf
-    
-    # Container tools (cross-platform)
-    docker-client
-    docker-compose
-    docker-credential-helpers
-    lazydocker
-    qemu
-    
-    # Kubernetes
-    kubectl
-    kubernetes-helm
-    k9s
-  ]
-  # macOS: Colima là container runtime thay OrbStack/Docker Desktop
-  ++ lib.optionals pkgs.stdenv.isDarwin [
-    colima
-  ]
-  # Linux: nerdctl cho containerd native + packages tương đương macOS brew
-  ++ lib.optionals pkgs.stdenv.isLinux [
-    nerdctl
-    # Build tools
-    cmake
-    pkg-config
-    llvm
-    llvmPackages_14.llvm
-    llvmPackages_15.llvm
-    # Media tools
-    imagemagick
-    ffmpeg-full
-    # Kubernetes (cross-platform)
-    kind
-    # Terminal utilities
-    unar
-    # LLM inference (tương đương llama.cpp trên brew)
-    llama-cpp
-    # Node version manager
-    fnm
-    # Android tools (tương đương android-commandlinetools cask)
-    android-tools
-  ];
+  home.packages =
+    with pkgs;
+    [
+      # Fonts
+      nerd-fonts.fira-code
+
+      # CLI utilities
+      atuin
+      yazi
+      lazygit
+      btop
+      eza
+      bat
+      fzf
+      ripgrep
+      fd
+      jq
+      gh
+      fastfetch
+      protobuf
+
+      # Container tools (cross-platform)
+      docker-client
+      docker-compose
+      docker-credential-helpers
+      lazydocker
+      qemu
+
+      # Kubernetes
+      kubectl
+      kubernetes-helm
+      k9s
+    ]
+    # macOS: Colima là container runtime thay OrbStack/Docker Desktop
+    ++ lib.optionals pkgs.stdenv.isDarwin [
+      colima
+    ]
+    # Linux: nerdctl cho containerd native + packages tương đương macOS brew
+    ++ lib.optionals pkgs.stdenv.isLinux [
+      nerdctl
+      # Build tools
+      cmake
+      pkg-config
+      llvm
+      llvmPackages_14.llvm
+      llvmPackages_15.llvm
+      # Media tools
+      imagemagick
+      ffmpeg-full
+      # Kubernetes (cross-platform)
+      kind
+      # Terminal utilities
+      unar
+      # LLM inference (tương đương llama.cpp trên brew)
+      llama-cpp
+      # Node version manager
+      fnm
+      # Android tools (tương đương android-commandlinetools cask)
+      android-tools
+    ];
 
   # ═══════════════════════════════════════════════════════════
   # STARSHIP — Prompt chung

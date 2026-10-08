@@ -1,22 +1,29 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.modules.shell;
-in {
+let
+  cfg = config.modules.shell;
+in
+{
   options.modules.shell = {
     enable = mkEnableOption "Enable shell configuration";
-    
+
     zsh = {
       enable = mkEnableOption "Enable zsh configuration";
-      
+
       autosuggestions = {
         enable = mkEnableOption "Enable zsh autosuggestions";
       };
-      
+
       syntaxHighlighting = {
         enable = mkEnableOption "Enable zsh syntax highlighting";
       };
-      
+
       ohmyzsh = {
         enable = mkEnableOption "Enable oh-my-zsh";
         theme = mkOption {
@@ -26,17 +33,20 @@ in {
         };
         plugins = mkOption {
           type = types.listOf types.str;
-          default = [ "git" "docker" ];
+          default = [
+            "git"
+            "docker"
+          ];
           description = "oh-my-zsh plugins";
         };
       };
-      
+
       aliases = mkOption {
         type = types.attrsOf types.str;
-        default = {};
+        default = { };
         description = "Shell aliases";
       };
-      
+
       extraConfig = mkOption {
         type = types.lines;
         default = "";
@@ -55,7 +65,7 @@ in {
         theme = cfg.zsh.ohmyzsh.theme;
         plugins = cfg.zsh.ohmyzsh.plugins;
       };
-      
+
       shellAliases = cfg.zsh.aliases;
       initContent = cfg.zsh.extraConfig;
     };

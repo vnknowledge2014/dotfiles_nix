@@ -1,4 +1,11 @@
-{ config, lib, pkgs, system, inputs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  system,
+  inputs,
+  ...
+}:
 
 # ═══════════════════════════════════════════════════════════
 # PROFILE: mike (macOS)
@@ -14,7 +21,11 @@
   ];
 
   # Override: macOS-specific oh-my-zsh plugin
-  modules.shell.zsh.ohmyzsh.plugins = [ "git" "macos" "docker" ]; 
+  modules.shell.zsh.ohmyzsh.plugins = [
+    "git"
+    "macos"
+    "docker"
+  ];
 
   # Greeting
   modules.shell.zsh.extraConfig = lib.mkAfter ''
@@ -27,7 +38,7 @@
     name = "architectureman";
     email = "vnknowledge2014@gmail.com";
   };
-  
+
   # macOS-specific packages (thêm ngoài base)
   home.packages = with pkgs; [
     # Thêm packages riêng cho Mike tại đây

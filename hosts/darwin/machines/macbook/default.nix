@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   # Đổi thành true để cài đặt Krunkit (cho phép Colima chạy AI Models bằng GPU)
@@ -6,8 +11,7 @@ let
 in
 {
   # Import cấu hình darwin chung
-  imports = [];
-
+  imports = [ ];
 
   # Các cấu hình đặc thù cho máy macbook
   nixpkgs.config = {
@@ -21,15 +25,19 @@ in
 
   # Cấu hình Homebrew
   # Machine-specific Homebrew config
-  extraTaps = if enableColimaAI then [
-    "slp/krunkit"
-    "quarkdown-labs/quarkdown"
-    "anomalyco/tap"
-  ] else [
-    "quarkdown-labs/quarkdown"
-    "anomalyco/tap"
-  ];
-  
+  extraTaps =
+    if enableColimaAI then
+      [
+        "slp/krunkit"
+        "quarkdown-labs/quarkdown"
+        "anomalyco/tap"
+      ]
+    else
+      [
+        "quarkdown-labs/quarkdown"
+        "anomalyco/tap"
+      ];
+
   extraBrews = [
     # CLI tools
     "atuin"
@@ -40,13 +48,13 @@ in
     "ast-grep"
     "tree-sitter"
     "gh"
-    
+
     # Kubernetes
     "kubernetes-cli"
     "k9s"
     "kind"
     "helm"
-    
+
     # Container (Colima)
     "colima"
     "docker"
@@ -54,12 +62,12 @@ in
     "docker-buildx"
     "docker-credential-helper"
     "incus"
-    
+
     # Media
     "mpv"
     "ffmpeg-full"
     "yt-dlp"
-    
+
     # Dev tools
     "asdf"
     "fnm"
@@ -70,7 +78,7 @@ in
     "imagemagick"
     "cmake"
     "llama.cpp"
-    
+
     # Build dependencies
     "pkg-config"
     "openssl@3"
@@ -79,17 +87,18 @@ in
     "p7zip"
     "pkgconf"
     "unar"
-    
+
     # Utilities
     "quarkdown-labs/quarkdown/quarkdown"
-    
+
     # Sync Additions
     "anomalyco/tap/opencode"
     "cocoapods"
     "llvm"
     "llvm@14"
     "llvm@15"
-  ] ++ lib.optionals enableColimaAI [
+  ]
+  ++ lib.optionals enableColimaAI [
     "krunkit"
   ];
 
@@ -103,19 +112,19 @@ in
     "gitbutler"
     "postman"
     "apidog"
-    
+
     # Browsers
     "brave-browser"
     "arc"
     "zen"
-    
+
     # Terminal & Fonts
     "ghostty"
     "font-fira-code-nerd-font"
-    
+
     # Android
     "android-commandlinetools"
-    
+
     # Utilities
     "gotiengviet"
     "cloudflare-warp"
@@ -138,7 +147,7 @@ in
       AppleInterfaceStyle = "Dark";
       AppleKeyboardUIMode = 3;
     };
-    
+
     dock = {
       orientation = "bottom";
       showhidden = true;
@@ -155,7 +164,7 @@ in
       TrackpadThreeFingerDrag = true;
       TrackpadRightClick = true;
     };
-    
+
     finder = {
       AppleShowAllExtensions = true;
       FXEnableExtensionChangeWarning = false;
@@ -167,7 +176,6 @@ in
   services = {
     # Các dịch vụ đặc thù cho máy macbook
   };
-
 
   # Các thiết lập khác
   users.users.mike = {

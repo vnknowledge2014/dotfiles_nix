@@ -1,4 +1,13 @@
-{ config, lib, pkgs, system, inputs, hostname, username, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  system,
+  inputs,
+  hostname,
+  username,
+  ...
+}:
 
 let
   # Check if machine-specific config exists
@@ -7,7 +16,7 @@ let
 in
 {
   # Import các module cơ bản và machine-specific config nếu tồn tại
-  imports = [ 
+  imports = [
     ./modules/core
     ./modules/shell
     ./modules/dev/git.nix
@@ -16,12 +25,13 @@ in
     ./profiles/${username}
     # Snap package management trên Ubuntu
     ../hosts/ubuntu/snapd.nix
-  ] ++ lib.optional hasMachineConfig machineConfigPath;
-  
+  ]
+  ++ lib.optional hasMachineConfig machineConfigPath;
+
   # Thông tin cơ bản
   home.username = username;
   home.homeDirectory = "/home/${username}";
-  
+
   # Module enables — base profile đã bật hết, ở đây chỉ cần khai báo tối thiểu
   modules = {
     core.enable = true;
@@ -29,7 +39,7 @@ in
     editors.enable = true;
     terminal.enable = true;
   };
-  
+
   # Phiên bản Home Manager
   home.stateVersion = "26.05";
   programs.home-manager.enable = true;

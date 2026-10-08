@@ -1,8 +1,13 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   # Import cấu hình darwin chung
-  imports = [];
+  imports = [ ];
 
   # Hostname của máy
   networking.hostName = "your-hostname";
@@ -25,24 +30,24 @@
       cleanup = "zap";
       upgrade = true;
     };
-    
+
     # Quản lý Brewfile
     global = {
       brewfile = true;
     };
-    
+
     # Danh sách đầy đủ các gói
     brews = [
       "python"
       "go"
-      "gh"       # GitHub CLI
+      "gh" # GitHub CLI
       # Thêm các brew formulae khác
     ];
-    
+
     casks = [
       "google-chrome"
       "iterm2"
-      "rectangle"  # Quản lý cửa sổ
+      "rectangle" # Quản lý cửa sổ
       # Thêm các cask applications khác
     ];
   };

@@ -1,4 +1,10 @@
-{ config, lib, pkgs, hostname, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  hostname,
+  ...
+}:
 
 # Machine-specific overrides cho Ubuntu PC (rnd)
 # File này tự động được import khi hostname = "ubuntu-pc"

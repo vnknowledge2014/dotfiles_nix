@@ -6,16 +6,29 @@
 
 {
   # Phát hiện nhóm hệ điều hành từ builtins.currentSystem (pure)
-  detectPlatform = system:
+  detectPlatform =
+    system:
     let
       inherit (nixpkgs) lib;
       isDarwin = lib.hasSuffix "-darwin" system;
       isLinux = lib.hasSuffix "-linux" system;
       isAarch64 = lib.hasPrefix "aarch64-" system;
-    in {
-      inherit isDarwin isLinux isAarch64 system;
+    in
+    {
+      inherit
+        isDarwin
+        isLinux
+        isAarch64
+        system
+        ;
       # Trả về tên ngắn gọn cho conditional logic
-      os = if isDarwin then "darwin" else if isLinux then "linux" else "unknown";
+      os =
+        if isDarwin then
+          "darwin"
+        else if isLinux then
+          "linux"
+        else
+          "unknown";
       arch = if isAarch64 then "aarch64" else "x86_64";
     };
 }

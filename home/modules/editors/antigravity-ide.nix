@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
@@ -16,7 +21,10 @@ let
       inherit (cfg) url sha256;
     };
 
-    nativeBuildInputs = [ pkgs.autoPatchelfHook pkgs.makeWrapper ];
+    nativeBuildInputs = [
+      pkgs.autoPatchelfHook
+      pkgs.makeWrapper
+    ];
 
     buildInputs = with pkgs; [
       gtk3
@@ -69,7 +77,8 @@ let
       EOF
     '';
   };
-in {
+in
+{
   options.modules.editors.antigravityIde = {
     enable = mkEnableOption "Enable Antigravity IDE (VS Code-based)";
 

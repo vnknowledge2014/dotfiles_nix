@@ -1,4 +1,11 @@
-{ config, lib, pkgs, hostname, username, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  hostname,
+  username,
+  ...
+}:
 
 {
   # Import các thành phần cấu hình theo thứ tự
@@ -6,31 +13,34 @@
     # Cấu hình Homebrew
     ./homebrew.nix
 
-    # Cấu hình cho XCode nếu có  
+    # Cấu hình cho XCode nếu có
     ./xcode.nix
   ];
-  
+
   # Thiết lập cơ bản
   networking.hostName = hostname;
-  
+
   # Set primary user for nix-darwin (required for certain options)
   system.primaryUser = username;
-  
+
   # Cấu hình Nix
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+
   # Fix nixbld group GID
   ids.gids.nixbld = 350;
-  
+
   # Gói macOS cơ bản (gộp từ base.nix)
   environment.systemPackages = with pkgs; [
-    m-cli  # Tiện ích CLI cho macOS
-    mas    # Mac App Store CLI
+    m-cli # Tiện ích CLI cho macOS
+    mas # Mac App Store CLI
   ];
-  
+
   # Cấu hình shell
   programs.zsh.enable = true;
-  
+
   # Fix LaunchAgents permissions and Homebrew directories
   system.activationScripts.preActivation.text = ''
     echo "Fixing LaunchAgents directory permissions..."
@@ -59,7 +69,7 @@
       chown -R ${username}:staff /usr/local/share/fish
     fi
   '';
-  
+
   # OpenZFS Tuning — Limit ZFS ARC memory to 16GB (16 * 1024 * 1024 * 1024)
   # Prevents kernel_task / Wired Memory exhaustion under heavy I/O
   environment.etc."zfs/zfs.conf".text = ''

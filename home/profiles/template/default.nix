@@ -1,4 +1,11 @@
-{ config, lib, pkgs, system, inputs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  system,
+  inputs,
+  ...
+}:
 
 # ═══════════════════════════════════════════════════════════
 # TEMPLATE PROFILE — Copy để tạo profile mới cho team member
@@ -21,7 +28,10 @@
 
   # Override: oh-my-zsh plugins (base mặc định: ["git" "docker"])
   # Thêm plugin theo OS: "macos", "ubuntu", "wsl"
-  modules.shell.zsh.ohmyzsh.plugins = [ "git" "docker" ];
+  modules.shell.zsh.ohmyzsh.plugins = [
+    "git"
+    "docker"
+  ];
 
   # Greeting (tùy chỉnh)
   modules.shell.zsh.extraConfig = lib.mkAfter ''

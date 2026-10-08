@@ -1,4 +1,11 @@
-{ config, lib, pkgs, system, inputs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  system,
+  inputs,
+  ...
+}:
 
 {
   imports = [
@@ -6,7 +13,11 @@
   ];
 
   # Override: Ubuntu-specific oh-my-zsh plugin
-  modules.shell.zsh.ohmyzsh.plugins = [ "git" "ubuntu" "docker" ];
+  modules.shell.zsh.ohmyzsh.plugins = [
+    "git"
+    "ubuntu"
+    "docker"
+  ];
 
   # Greeting
   modules.shell.zsh.extraConfig = lib.mkAfter ''
@@ -22,7 +33,7 @@
 
   # Ubuntu-specific packages (thêm ngoài base)
   home.packages = with pkgs; [
-    incus  # Ubuntu-specific container tool
+    incus # Ubuntu-specific container tool
   ];
 
   # Ubuntu-specific env vars

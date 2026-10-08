@@ -1,4 +1,13 @@
-{ config, lib, pkgs, system, inputs, hostname, username, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  system,
+  inputs,
+  hostname,
+  username,
+  ...
+}:
 
 let
   # Check if machine-specific config exists
@@ -7,22 +16,23 @@ let
 in
 {
   # Import các module cơ bản và machine-specific config nếu tồn tại
-  imports = [ 
+  imports = [
     ./modules/core
     ./modules/shell
     ./modules/dev/git.nix
     ./modules/editors
     ./modules/terminal
-    ./profiles/${username} 
-  ] ++ lib.optional hasMachineConfig machineConfigPath;
-  
+    ./profiles/${username}
+  ]
+  ++ lib.optional hasMachineConfig machineConfigPath;
+
   # Thông tin cơ bản
   home = {
     username = username;
     homeDirectory = lib.mkForce "/Users/${username}";
     stateVersion = "26.05";
   };
-  
+
   # Kích hoạt các module cơ bản
   modules = {
     core = {
@@ -31,12 +41,12 @@ in
 
       ];
     };
-    
+
     dev.git.enable = true;
     editors.enable = true;
     terminal.enable = true;
   };
-  
+
   # Các gói cơ bản cho macOS
   home.packages = with pkgs; [
     # CLI tools
@@ -49,12 +59,12 @@ in
 
   # Darwin-specific activation
   home.activation = {
-    fixLaunchAgentsPermissions = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    fixLaunchAgentsPermissions = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       $DRY_RUN_CMD mkdir -p $VERBOSE_ARG "$HOME/Library/LaunchAgents"
       $DRY_RUN_CMD chmod $VERBOSE_ARG 755 "$HOME/Library/LaunchAgents"
     '';
   };
-  
+
   # Integracja z Homebrew
   programs.zsh.initContent = lib.mkIf config.programs.zsh.enable ''
     # Homebrew integration
@@ -70,7 +80,7 @@ in
       export PATH="/usr/local/zfs/bin:/usr/local/zfs/sbin:$PATH"
     fi
   '';
-  
+
   # Phiên bản Home Manager
   programs.home-manager.enable = true;
 }

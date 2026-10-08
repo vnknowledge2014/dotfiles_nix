@@ -1,14 +1,21 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.modules.secrets;
-in {
+let
+  cfg = config.modules.secrets;
+in
+{
   options.modules.secrets = {
     enable = mkEnableOption "Enable secrets management (SOPS + Age)";
 
     agePublicKeys = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = ''
         Danh sách Age public keys của team members.
         Dùng để cập nhật .sops.yaml khi thêm người mới.

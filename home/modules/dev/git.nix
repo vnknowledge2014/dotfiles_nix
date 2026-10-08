@@ -1,11 +1,18 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.modules.dev.git;
-in {
+let
+  cfg = config.modules.dev.git;
+in
+{
   options.modules.dev.git = {
     enable = mkEnableOption "Enable git configuration";
-    
+
     aliases = mkOption {
       type = types.attrsOf types.str;
       default = {
@@ -17,7 +24,7 @@ in {
       };
       description = "Git aliases";
     };
-    
+
     extraConfig = mkOption {
       type = types.attrsOf types.anything;
       default = {

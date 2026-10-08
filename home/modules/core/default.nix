@@ -1,22 +1,32 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.modules.core;
-in {
+let
+  cfg = config.modules.core;
+in
+{
   options.modules.core = {
     enable = mkEnableOption "Enable core configuration";
-    
+
     packages = mkOption {
       type = types.listOf types.package;
-      default = [];
+      default = [ ];
       description = "List of core packages to install";
     };
   };
 
   config = mkIf cfg.enable {
-    home.packages = with pkgs; [
-      # Các công cụ cơ bản
-      # Secrets (sops + age) được quản lý bởi modules/secrets.nix
-    ] ++ cfg.packages;
+    home.packages =
+      with pkgs;
+      [
+        # Các công cụ cơ bản
+        # Secrets (sops + age) được quản lý bởi modules/secrets.nix
+      ]
+      ++ cfg.packages;
   };
 }
